@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life Tracker</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            neutral: {
+              50: '#fafafa',
+              100: '#f5f5f5',
+              200: '#e5e5e5',
+              300: '#d4d4d4',
+              400: '#a3a3a3',
+              500: '#737373',
+              600: '#525252',
+              700: '#404040',
+              800: '#262626',
+              900: '#171717',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- React -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    #root { width: 100%; min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useCallback, useRef } = React;
+    
+    // Icon components
+    const Camera = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>;
+    const Book = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
+    const Music = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>;
+    const Film = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>;
+    const Target = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
+    const CheckCircle2 = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>;
+    const Circle = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/></svg>;
+    const Plus = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+    const X = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+    const ChevronLeft = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="15 18 9 12 15 6"/></svg>;
+    const ChevronRight = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"/></svg>;
+    const Trash2 = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
+    const Settings = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>;
+    const Sun = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>;
+    const Moon = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>;
+
+// Haptic feedback helper
+const triggerHaptic = () => {
+  if (navigator.vibrate) {
+    navigator.vibrate([15, 40, 50]); // Success pattern
+  }
+};
+
+const GoalTrackerApp = () => {
+  // ============================================
+  // UNIFIED STATE
+  // ============================================
+  const [appState, setAppState] = useState({
+    goals: [],
+    dailyTasks: {},
+    taskCompletions: {},
+    journalEntries: {},
+    journalConfig: {
+      prompts: [
+        { id: 1, type: 'text', label: 'How was your day?', placeholder: 'Write about your day...' },
+        { id: 2, type: 'slider', label: 'Energy level', min: 0, max: 10 }
+      ]
+    },
+    dailyPhotos: {},
+    media: {},
+    darkMode: false,
+    categories: [
+      { id: 'personal', name: 'Personal Growth', color: '#6366f1' },
+      { id: 'health', name: 'Health & Fitness', color: '#10b981' },
+      { id: 'career', name: 'Career', color: '#f59e0b' },
+      { id: 'creative', name: 'Creative', color: '#ec4899' },
+      { id: 'social', name: 'Social', color: '#8b5cf6' },
+      { id: 'financial', name: 'Financial', color: '#06b6d4' }
+    ]
+  });
+
+  const [currentView, setCurrentView] = useState('daily');
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showCompletionModal, setShowCompletionModal] = useState(null);
+  const [viewingCompletion, setViewingCompletion] = useState(null);
+  const [showJournalSettings, setShowJournalSettings] = useState(false);
+  const [showGoalForm, setShowGoalForm] = useState(false);
+  const [deletingGoalId, setDeletingGoalId] = useState(null);
+  const [editingGoal, setEditingGoal] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [animatingTasks, setAnimatingTasks] = useState({});
+  const [showCategorySettings, setShowCategorySettings] = useState(false);
+
+  const { goals, dailyTasks, taskCompletions, journalEntries, journalConfig, dailyPhotos, media, darkMode, categories } = appState;
+
+  // ============================================
+  // PERSISTENCE
+  // ============================================
+  const saveTimeoutRef = useRef(null);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('goalTrackerData');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setAppState(prev => ({ ...prev, ...parsed }));
+      }
+    } catch (e) {
+      console.error('Failed to load data:', e);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!isLoaded) return;
+
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+
+    saveTimeoutRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem('goalTrackerData', JSON.stringify(appState));
+      } catch (e) {
+        console.error('Failed to save:', e);
+        if (e.name === 'QuotaExceededError') {
+          alert('Storage is full! Consider removing some photos.');
+        }
+      }
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, [appState, isLoaded]);
+
+  // ============================================
+  // STATE HELPERS
+  // ============================================
+  const updateState = useCallback((key, value) => {
+    setAppState(prev => ({
+      ...prev,
+      [key]: typeof value === 'function' ? value(prev[key]) : value
+    }));
+  }, []);
+
+  const setGoals = useCallback((value) => updateState('goals', value), [updateState]);
+  const setDailyTasks = useCallback((value) => updateState('dailyTasks', value), [updateState]);
+  const setTaskCompletions = useCallback((value) => updateState('taskCompletions', value), [updateState]);
+  const setJournalEntries = useCallback((value) => updateState('journalEntries', value), [updateState]);
+  const setJournalConfig = useCallback((value) => updateState('journalConfig', value), [updateState]);
+  const setDailyPhotos = useCallback((value) => updateState('dailyPhotos', value), [updateState]);
+  const setMedia = useCallback((value) => updateState('media', value), [updateState]);
+  const setDarkMode = useCallback((value) => updateState('darkMode', value), [updateState]);
+  const setCategories = useCallback((value) => updateState('categories', value), [updateState]);
+
+  const formatDate = useCallback((date) => date.toISOString().split('T')[0], []);
+  const getDateKey = useCallback((date) => formatDate(date), [formatDate]);
+
+  // Animation helper
+  const triggerTaskAnimation = useCallback((taskKey) => {
+    setAnimatingTasks(prev => ({ ...prev, [taskKey]: true }));
+    triggerHaptic();
+    setTimeout(() => {
+      setAnimatingTasks(prev => ({ ...prev, [taskKey]: false }));
+    }, 1200);
+  }, []);
+
+  // ============================================
+  // GOAL MANAGEMENT
+  // ============================================
+  const addGoal = useCallback((goal) => {
+    const newGoal = { id: Date.now(), ...goal, createdAt: new Date().toISOString() };
+    setGoals(prev => [...prev, newGoal]);
+    setShowGoalForm(false);
+  }, [setGoals]);
+
+  const updateGoal = useCallback((id, updates) => {
+    setGoals(prev => prev.map(g => g.id === id ? { ...g, ...updates } : g));
+    setEditingGoal(null);
+  }, [setGoals]);
+
+  const deleteGoal = useCallback((id) => {
+    setGoals(prev => prev.filter(g => g.id !== id));
+    setDailyTasks(prev => {
+      const newTasks = { ...prev };
+      Object.keys(newTasks).forEach(dateKey => {
+        const dateTasks = { ...newTasks[dateKey] };
+        Object.keys(dateTasks).forEach(taskKey => {
+          if (taskKey === id || taskKey.startsWith(`${id}-`)) delete dateTasks[taskKey];
+        });
+        newTasks[dateKey] = dateTasks;
+      });
+      return newTasks;
+    });
+  }, [setGoals, setDailyTasks]);
+
+  // ============================================
+  // TASK MANAGEMENT
+  // ============================================
+  const toggleTask = useCallback((dateKey, goalId, taskId, checkIndex = 0, task = null) => {
+    const taskKey = `${goalId}-${taskId}-${checkIndex}`;
+    const currentValue = dailyTasks[dateKey]?.[taskKey];
+
+    if (currentValue) {
+      setDailyTasks(prev => ({ ...prev, [dateKey]: { ...prev[dateKey], [taskKey]: false } }));
+      return;
+    }
+
+    // Trigger animation when completing (not uncompleting)
+    triggerTaskAnimation(taskKey);
+
+    if (task && task.promptForNote) {
+      setShowCompletionModal({ dateKey, goalId, taskId, checkIndex, task });
+      return;
+    }
+
+    setDailyTasks(prev => ({ ...prev, [dateKey]: { ...prev[dateKey], [taskKey]: true } }));
+  }, [dailyTasks, setDailyTasks, triggerTaskAnimation]);
+
+  const saveTaskCompletion = useCallback((dateKey, goalId, taskId, checkIndex, note, photo) => {
+    const taskKey = `${goalId}-${taskId}-${checkIndex}`;
+    setDailyTasks(prev => ({ ...prev, [dateKey]: { ...prev[dateKey], [taskKey]: true } }));
+    
+    if (note || photo) {
+      const completionKey = `${dateKey}-${taskKey}`;
+      setTaskCompletions(prev => ({
+        ...prev,
+        [completionKey]: { note, photo, timestamp: new Date().toISOString() }
+      }));
+    }
+    setShowCompletionModal(null);
+  }, [setDailyTasks, setTaskCompletions]);
+
+  const getTaskCompletionCount = useCallback((dateKey, goalId, taskId, totalChecks) => {
+    const tasks = dailyTasks[dateKey] || {};
+    let count = 0;
+    for (let i = 0; i < totalChecks; i++) {
+      if (tasks[`${goalId}-${taskId}-${i}`]) count++;
+    }
+    return count;
+  }, [dailyTasks]);
+
+  const isTaskCompleted = useCallback((dateKey, goalId, taskId) => {
+    const tasks = dailyTasks[dateKey] || {};
+    const newKey = `${goalId}-${taskId}-0`;
+    if (tasks[newKey] !== undefined) return tasks[newKey];
+    return tasks[goalId] || false;
+  }, [dailyTasks]);
+
+  // ============================================
+  // PHOTO & MEDIA
+  // ============================================
+  const updateDailyPhoto = useCallback((dateKey, photoData) => {
+    setDailyPhotos(prev => ({ ...prev, [dateKey]: photoData }));
+  }, [setDailyPhotos]);
+
+  const removeDailyPhoto = useCallback((dateKey) => {
+    setDailyPhotos(prev => {
+      const newPhotos = { ...prev };
+      delete newPhotos[dateKey];
+      return newPhotos;
+    });
+  }, [setDailyPhotos]);
+
+  const addMedia = useCallback((dateKey, mediaItem) => {
+    setMedia(prev => ({
+      ...prev,
+      [dateKey]: [...(prev[dateKey] || []), { ...mediaItem, id: Date.now() }]
+    }));
+  }, [setMedia]);
+
+  const removeMedia = useCallback((dateKey, mediaId) => {
+    setMedia(prev => ({
+      ...prev,
+      [dateKey]: (prev[dateKey] || []).filter(m => m.id !== mediaId)
+    }));
+  }, [setMedia]);
+
+  // ============================================
+  // MEMOIZED CALCULATIONS
+  // ============================================
+  const getWeekRange = useCallback((date) => {
+    const day = date.getDay();
+    const diff = date.getDate() - day;
+    const monday = new Date(date);
+    monday.setDate(diff);
+    monday.setHours(0, 0, 0, 0);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+    return { monday, sunday };
+  }, []);
+
+  const goalProgressCache = useMemo(() => {
+    const cache = {};
+    const today = new Date();
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    const daysPassed = Math.floor((today - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+
+    goals.forEach(goal => {
+      let completedDays = 0;
+      for (let i = 0; i < daysPassed; i++) {
+        const date = new Date(startOfYear);
+        date.setDate(date.getDate() + i);
+        const dateKey = date.toISOString().split('T')[0];
+        const tasks = dailyTasks[dateKey] || {};
+        const hasCompletion = Object.keys(tasks).some(key => 
+          key === goal.id || key.startsWith(`${goal.id}-`)
+        );
+        if (hasCompletion) completedDays++;
+      }
+      cache[goal.id] = {
+        completedDays,
+        totalDays: daysPassed,
+        percentage: daysPassed > 0 ? Math.round((completedDays / daysPassed) * 100) : 0
+      };
+    });
+    return cache;
+  }, [goals, dailyTasks]);
+
+  const calculateProgress = useCallback((goal) => {
+    return goalProgressCache[goal.id] || { completedDays: 0, totalDays: 0, percentage: 0 };
+  }, [goalProgressCache]);
+
+  const calculateWeeklyProgress = useCallback((task, goalId, date) => {
+    const { monday, sunday } = getWeekRange(date);
+    let completedCount = 0;
+    for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
+      const dateKey = d.toISOString().split('T')[0];
+      if (isTaskCompleted(dateKey, goalId, task.id)) completedCount++;
+    }
+    const target = task.weeklyTarget || 4;
+    return { completed: completedCount, target, percentage: Math.round((completedCount / target) * 100) };
+  }, [getWeekRange, isTaskCompleted]);
+
+  const selectedDateKey = useMemo(() => getDateKey(selectedDate), [selectedDate, getDateKey]);
+
+  const dailyProgress = useMemo(() => {
+    let totalTasks = 0;
+    let completedTasks = 0;
+    goals.forEach(goal => {
+      if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+      goal.tasks.forEach(task => {
+        if (!task.frequency || task.frequency === 'daily') {
+          const checksPerDay = task.dailyChecks || 1;
+          totalTasks += checksPerDay;
+          for (let i = 0; i < checksPerDay; i++) {
+            if (dailyTasks[selectedDateKey]?.[`${goal.id}-${task.id}-${i}`]) completedTasks++;
+          }
+        }
+      });
+    });
+    return {
+      completed: completedTasks,
+      total: totalTasks,
+      percentage: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+    };
+  }, [goals, dailyTasks, selectedDateKey]);
+
+  const calculateDailyProgress = useCallback((dateKey) => {
+    let totalTasks = 0;
+    let completedTasks = 0;
+    goals.forEach(goal => {
+      if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+      goal.tasks.forEach(task => {
+        if (!task.frequency || task.frequency === 'daily') {
+          const checksPerDay = task.dailyChecks || 1;
+          totalTasks += checksPerDay;
+          for (let i = 0; i < checksPerDay; i++) {
+            if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) completedTasks++;
+          }
+        }
+      });
+    });
+    return {
+      completed: completedTasks,
+      total: totalTasks,
+      percentage: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+    };
+  }, [goals, dailyTasks]);
+
+  const weeklyOverallProgress = useMemo(() => {
+    const { monday, sunday } = getWeekRange(selectedDate);
+    let totalExpected = 0;
+    let totalCompleted = 0;
+
+    goals.forEach(goal => {
+      if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+      goal.tasks.forEach(task => {
+        if (!task.frequency || task.frequency === 'daily') {
+          const checksPerDay = task.dailyChecks || 1;
+          for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
+            const dateKey = d.toISOString().split('T')[0];
+            totalExpected += checksPerDay;
+            for (let i = 0; i < checksPerDay; i++) {
+              if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) totalCompleted++;
+            }
+          }
+        } else if (task.frequency === 'weekly') {
+          const target = task.weeklyTarget || 4;
+          totalExpected += target;
+          for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
+            const dateKey = d.toISOString().split('T')[0];
+            if (isTaskCompleted(dateKey, goal.id, task.id)) totalCompleted++;
+          }
+        }
+      });
+    });
+    return {
+      completed: totalCompleted,
+      total: totalExpected,
+      percentage: totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0
+    };
+  }, [goals, dailyTasks, selectedDate, getWeekRange, isTaskCompleted]);
+
+  // ============================================
+  // THEME CLASSES - Clean Navy Design
+  // ============================================
+  const theme = {
+    // Backgrounds
+    pageBg: darkMode ? 'bg-slate-900' : 'bg-gradient-to-b from-slate-50 to-slate-100',
+    headerBg: darkMode ? 'bg-slate-900/90' : 'bg-slate-50/90',
+    cardBg: darkMode ? 'bg-slate-800' : 'bg-white',
+    inputBg: darkMode ? 'bg-slate-700' : 'bg-slate-50',
+    
+    // Text
+    textPrimary: darkMode ? 'text-slate-100' : 'text-slate-800',
+    textSecondary: darkMode ? 'text-slate-400' : 'text-slate-500',
+    textMuted: darkMode ? 'text-slate-500' : 'text-slate-400',
+    
+    // Borders
+    border: darkMode ? 'border-slate-700' : 'border-slate-200',
+    divider: darkMode ? 'border-slate-700' : 'border-slate-100',
+    
+    // Accents
+    accent: darkMode ? 'bg-slate-200 text-slate-900' : 'bg-slate-700 text-white',
+    accentMuted: darkMode ? 'bg-slate-700' : 'bg-slate-200',
+    checkDone: darkMode ? 'text-slate-200' : 'text-slate-700',
+    checkUndone: darkMode ? 'text-slate-600' : 'text-slate-300',
+    
+    // Progress
+    progressBg: darkMode ? 'bg-slate-700' : 'bg-slate-200',
+    progressFill: darkMode ? 'bg-slate-300' : 'bg-slate-700',
+    progressSuccess: 'bg-emerald-500',
+    
+    // Buttons
+    btnPrimary: darkMode ? 'bg-slate-200 text-slate-900' : 'bg-slate-700 text-white',
+    btnSecondary: darkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-700',
+    btnIcon: darkMode ? 'bg-slate-800 text-slate-400' : 'bg-white text-slate-400',
+  };
+
+  // ============================================
+  // MODAL COMPONENTS
+  // ============================================
+  const JournalSettingsModal = ({ config, onSave, onCancel }) => {
+    const [prompts, setPrompts] = useState(config.prompts || []);
+    const addPrompt = (type) => {
+      setPrompts([...prompts, {
+        id: Date.now(),
+        type,
+        label: type === 'text' ? 'New prompt' : type === 'yesno' ? 'Yes or no question' : 'Rate something',
+        placeholder: type === 'text' ? 'Write here...' : '',
+        min: type === 'slider' ? 0 : undefined,
+        max: type === 'slider' ? 10 : undefined
+      }]);
+    };
+    const updatePrompt = (id, field, value) => setPrompts(prompts.map(p => p.id === id ? { ...p, [field]: value } : p));
+    const deletePrompt = (id) => setPrompts(prompts.filter(p => p.id !== id));
+    const movePrompt = (index, direction) => {
+      const newPrompts = [...prompts];
+      const newIndex = index + direction;
+      if (newIndex >= 0 && newIndex < prompts.length) {
+        [newPrompts[index], newPrompts[newIndex]] = [newPrompts[newIndex], newPrompts[index]];
+        setPrompts(newPrompts);
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className={`${theme.cardBg} rounded-2xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={`text-base font-semibold ${theme.textPrimary}`}>Journal Settings</h3>
+            <button onClick={onCancel} className={`p-1 rounded-lg hover:${theme.inputBg}`}>
+              <X className={`w-5 h-5 ${theme.textMuted}`} />
+            </button>
+          </div>
+          <div className="space-y-3 mb-5">
+            <div className="flex gap-2">
+              <button onClick={() => addPrompt('text')} className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium ${theme.btnSecondary}`}>+ Text</button>
+              <button onClick={() => addPrompt('slider')} className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium ${theme.btnSecondary}`}>+ Slider</button>
+              <button onClick={() => addPrompt('yesno')} className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium ${theme.btnSecondary}`}>+ Yes/No</button>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {prompts.map((prompt, index) => (
+                <div key={prompt.id} className={`p-3 rounded-lg ${theme.inputBg}`}>
+                  <div className="flex items-start gap-2">
+                    <div className="flex flex-col gap-1">
+                      <button onClick={() => movePrompt(index, -1)} disabled={index === 0} className={`p-0.5 rounded ${index === 0 ? 'opacity-30' : ''}`}>
+                        <ChevronLeft className="w-3 h-3 rotate-90" />
+                      </button>
+                      <button onClick={() => movePrompt(index, 1)} disabled={index === prompts.length - 1} className={`p-0.5 rounded ${index === prompts.length - 1 ? 'opacity-30' : ''}`}>
+                        <ChevronRight className="w-3 h-3 rotate-90" />
+                      </button>
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <input type="text" value={prompt.label} onChange={(e) => updatePrompt(prompt.id, 'label', e.target.value)} className={`w-full rounded-lg px-2 py-1.5 text-sm ${theme.cardBg} ${theme.textPrimary}`} />
+                      {prompt.type === 'text' && <input type="text" value={prompt.placeholder} onChange={(e) => updatePrompt(prompt.id, 'placeholder', e.target.value)} placeholder="Placeholder" className={`w-full rounded-lg px-2 py-1.5 text-sm ${theme.cardBg} ${theme.textSecondary}`} />}
+                      {prompt.type === 'slider' && (
+                        <div className="flex gap-2 items-center text-xs">
+                          <span className={theme.textMuted}>Min:</span>
+                          <input type="number" value={prompt.min} onChange={(e) => updatePrompt(prompt.id, 'min', parseInt(e.target.value))} className={`w-12 rounded px-1.5 py-1 ${theme.cardBg} ${theme.textPrimary}`} />
+                          <span className={theme.textMuted}>Max:</span>
+                          <input type="number" value={prompt.max} onChange={(e) => updatePrompt(prompt.id, 'max', parseInt(e.target.value))} className={`w-12 rounded px-1.5 py-1 ${theme.cardBg} ${theme.textPrimary}`} />
+                        </div>
+                      )}
+                      {prompt.type === 'yesno' && (
+                        <p className={`text-xs ${theme.textMuted}`}>Yes/No question</p>
+                      )}
+                    </div>
+                    <button onClick={() => deletePrompt(prompt.id)} className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></button>
+                  </div>
+                </div>
+              ))}
+              {prompts.length === 0 && <p className={`text-center py-6 text-sm ${theme.textMuted}`}>No prompts yet</p>}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => onSave({ prompts })} className={`flex-1 py-2 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>Save</button>
+            <button onClick={onCancel} className={`px-4 py-2 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Cancel</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // CATEGORY SETTINGS MODAL
+  // ============================================
+  const CategorySettingsModal = ({ categories: cats, onSave, onCancel }) => {
+    const [localCategories, setLocalCategories] = useState(cats || []);
+    const colorOptions = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#ef4444', '#84cc16', '#f97316', '#14b8a6'];
+    
+    const addCategory = () => {
+      setLocalCategories([...localCategories, {
+        id: `cat-${Date.now()}`,
+        name: 'New Category',
+        color: colorOptions[localCategories.length % colorOptions.length]
+      }]);
+    };
+    
+    const updateCategory = (id, field, value) => {
+      setLocalCategories(localCategories.map(c => c.id === id ? { ...c, [field]: value } : c));
+    };
+    
+    const deleteCategory = (id) => {
+      if (localCategories.length <= 1) return;
+      setLocalCategories(localCategories.filter(c => c.id !== id));
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className={`${theme.cardBg} rounded-2xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={`text-base font-semibold ${theme.textPrimary}`}>Edit Categories</h3>
+            <button onClick={onCancel} className={`p-1 rounded-lg`}>
+              <X className={`w-5 h-5 ${theme.textMuted}`} />
+            </button>
+          </div>
+          
+          <div className="space-y-2 mb-4">
+            {localCategories.map((cat) => (
+              <div key={cat.id} className={`p-3 rounded-lg ${theme.inputBg}`}>
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1">
+                    {colorOptions.map(color => (
+                      <button
+                        key={color}
+                        onClick={() => updateCategory(cat.id, 'color', color)}
+                        className={`w-5 h-5 rounded-full ${cat.color === color ? 'ring-2 ring-offset-1 ring-slate-400' : ''}`}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                  <input
+                    type="text"
+                    value={cat.name}
+                    onChange={(e) => updateCategory(cat.id, 'name', e.target.value)}
+                    className={`flex-1 rounded-lg px-2 py-1.5 text-sm ${theme.cardBg} ${theme.textPrimary}`}
+                  />
+                  <button 
+                    onClick={() => deleteCategory(cat.id)} 
+                    disabled={localCategories.length <= 1}
+                    className={`p-1 rounded-lg ${localCategories.length <= 1 ? 'opacity-30' : 'text-red-500 hover:bg-red-500/10'}`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <button onClick={addCategory} className={`w-full py-2 rounded-lg text-sm font-medium mb-4 ${theme.btnSecondary}`}>+ Add Category</button>
+          
+          <div className="flex gap-2">
+            <button onClick={() => onSave(localCategories)} className={`flex-1 py-2 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>Save</button>
+            <button onClick={onCancel} className={`px-4 py-2 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Cancel</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ViewCompletionModal = ({ completion, taskName, onClose }) => (
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className={`${theme.cardBg} rounded-2xl p-5 w-full max-w-md shadow-xl`}>
+        <div className="flex items-start justify-between mb-4">
+          <h3 className={`text-base font-semibold ${theme.textPrimary}`}>{taskName}</h3>
+          <button onClick={onClose} className={`p-1 rounded-lg`}><X className={`w-5 h-5 ${theme.textMuted}`} /></button>
+        </div>
+        <div className="space-y-3">
+          {completion.note && <div><p className={`text-xs font-medium mb-1 ${theme.textMuted}`}>Note</p><p className={`p-2 rounded-lg text-sm ${theme.inputBg} ${theme.textSecondary}`}>{completion.note}</p></div>}
+          {completion.photo && <div><p className={`text-xs font-medium mb-1 ${theme.textMuted}`}>Photo</p><img src={completion.photo} alt="Completion" className="w-full h-48 object-cover rounded-lg" /></div>}
+          {completion.timestamp && <p className={`text-xs ${theme.textMuted}`}>Completed {new Date(completion.timestamp).toLocaleString()}</p>}
+        </div>
+        <button onClick={onClose} className={`w-full mt-4 py-2 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Close</button>
+      </div>
+    </div>
+  );
+
+  const TaskCompletionModal = ({ onSave, onCancel, taskName }) => {
+    const [note, setNote] = useState('');
+    const [photo, setPhoto] = useState(null);
+    const [photoPreview, setPhotoPreview] = useState(null);
+    const handlePhotoChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => { setPhoto(reader.result); setPhotoPreview(reader.result); };
+        reader.readAsDataURL(file);
+      }
+    };
+    return (
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className={`${theme.cardBg} rounded-2xl p-5 w-full max-w-md shadow-xl`}>
+          <h3 className={`text-base font-semibold mb-4 ${theme.textPrimary}`}>{taskName} completed! 🎉</h3>
+          <div className="space-y-3">
+            <div>
+              <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Note (optional)</label>
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="How did it go?" className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`} rows="2" />
+            </div>
+            <div>
+              <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Photo (optional)</label>
+              <input type="file" accept="image/*" onChange={handlePhotoChange} className={`w-full text-xs ${theme.textMuted}`} />
+              {photoPreview && (
+                <div className="mt-2 relative">
+                  <img src={photoPreview} alt="Preview" className="w-full h-32 object-cover rounded-lg" />
+                  <button onClick={() => { setPhoto(null); setPhotoPreview(null); }} className="absolute top-1 right-1 p-1 bg-red-500 rounded-full"><X className="w-3 h-3 text-white" /></button>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button onClick={() => onSave(note, photo)} className={`flex-1 py-2 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>{note || photo ? 'Save' : 'Done'}</button>
+            <button onClick={onCancel} className={`px-4 py-2 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Cancel</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const GoalForm = ({ goal, onSave, onCancel }) => {
+    const migrateOldGoal = (oldGoal) => {
+      if (!oldGoal) return null;
+      if (oldGoal.tasks && Array.isArray(oldGoal.tasks)) return oldGoal;
+      return { ...oldGoal, tasks: [{ id: Date.now(), action: oldGoal.dailyAction || '', frequency: oldGoal.frequency || 'daily', weeklyTarget: oldGoal.weeklyTarget || 4, dailyChecks: 1 }] };
+    };
+    const migratedGoal = goal ? migrateOldGoal(goal) : null;
+    const [formData, setFormData] = useState(migratedGoal || {
+      title: '', yearlyGoal: '', checkpoint: 'weekly', checkpointValue: '', category: 'personal',
+      tasks: [{ id: Date.now(), action: '', frequency: 'daily', weeklyTarget: 4, dailyChecks: 1 }]
+    });
+
+    return (
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className={`${theme.cardBg} rounded-2xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl`}>
+          <h3 className={`text-base font-semibold mb-4 ${theme.textPrimary}`}>{goal ? 'Edit Goal' : 'New Goal'}</h3>
+          <div className="space-y-3">
+            <div>
+              <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Goal Title</label>
+              <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`} placeholder="Improve gum health" />
+            </div>
+            <div>
+              <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Yearly Goal</label>
+              <input type="text" value={formData.yearlyGoal} onChange={(e) => setFormData({ ...formData, yearlyGoal: e.target.value })} className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`} placeholder="No cavities" />
+            </div>
+            <div>
+              <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Category</label>
+              <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`}>
+                {(categories || []).map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className={`pt-3 border-t ${theme.divider}`}>
+              <div className="flex items-center justify-between mb-2">
+                <label className={`text-xs font-medium ${theme.textMuted}`}>Tasks</label>
+                <button type="button" onClick={() => setFormData({ ...formData, tasks: [...formData.tasks, { id: Date.now(), action: '', frequency: 'daily', weeklyTarget: 4, dailyChecks: 1 }] })} className={`text-xs px-2 py-1 rounded-lg font-medium ${theme.btnSecondary}`}>+ Add</button>
+              </div>
+              <div className="space-y-2">
+                {formData.tasks.map((task, index) => (
+                  <div key={task.id} className={`p-2.5 rounded-lg ${theme.inputBg}`}>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <input type="text" value={task.action} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].action = e.target.value; setFormData({ ...formData, tasks: newTasks }); }} className={`flex-1 rounded-lg px-2 py-1.5 text-sm ${theme.cardBg} ${theme.textPrimary}`} placeholder="Brush teeth" />
+                        {formData.tasks.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, tasks: formData.tasks.filter((_, i) => i !== index) })} className="p-1 text-red-500"><X className="w-4 h-4" /></button>}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className={`block text-xs mb-1 ${theme.textMuted}`}>Frequency</label>
+                          <select value={task.frequency} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].frequency = e.target.value; setFormData({ ...formData, tasks: newTasks }); }} className={`w-full rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary}`}>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                          </select>
+                        </div>
+                        {task.frequency === 'weekly' ? (
+                          <div>
+                            <label className={`block text-xs mb-1 ${theme.textMuted}`}>Target/week</label>
+                            <input type="number" min="1" max="7" value={task.weeklyTarget} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].weeklyTarget = parseInt(e.target.value) || 1; setFormData({ ...formData, tasks: newTasks }); }} className={`w-full rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary}`} />
+                          </div>
+                        ) : (
+                          <div>
+                            <label className={`block text-xs mb-1 ${theme.textMuted}`}>Times/day</label>
+                            <input type="number" min="1" max="10" value={task.dailyChecks} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].dailyChecks = parseInt(e.target.value) || 1; setFormData({ ...formData, tasks: newTasks }); }} className={`w-full rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary}`} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" id={`prompt-${task.id}`} checked={task.promptForNote || false} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].promptForNote = e.target.checked; setFormData({ ...formData, tasks: newTasks }); }} className="w-3.5 h-3.5 rounded" />
+                        <label htmlFor={`prompt-${task.id}`} className={`text-xs ${theme.textMuted}`}>Prompt for note/photo</label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button onClick={() => onSave(formData)} className={`flex-1 py-2 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>Save Goal</button>
+            <button onClick={onCancel} className={`px-4 py-2 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Cancel</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // CALENDAR VIEW
+  // ============================================
+  const CalendarView = () => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    const days = [];
+    for (let i = 0; i < startingDayOfWeek; i++) days.push(null);
+    for (let day = 1; day <= daysInMonth; day++) days.push(day);
+    const changeMonth = (offset) => { const newDate = new Date(calendarDate); newDate.setMonth(newDate.getMonth() + offset); setCalendarDate(newDate); };
+    const goToDay = (day) => { setSelectedDate(new Date(year, month, day)); setCurrentView('daily'); };
+
+    return (
+      <div className="space-y-4">
+        {/* Month Navigator */}
+        <div className="flex items-center justify-between py-2">
+          <button onClick={() => changeMonth(-1)} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <h2 className={`text-lg font-semibold ${theme.textPrimary}`}>{calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
+          <button onClick={() => changeMonth(1)} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Calendar Grid */}
+        <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+              <div key={i} className={`text-center text-xs font-medium py-1 ${theme.textMuted}`}>{day}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {days.map((day, index) => {
+              if (!day) return <div key={`empty-${index}`} className="aspect-square" />;
+              const date = new Date(year, month, day);
+              const dateKey = getDateKey(date);
+              const progress = calculateDailyProgress(dateKey);
+              const isToday = formatDate(date) === formatDate(new Date());
+              const hasJournal = journalConfig.prompts.some(p => { const v = journalEntries[`${dateKey}-${p.id}`]; return v && (typeof v === 'string' ? v.trim().length > 0 : true); });
+              const hasPhoto = dailyPhotos[dateKey];
+              
+              return (
+                <button key={day} onClick={() => goToDay(day)} className={`aspect-square rounded-lg p-1 relative flex flex-col items-center justify-center transition-all ${isToday ? `ring-2 ${darkMode ? 'ring-slate-400' : 'ring-slate-700'}` : ''} ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}>
+                  <span className={`text-sm font-medium ${isToday ? theme.textPrimary : theme.textSecondary}`}>{day}</span>
+                  {progress.total > 0 && (
+                    <div className={`w-5 h-1 rounded-full mt-0.5 ${theme.progressBg}`}>
+                      <div className={`h-full rounded-full ${progress.percentage === 100 ? theme.progressSuccess : theme.progressFill}`} style={{ width: `${progress.percentage}%` }} />
+                    </div>
+                  )}
+                  <div className="flex gap-0.5 mt-0.5">
+                    {hasJournal && <div className="w-1 h-1 rounded-full bg-blue-400" />}
+                    {hasPhoto && <div className="w-1 h-1 rounded-full bg-purple-400" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
+          <p className={`text-xs font-medium mb-2 ${theme.textMuted}`}>LEGEND</p>
+          <div className="flex flex-wrap gap-3 text-xs">
+            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded bg-emerald-500" /><span className={theme.textSecondary}>100%</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-blue-400" /><span className={theme.textSecondary}>Journal</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-purple-400" /><span className={theme.textSecondary}>Photo</span></div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // DAILY VIEW - Compact Clean Navy Design
+  // ============================================
+  const DailyView = () => {
+    const dateKey = selectedDateKey;
+    const todayMedia = media[dateKey] || [];
+    const [showMediaForm, setShowMediaForm] = useState(false);
+    const [mediaForm, setMediaForm] = useState({ type: 'book', title: '', notes: '' });
+    const changeDate = (days) => { const newDate = new Date(selectedDate); newDate.setDate(newDate.getDate() + days); setSelectedDate(newDate); };
+
+    // Get all daily tasks
+    const dailyTasksList = goals.flatMap(goal => {
+      if (!goal.tasks || !Array.isArray(goal.tasks)) return [];
+      return goal.tasks.filter(t => !t.frequency || t.frequency === 'daily').map(task => ({ goal, task }));
+    });
+
+    // Get all weekly tasks
+    const weeklyTasksList = goals.flatMap(goal => {
+      if (!goal.tasks || !Array.isArray(goal.tasks)) return [];
+      return goal.tasks.filter(t => t.frequency === 'weekly').map(task => ({ goal, task }));
+    });
+
+    return (
+      <div className="space-y-4">
+        {/* Date Navigator */}
+        <div className="flex items-center justify-between py-2">
+          <button onClick={() => changeDate(-1)} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="text-center">
+            <p className={`text-lg font-semibold ${theme.textPrimary}`}>{selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+            <p className={`text-xs ${theme.textMuted}`}>{selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}</p>
+          </div>
+          <button onClick={() => changeDate(1)} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Daily Tasks Section */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Daily Tasks</p>
+            <p className={`text-xs ${theme.textSecondary}`}>{dailyProgress.percentage}%</p>
+          </div>
+          <div className={`h-1 ${theme.progressBg} rounded-full mb-3`}>
+            <div className={`h-full rounded-full transition-all ${dailyProgress.percentage === 100 ? theme.progressSuccess : theme.progressFill}`} style={{ width: `${dailyProgress.percentage}%` }} />
+          </div>
+
+          {dailyTasksList.length === 0 ? (
+            <div className={`${theme.cardBg} rounded-xl shadow-sm p-6 text-center`}>
+              <p className={`text-sm ${theme.textMuted}`}>No daily tasks yet</p>
+              <button onClick={() => setShowGoalForm(true)} className={`mt-2 text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>+ Add a goal</button>
+            </div>
+          ) : (
+            <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+              {dailyTasksList.map(({ goal, task }, index) => {
+                const totalChecks = task.dailyChecks || 1;
+                const completedCount = getTaskCompletionCount(dateKey, goal.id, task.id, totalChecks);
+                
+                return (
+                  <div key={`${goal.id}-${task.id}`} className={`${index !== dailyTasksList.length - 1 ? `border-b ${theme.divider}` : ''}`}>
+                    {totalChecks === 1 ? (
+                      // Single checkbox - with animation
+                      <div 
+                        className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer ${animatingTasks[`${goal.id}-${task.id}-0`] ? 'task-row-animate' : ''}`}
+                        onClick={() => toggleTask(dateKey, goal.id, task.id, 0, task)}
+                      >
+                        <div className={`flex-shrink-0 ${animatingTasks[`${goal.id}-${task.id}-0`] ? 'checkbox-animate' : ''}`}>
+                          {dailyTasks[dateKey]?.[`${goal.id}-${task.id}-0`] ? (
+                            <CheckCircle2 className={`w-5 h-5 ${theme.checkDone}`} />
+                          ) : (
+                            <Circle className={`w-5 h-5 ${theme.checkUndone}`} />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm truncate ${dailyTasks[dateKey]?.[`${goal.id}-${task.id}-0`] ? theme.textSecondary : theme.textPrimary}`}>{task.action}</p>
+                        </div>
+                        {taskCompletions[`${dateKey}-${goal.id}-${task.id}-0`] && (
+                          <button onClick={(e) => { e.stopPropagation(); setViewingCompletion({ completion: taskCompletions[`${dateKey}-${goal.id}-${task.id}-0`], taskName: task.action }); }} className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0" />
+                        )}
+                      </div>
+                    ) : (
+                      // Multiple checkboxes - with animation on whole row
+                      (() => {
+                        const rowAnimating = Array.from({ length: totalChecks }).some((_, i) => animatingTasks[`${goal.id}-${task.id}-${i}`]);
+                        return (
+                          <div className={`flex items-center gap-3 px-3 py-2.5 ${rowAnimating ? 'task-row-animate' : ''}`}>
+                            <div className="flex gap-1.5 flex-shrink-0">
+                              {Array.from({ length: totalChecks }).map((_, checkIndex) => {
+                                const taskKey = `${goal.id}-${task.id}-${checkIndex}`;
+                                const isChecked = dailyTasks[dateKey]?.[taskKey];
+                                return (
+                                  <button 
+                                    key={checkIndex} 
+                                    onClick={() => toggleTask(dateKey, goal.id, task.id, checkIndex, task)}
+                                    className={animatingTasks[taskKey] ? 'checkbox-animate' : ''}
+                                  >
+                                    {isChecked ? (
+                                      <CheckCircle2 className={`w-5 h-5 ${theme.checkDone}`} />
+                                    ) : (
+                                      <Circle className={`w-5 h-5 ${theme.checkUndone}`} />
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm truncate ${completedCount === totalChecks ? theme.textSecondary : theme.textPrimary}`}>{task.action}</p>
+                            </div>
+                            <span className={`text-xs flex-shrink-0 ${theme.textMuted}`}>{completedCount}/{totalChecks}</span>
+                          </div>
+                        );
+                      })()
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Weekly Tasks Section */}
+        {weeklyTasksList.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Weekly Tasks</p>
+              <p className={`text-xs ${theme.textSecondary}`}>{weeklyOverallProgress.percentage}%</p>
+            </div>
+            <div className={`h-1 ${theme.progressBg} rounded-full mb-3`}>
+              <div className={`h-full rounded-full transition-all ${weeklyOverallProgress.percentage === 100 ? theme.progressSuccess : theme.progressFill}`} style={{ width: `${weeklyOverallProgress.percentage}%` }} />
+            </div>
+
+            <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+              {weeklyTasksList.map(({ goal, task }, index) => {
+                const weekProgress = calculateWeeklyProgress(task, goal.id, selectedDate);
+                const isCheckedToday = isTaskCompleted(dateKey, goal.id, task.id);
+                const taskKey = `${goal.id}-${task.id}-0`;
+                
+                return (
+                  <div 
+                    key={`${goal.id}-${task.id}`} 
+                    className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer ${index !== weeklyTasksList.length - 1 ? `border-b ${theme.divider}` : ''} ${animatingTasks[taskKey] ? 'task-row-animate' : ''}`}
+                    onClick={() => toggleTask(dateKey, goal.id, task.id, 0, task)}
+                  >
+                    <div className={`flex-shrink-0 ${animatingTasks[taskKey] ? 'checkbox-animate' : ''}`}>
+                      {isCheckedToday ? (
+                        <CheckCircle2 className={`w-5 h-5 ${theme.checkDone}`} />
+                      ) : (
+                        <Circle className={`w-5 h-5 ${theme.checkUndone}`} />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm truncate ${isCheckedToday ? theme.textSecondary : theme.textPrimary}`}>{task.action}</p>
+                    </div>
+                    <span className={`text-xs flex-shrink-0 ${theme.textMuted}`}>{weekProgress.completed}/{weekProgress.target}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Journal Section */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Journal</p>
+            <button onClick={() => setShowJournalSettings(true)} className={theme.textMuted}>
+              <Settings className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-3 space-y-3`}>
+            {journalConfig.prompts.map((prompt) => {
+              const promptKey = `${dateKey}-${prompt.id}`;
+              const currentValue = journalEntries[promptKey] || '';
+              
+              if (prompt.type === 'text') {
+                return (
+                  <div key={prompt.id}>
+                    <p className={`text-xs mb-1 ${theme.textMuted}`}>{prompt.label}</p>
+                    <textarea
+                      value={currentValue}
+                      onChange={(e) => setJournalEntries(prev => ({ ...prev, [promptKey]: e.target.value }))}
+                      placeholder={prompt.placeholder}
+                      className={`w-full rounded-lg px-2.5 py-2 text-sm min-h-[60px] resize-none ${theme.inputBg} ${theme.textPrimary}`}
+                    />
+                  </div>
+                );
+              } else if (prompt.type === 'slider') {
+                const sliderValue = currentValue || prompt.min || 0;
+                return (
+                  <div key={prompt.id}>
+                    <p className={`text-xs mb-1 ${theme.textMuted}`}>{prompt.label}</p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min={prompt.min || 0}
+                        max={prompt.max || 10}
+                        value={sliderValue}
+                        onChange={(e) => setJournalEntries(prev => ({ ...prev, [promptKey]: parseInt(e.target.value) }))}
+                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                        style={{ background: darkMode ? '#334155' : '#e2e8f0' }}
+                      />
+                      <span className={`text-xs w-5 text-right ${theme.textSecondary}`}>{sliderValue}</span>
+                    </div>
+                  </div>
+                );
+              } else if (prompt.type === 'yesno') {
+                return (
+                  <div key={prompt.id}>
+                    <p className={`text-xs mb-2 ${theme.textMuted}`}>{prompt.label}</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setJournalEntries(prev => ({ ...prev, [promptKey]: 'yes' }))}
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                          currentValue === 'yes'
+                            ? 'bg-emerald-500 text-white'
+                            : `${theme.inputBg} ${theme.textSecondary}`
+                        }`}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setJournalEntries(prev => ({ ...prev, [promptKey]: 'no' }))}
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                          currentValue === 'no'
+                            ? 'bg-red-500 text-white'
+                            : `${theme.inputBg} ${theme.textSecondary}`
+                        }`}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+        </div>
+
+        {/* Photo of the Day */}
+        <div>
+          <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${theme.textMuted}`}>Photo of the Day</p>
+          {dailyPhotos[dateKey] ? (
+            <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden relative`}>
+              <img src={dailyPhotos[dateKey]} alt="Photo of the day" className="w-full h-40 object-cover" />
+              <button onClick={() => removeDailyPhoto(dateKey)} className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-lg">
+                <Trash2 className="w-3.5 h-3.5 text-white" />
+              </button>
+            </div>
+          ) : (
+            <div className={`${theme.cardBg} rounded-xl shadow-sm p-4 border-2 border-dashed ${theme.border} flex items-center justify-center`}>
+              <label className="text-center cursor-pointer">
+                <Camera className={`w-6 h-6 mx-auto mb-1 ${theme.textMuted}`} />
+                <p className={`text-xs ${theme.textMuted}`}>Add photo</p>
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => updateDailyPhoto(dateKey, reader.result);
+                    reader.readAsDataURL(file);
+                  }
+                }} />
+              </label>
+            </div>
+          )}
+        </div>
+
+        {/* Media Section */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Media</p>
+            <button onClick={() => setShowMediaForm(true)} className={`w-6 h-6 rounded-full ${theme.btnPrimary} flex items-center justify-center`}>
+              <Plus className="w-3 h-3" />
+            </button>
+          </div>
+          {todayMedia.length === 0 ? (
+            <div className={`${theme.cardBg} rounded-xl shadow-sm p-4 text-center`}>
+              <p className={`text-xs ${theme.textMuted}`}>No media logged today</p>
+            </div>
+          ) : (
+            <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+              {todayMedia.map((item, index) => (
+                <div key={item.id} className={`flex items-center gap-3 px-3 py-2.5 group ${index !== todayMedia.length - 1 ? `border-b ${theme.divider}` : ''}`}>
+                  <div className={`w-7 h-7 rounded flex items-center justify-center ${theme.inputBg}`}>
+                    {item.type === 'book' && <Book className={`w-3.5 h-3.5 ${theme.textSecondary}`} />}
+                    {item.type === 'music' && <Music className={`w-3.5 h-3.5 ${theme.textSecondary}`} />}
+                    {item.type === 'movie' && <Film className={`w-3.5 h-3.5 ${theme.textSecondary}`} />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm truncate ${theme.textPrimary}`}>{item.title}</p>
+                    {item.notes && <p className={`text-xs truncate ${theme.textMuted}`}>{item.notes}</p>}
+                  </div>
+                  <button onClick={() => removeMedia(dateKey, item.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 rounded">
+                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Media Form Modal */}
+          {showMediaForm && (
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className={`${theme.cardBg} rounded-2xl p-5 w-full max-w-md shadow-xl`}>
+                <h4 className={`text-base font-semibold mb-4 ${theme.textPrimary}`}>Add Media</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Type</label>
+                    <select value={mediaForm.type} onChange={(e) => setMediaForm({ ...mediaForm, type: e.target.value })} className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`}>
+                      <option value="book">Book</option>
+                      <option value="music">Album</option>
+                      <option value="movie">Movie</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Title</label>
+                    <input type="text" value={mediaForm.title} onChange={(e) => setMediaForm({ ...mediaForm, title: e.target.value })} className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`} placeholder="Enter title..." />
+                  </div>
+                  <div>
+                    <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Notes (optional)</label>
+                    <textarea value={mediaForm.notes} onChange={(e) => setMediaForm({ ...mediaForm, notes: e.target.value })} className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`} rows="2" placeholder="Your thoughts..." />
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <button onClick={() => { if (mediaForm.title) { addMedia(dateKey, mediaForm); setMediaForm({ type: 'book', title: '', notes: '' }); setShowMediaForm(false); } }} className={`flex-1 py-2 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>Add</button>
+                  <button onClick={() => { setShowMediaForm(false); setMediaForm({ type: 'book', title: '', notes: '' }); }} className={`px-4 py-2 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Cancel</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // PROGRESS VIEW - Card Stack with Time Period
+  // ============================================
+  const ProgressView = () => {
+    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [timePeriod, setTimePeriod] = useState('1M');
+    
+    const timePeriods = [
+      { id: '1W', label: '1W', days: 7 },
+      { id: '1M', label: '1M', days: 30 },
+      { id: '3M', label: '3M', days: 90 },
+      { id: '6M', label: '6M', days: 180 },
+      { id: '1Y', label: '1Y', days: 365 },
+      { id: 'ALL', label: 'All', days: null },
+    ];
+    
+    const currentPeriod = timePeriods.find(p => p.id === timePeriod);
+    
+    // Calculate progress for a category over the selected time period
+    const calculateCategoryProgress = useCallback((categoryId) => {
+      const categoryGoals = goals.filter(g => g.category === categoryId);
+      if (categoryGoals.length === 0) return { percentage: 0, goalsCount: 0, totalDays: 0, completedDays: 0, goals: [] };
+      
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      
+      let periodStart;
+      if (currentPeriod.days === null) {
+        // ALL time - find earliest goal creation date
+        const earliestGoal = categoryGoals.reduce((earliest, goal) => {
+          const created = goal.createdAt ? new Date(goal.createdAt) : new Date();
+          return created < earliest ? created : earliest;
+        }, new Date());
+        periodStart = earliestGoal;
+      } else {
+        periodStart = new Date(today);
+        periodStart.setDate(today.getDate() - currentPeriod.days + 1);
+      }
+      periodStart.setHours(0, 0, 0, 0);
+      
+      let totalExpected = 0;
+      let totalCompleted = 0;
+      
+      const goalsWithProgress = categoryGoals.map(goal => {
+        let goalExpected = 0;
+        let goalCompleted = 0;
+        
+        if (!goal.tasks || !Array.isArray(goal.tasks)) {
+          return { ...goal, percentage: 0, completed: 0, total: 0 };
+        }
+        
+        goal.tasks.forEach(task => {
+          for (let d = new Date(periodStart); d <= today; d.setDate(d.getDate() + 1)) {
+            const dateKey = d.toISOString().split('T')[0];
+            
+            if (!task.frequency || task.frequency === 'daily') {
+              const checksPerDay = task.dailyChecks || 1;
+              goalExpected += checksPerDay;
+              for (let i = 0; i < checksPerDay; i++) {
+                if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) goalCompleted++;
+              }
+            } else if (task.frequency === 'weekly') {
+              // For weekly tasks, only count on the last day of each week in period
+              if (d.getDay() === 0 || d.getTime() === today.getTime()) {
+                const weekStart = new Date(d);
+                weekStart.setDate(d.getDate() - d.getDay());
+                if (weekStart < periodStart) weekStart.setTime(periodStart.getTime());
+                
+                const target = task.weeklyTarget || 4;
+                goalExpected += target;
+                
+                for (let wd = new Date(weekStart); wd <= d; wd.setDate(wd.getDate() + 1)) {
+                  const wdKey = wd.toISOString().split('T')[0];
+                  if (dailyTasks[wdKey]?.[`${goal.id}-${task.id}-0`]) goalCompleted++;
+                }
+              }
+            }
+          }
+        });
+        
+        totalExpected += goalExpected;
+        totalCompleted += goalCompleted;
+        
+        const daysInPeriod = Math.ceil((today - periodStart) / (1000 * 60 * 60 * 24)) + 1;
+        
+        return {
+          ...goal,
+          percentage: goalExpected > 0 ? Math.round((goalCompleted / goalExpected) * 100) : 0,
+          completed: goalCompleted,
+          total: goalExpected,
+          daysInPeriod
+        };
+      });
+      
+      const daysInPeriod = Math.ceil((today - periodStart) / (1000 * 60 * 60 * 24)) + 1;
+      
+      return {
+        percentage: totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0,
+        goalsCount: categoryGoals.length,
+        totalExpected,
+        totalCompleted,
+        daysInPeriod,
+        goals: goalsWithProgress
+      };
+    }, [goals, dailyTasks, currentPeriod]);
+    
+    // Calculate chart data points for a category
+    const calculateChartData = useCallback((categoryId) => {
+      const categoryGoals = goals.filter(g => g.category === categoryId);
+      if (categoryGoals.length === 0) return [];
+      
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      
+      let periodStart;
+      let numPoints;
+      let pointInterval;
+      
+      if (currentPeriod.days === null) {
+        // ALL time
+        const earliestGoal = categoryGoals.reduce((earliest, goal) => {
+          const created = goal.createdAt ? new Date(goal.createdAt) : new Date();
+          return created < earliest ? created : earliest;
+        }, new Date());
+        periodStart = earliestGoal;
+        const totalDays = Math.ceil((today - periodStart) / (1000 * 60 * 60 * 24));
+        numPoints = Math.min(12, Math.max(4, Math.ceil(totalDays / 7)));
+        pointInterval = Math.ceil(totalDays / numPoints);
+      } else if (currentPeriod.days <= 7) {
+        periodStart = new Date(today);
+        periodStart.setDate(today.getDate() - currentPeriod.days + 1);
+        numPoints = currentPeriod.days;
+        pointInterval = 1;
+      } else if (currentPeriod.days <= 30) {
+        periodStart = new Date(today);
+        periodStart.setDate(today.getDate() - currentPeriod.days + 1);
+        numPoints = Math.ceil(currentPeriod.days / 7);
+        pointInterval = 7;
+      } else {
+        periodStart = new Date(today);
+        periodStart.setDate(today.getDate() - currentPeriod.days + 1);
+        numPoints = Math.min(12, Math.ceil(currentPeriod.days / 7));
+        pointInterval = Math.ceil(currentPeriod.days / numPoints);
+      }
+      periodStart.setHours(0, 0, 0, 0);
+      
+      const dataPoints = [];
+      
+      for (let i = 0; i < numPoints; i++) {
+        const pointEnd = new Date(periodStart);
+        pointEnd.setDate(periodStart.getDate() + (i + 1) * pointInterval - 1);
+        if (pointEnd > today) pointEnd.setTime(today.getTime());
+        
+        const pointStart = new Date(periodStart);
+        pointStart.setDate(periodStart.getDate() + i * pointInterval);
+        
+        let expected = 0;
+        let completed = 0;
+        
+        categoryGoals.forEach(goal => {
+          if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+          
+          goal.tasks.forEach(task => {
+            for (let d = new Date(pointStart); d <= pointEnd; d.setDate(d.getDate() + 1)) {
+              const dateKey = d.toISOString().split('T')[0];
+              
+              if (!task.frequency || task.frequency === 'daily') {
+                const checksPerDay = task.dailyChecks || 1;
+                expected += checksPerDay;
+                for (let c = 0; c < checksPerDay; c++) {
+                  if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) completed++;
+                }
+              }
+            }
+          });
+        });
+        
+        dataPoints.push({
+          percentage: expected > 0 ? Math.round((completed / expected) * 100) : 0
+        });
+      }
+      
+      return dataPoints;
+    }, [goals, dailyTasks, currentPeriod]);
+    
+    // Mini chart component
+    const MiniChart = ({ data, color, height = 60, showLabels = false }) => {
+      if (!data || data.length < 2) return <div className={`h-${height} flex items-center justify-center`}><p className={`text-xs ${theme.textMuted}`}>Not enough data</p></div>;
+      
+      const max = 100;
+      const width = 200;
+      const padding = showLabels ? { top: 5, right: 5, bottom: 18, left: 22 } : { top: 3, right: 3, bottom: 3, left: 3 };
+      const chartWidth = width - padding.left - padding.right;
+      const chartHeight = height - padding.top - padding.bottom;
+      
+      const points = data.map((d, i) => {
+        const x = padding.left + (i / (data.length - 1)) * chartWidth;
+        const y = padding.top + chartHeight - (d.percentage / max) * chartHeight;
+        return { x, y, val: d.percentage };
+      });
+      
+      const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      const areaD = `M ${points[0].x} ${padding.top + chartHeight} ${pathD.substring(1)} L ${points[points.length - 1].x} ${padding.top + chartHeight} Z`;
+      
+      return (
+        <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
+          {showLabels && [0, 50, 100].map(val => {
+            const y = padding.top + chartHeight - (val / max) * chartHeight;
+            return (
+              <g key={val}>
+                <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke={darkMode ? '#334155' : '#e2e8f0'} strokeWidth="1" strokeDasharray={val === 0 ? "0" : "2,2"} />
+                <text x={padding.left - 4} y={y + 3} fontSize="8" fill={darkMode ? '#64748b' : '#94a3b8'} textAnchor="end">{val}</text>
+              </g>
+            );
+          })}
+          <path d={areaD} fill={color} opacity="0.15" />
+          <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {points.map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y} r={showLabels ? "3" : "2"} fill={color} />
+          ))}
+          {showLabels && (
+            <>
+              <text x={padding.left} y={height - 3} fontSize="8" fill={darkMode ? '#64748b' : '#94a3b8'} textAnchor="start">Start</text>
+              <text x={width - padding.right} y={height - 3} fontSize="8" fill={darkMode ? '#64748b' : '#94a3b8'} textAnchor="end">Now</text>
+            </>
+          )}
+        </svg>
+      );
+    };
+    
+    // Get categories that have goals
+    const activeCategories = (categories || []).filter(cat => 
+      goals.some(g => g.category === cat.id)
+    );
+
+    return (
+      <div className="space-y-3">
+        {/* Header */}
+        <div className="flex items-center justify-between py-2">
+          <div>
+            <h2 className={`text-lg font-semibold ${theme.textPrimary}`}>Progress</h2>
+            <p className={`text-xs ${theme.textMuted}`}>By category</p>
+          </div>
+          <button onClick={() => setShowCategorySettings(true)} className={`p-2 rounded-lg ${theme.btnSecondary}`}>
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+        
+        {/* Time Period Selector */}
+        <div className={`${theme.cardBg} rounded-xl shadow-sm p-1 flex gap-1`}>
+          {timePeriods.map(period => (
+            <button
+              key={period.id}
+              onClick={() => setTimePeriod(period.id)}
+              className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all ${
+                timePeriod === period.id
+                  ? theme.btnPrimary
+                  : `${theme.textMuted} hover:${theme.inputBg}`
+              }`}
+            >
+              {period.label}
+            </button>
+          ))}
+        </div>
+
+        {goals.length === 0 ? (
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-8 text-center`}>
+            <Target className={`w-10 h-10 mx-auto mb-3 ${theme.textMuted}`} />
+            <h3 className={`text-sm font-semibold mb-1 ${theme.textPrimary}`}>No goals yet</h3>
+            <p className={`text-xs mb-4 ${theme.textMuted}`}>Create your first goal to start tracking</p>
+            <button onClick={() => setShowGoalForm(true)} className={`px-4 py-2 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>Create Goal</button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {activeCategories.map(category => {
+              const progress = calculateCategoryProgress(category.id);
+              const chartData = calculateChartData(category.id);
+              const isExpanded = expandedCategory === category.id;
+              
+              return (
+                <div key={category.id} className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                  {/* Category Header */}
+                  <button 
+                    onClick={() => setExpandedCategory(isExpanded ? null : category.id)}
+                    className="w-full p-4 flex items-center gap-3"
+                  >
+                    {/* Percentage Badge */}
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" 
+                      style={{ backgroundColor: `${category.color}15` }}
+                    >
+                      <span className="text-base font-bold" style={{ color: category.color }}>{progress.percentage}%</span>
+                    </div>
+                    
+                    {/* Category Info */}
+                    <div className="flex-1 text-left min-w-0">
+                      <h3 className={`font-semibold text-sm ${theme.textPrimary}`}>{category.name}</h3>
+                      <p className={`text-xs ${theme.textMuted}`}>{progress.goalsCount} goal{progress.goalsCount !== 1 ? 's' : ''}</p>
+                    </div>
+                    
+                    {/* Mini Sparkline */}
+                    <div className="w-16 h-8 flex-shrink-0">
+                      <MiniChart data={chartData} color={category.color} height={32} />
+                    </div>
+                    
+                    <ChevronRight className={`w-4 h-4 flex-shrink-0 ${theme.textMuted} transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                  </button>
+                  
+                  {/* Expanded Content */}
+                  {isExpanded && (
+                    <div className={`px-4 pb-4 border-t ${theme.divider}`}>
+                      {/* Larger Chart */}
+                      <div className="py-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className={`text-xs font-medium ${theme.textMuted}`}>
+                            {currentPeriod.days === null ? 'All Time' : `Last ${currentPeriod.days} days`}
+                          </p>
+                          {chartData.length >= 2 && (
+                            <p className={`text-xs ${theme.textMuted}`}>
+                              {chartData[0]?.percentage}% → {chartData[chartData.length - 1]?.percentage}%
+                            </p>
+                          )}
+                        </div>
+                        <MiniChart data={chartData} color={category.color} height={100} showLabels />
+                      </div>
+                      
+                      {/* Goals List */}
+                      <div className="space-y-2 mt-2">
+                        <p className={`text-xs font-medium ${theme.textMuted}`}>Goals</p>
+                        {progress.goals.map(goal => (
+                          <div key={goal.id} className={`p-3 rounded-lg ${theme.inputBg}`}>
+                            <div className="flex justify-between mb-1.5">
+                              <span className={`text-sm font-medium ${theme.textPrimary}`}>{goal.title}</span>
+                              <span className="text-sm font-bold" style={{ color: category.color }}>{goal.percentage}%</span>
+                            </div>
+                            <div className={`h-1.5 rounded-full mb-1.5 ${theme.progressBg}`}>
+                              <div 
+                                className="h-full rounded-full transition-all" 
+                                style={{ width: `${goal.percentage}%`, backgroundColor: category.color }} 
+                              />
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <p className={`text-xs ${theme.textMuted}`}>{goal.completed} of {goal.total} tasks</p>
+                              <div className="flex gap-2">
+                                <button onClick={(e) => { e.stopPropagation(); setEditingGoal(goal); }} className={`text-xs ${theme.textSecondary}`}>Edit</button>
+                                {deletingGoalId === goal.id ? (
+                                  <button onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id); setDeletingGoalId(null); }} className="text-xs text-red-500">Confirm</button>
+                                ) : (
+                                  <button onClick={(e) => { e.stopPropagation(); setDeletingGoalId(goal.id); }} className="text-xs text-red-500">Delete</button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Uncategorized goals */}
+            {goals.filter(g => !activeCategories.some(c => c.id === g.category)).length > 0 && (
+              <div className={`${theme.cardBg} rounded-xl shadow-sm p-4`}>
+                <h3 className={`font-semibold text-sm mb-3 ${theme.textPrimary}`}>Uncategorized</h3>
+                {goals.filter(g => !activeCategories.some(c => c.id === g.category)).map(goal => {
+                  const progress = calculateProgress(goal);
+                  return (
+                    <div key={goal.id} className={`p-3 rounded-lg ${theme.inputBg} mb-2 last:mb-0`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className={`font-medium text-sm ${theme.textPrimary}`}>{goal.title}</h4>
+                        <span className={`text-sm font-semibold ${theme.textPrimary}`}>{progress.percentage}%</span>
+                      </div>
+                      <div className={`h-1.5 rounded-full ${theme.progressBg}`}>
+                        <div className={`h-full rounded-full ${theme.progressFill}`} style={{ width: `${progress.percentage}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ============================================
+  // MAIN RENDER
+  // ============================================
+  if (!isLoaded) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme.pageBg}`}>
+        <p className={theme.textMuted}>Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen ${theme.pageBg} font-sans`}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: ${darkMode ? '#e2e8f0' : '#334155'};
+          cursor: pointer;
+        }
+        @keyframes shrinkBounceBg {
+          0% { transform: scale(1); background-color: transparent; }
+          15% { transform: scale(0.975); background-color: rgba(16, 185, 129, 0.15); }
+          40% { transform: scale(1.012); background-color: rgba(16, 185, 129, 0.2); }
+          60% { transform: scale(0.995); background-color: rgba(16, 185, 129, 0.12); }
+          80% { transform: scale(1.003); background-color: rgba(16, 185, 129, 0.05); }
+          100% { transform: scale(1); background-color: transparent; }
+        }
+        @keyframes morphCheckbox {
+          0% { transform: scale(1); }
+          30% { transform: scale(0.8); }
+          60% { transform: scale(1.1); }
+          80% { transform: scale(0.95); }
+          100% { transform: scale(1); }
+        }
+        .task-row-animate { animation: shrinkBounceBg 1.2s ease-out; }
+        .checkbox-animate { animation: morphCheckbox 0.7s ease-out; }
+      `}</style>
+      
+      {/* Sticky Header */}
+      <div className={`sticky top-0 z-40 ${theme.headerBg} backdrop-blur-sm border-b ${theme.border}`}>
+        <div className="max-w-lg mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <h1 className={`text-lg font-semibold tracking-tight ${theme.textPrimary}`}>Life Tracker</h1>
+            <div className="flex gap-2">
+              <button onClick={() => setDarkMode(!darkMode)} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
+                {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+              <button onClick={() => setShowGoalForm(true)} className={`w-8 h-8 rounded-full ${theme.btnPrimary} shadow-sm flex items-center justify-center`}>
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Navigation Pills */}
+          <div className="mt-3">
+            <div className={`flex gap-1 ${theme.cardBg} rounded-full p-1 shadow-sm w-fit`}>
+              <button onClick={() => setCurrentView('daily')} className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${currentView === 'daily' ? theme.btnPrimary : theme.textSecondary}`}>Daily</button>
+              <button onClick={() => setCurrentView('calendar')} className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${currentView === 'calendar' ? theme.btnPrimary : theme.textSecondary}`}>Calendar</button>
+              <button onClick={() => setCurrentView('progress')} className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${currentView === 'progress' ? theme.btnPrimary : theme.textSecondary}`}>Progress</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-lg mx-auto px-4 py-4 pb-8">
+        {currentView === 'daily' && <DailyView />}
+        {currentView === 'calendar' && <CalendarView />}
+        {currentView === 'progress' && <ProgressView />}
+      </div>
+
+      {/* Modals */}
+      {showGoalForm && <GoalForm onSave={addGoal} onCancel={() => setShowGoalForm(false)} />}
+      {editingGoal && <GoalForm goal={editingGoal} onSave={(updates) => updateGoal(editingGoal.id, updates)} onCancel={() => setEditingGoal(null)} />}
+      {showCompletionModal && <TaskCompletionModal onSave={(note, photo) => saveTaskCompletion(showCompletionModal.dateKey, showCompletionModal.goalId, showCompletionModal.taskId, showCompletionModal.checkIndex, note, photo)} onCancel={() => setShowCompletionModal(null)} taskName={showCompletionModal.task?.action || 'Task'} />}
+      {viewingCompletion && <ViewCompletionModal completion={viewingCompletion.completion} taskName={viewingCompletion.taskName} onClose={() => setViewingCompletion(null)} />}
+      {showJournalSettings && <JournalSettingsModal config={journalConfig} onSave={(newConfig) => { setJournalConfig(newConfig); setShowJournalSettings(false); }} onCancel={() => setShowJournalSettings(false)} />}
+      {showCategorySettings && <CategorySettingsModal categories={categories} onSave={(newCategories) => { setCategories(newCategories); setShowCategorySettings(false); }} onCancel={() => setShowCategorySettings(false)} />}
+    </div>
+  );
+};
+
+
+    // Mount the app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<GoalTrackerApp />);
+  </script>
+</body>
+</html>
