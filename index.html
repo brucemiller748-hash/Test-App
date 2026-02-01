@@ -2,63 +2,86 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>Life Tracker</title>
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            neutral: {
-              50: '#fafafa',
-              100: '#f5f5f5',
-              200: '#e5e5e5',
-              300: '#d4d4d4',
-              400: '#a3a3a3',
-              500: '#737373',
-              600: '#525252',
-              700: '#404040',
-              800: '#262626',
-              900: '#171717',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <!-- React -->
+  
+  <!-- React 18 -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Babel for JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
   <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    #root { width: 100%; min-height: 100vh; }
+    html, body {
+      overscroll-behavior: none;
+      -webkit-overflow-scrolling: touch;
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
+  
   <script type="text/babel">
-    const { useState, useEffect, useMemo, useCallback, useRef } = React;
+    // Destructure from React
+    const { useState, useEffect, useMemo, useCallback, useRef, memo } = React;
     
-    // Icon components
-    const Camera = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>;
-    const Book = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
-    const Music = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>;
-    const Film = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>;
-    const Target = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
-    const CheckCircle2 = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>;
-    const Circle = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/></svg>;
-    const Plus = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-    const X = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-    const ChevronLeft = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="15 18 9 12 15 6"/></svg>;
-    const ChevronRight = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"/></svg>;
-    const Trash2 = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
-    const Settings = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>;
-    const Sun = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>;
-    const Moon = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>;
+    // Define icons as simple SVG components (instead of using lucide-react CDN)
+    const Icon = ({ d, className = "w-4 h-4", strokeWidth = 2 }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d={d} />
+      </svg>
+    );
+    
+    const MultiPathIcon = ({ paths, className = "w-4 h-4", strokeWidth = 2 }) => (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        {paths.map((p, i) => typeof p === 'string' ? <path key={i} d={p} /> : p)}
+      </svg>
+    );
+
+    // Icon definitions
+    const Camera = ({ className }) => <MultiPathIcon className={className} paths={["M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z", <circle key="c" cx="12" cy="13" r="4" />]} />;
+    const Book = ({ className }) => <MultiPathIcon className={className} paths={["M4 19.5A2.5 2.5 0 0 1 6.5 17H20", "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"]} />;
+    const Music = ({ className }) => <MultiPathIcon className={className} paths={["M9 18V5l12-2v13", <circle key="c1" cx="6" cy="18" r="3" />, <circle key="c2" cx="18" cy="16" r="3" />]} />;
+    const Film = ({ className }) => <MultiPathIcon className={className} paths={[<rect key="r" x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />, "M7 2v20", "M17 2v20", "M2 12h20", "M2 7h5", "M2 17h5", "M17 17h5", "M17 7h5"]} />;
+    const Target = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c1" cx="12" cy="12" r="10" />, <circle key="c2" cx="12" cy="12" r="6" />, <circle key="c3" cx="12" cy="12" r="2" />]} />;
+    const CheckCircle2 = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="10" />, "M9 12l2 2 4-4"]} />;
+    const Check = ({ className }) => <Icon className={className} d="M20 6L9 17l-5-5" />;
+    const Circle = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="10" />]} />;
+    const Plus = ({ className }) => <MultiPathIcon className={className} paths={["M12 5v14", "M5 12h14"]} />;
+    const Minus = ({ className }) => <Icon className={className} d="M5 12h14" />;
+    const X = ({ className }) => <MultiPathIcon className={className} paths={["M18 6L6 18", "M6 6l12 12"]} />;
+    const ChevronLeft = ({ className }) => <Icon className={className} d="M15 18l-6-6 6-6" />;
+    const ChevronRight = ({ className }) => <Icon className={className} d="M9 18l6-6-6-6" />;
+    const ChevronUp = ({ className }) => <Icon className={className} d="M18 15l-6-6-6 6" />;
+    const ChevronDown = ({ className }) => <Icon className={className} d="M6 9l6 6 6-6" />;
+    const Trash2 = ({ className }) => <MultiPathIcon className={className} paths={["M3 6h18", "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", "M10 11v6", "M14 11v6"]} />;
+    const Settings = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="3" />, "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"]} />;
+    const Sun = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="5" />, "M12 1v2", "M12 21v2", "M4.22 4.22l1.42 1.42", "M18.36 18.36l1.42 1.42", "M1 12h2", "M21 12h2", "M4.22 19.78l1.42-1.42", "M18.36 5.64l1.42-1.42"]} />;
+    const Moon = ({ className }) => <Icon className={className} d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />;
+    const Star = ({ className }) => <Icon className={className} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />;
+    const Flame = ({ className }) => <Icon className={className} d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />;
+    const Zap = ({ className }) => <Icon className={className} d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />;
+    const Clock = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="10" />, "M12 6v6l4 2"]} />;
+    const Heart = ({ className }) => <Icon className={className} d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />;
+    const Trophy = ({ className }) => <MultiPathIcon className={className} paths={["M6 9H4.5a2.5 2.5 0 0 1 0-5H6", "M18 9h1.5a2.5 2.5 0 0 0 0-5H18", "M4 22h16", "M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22", "M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22", "M18 2H6v7a6 6 0 0 0 12 0V2Z"]} />;
+    const Sliders = ({ className }) => <MultiPathIcon className={className} paths={["M4 21v-7", "M4 10V3", "M12 21v-9", "M12 8V3", "M20 21v-5", "M20 12V3", "M1 14h6", "M9 8h6", "M17 16h6"]} />;
+    const Hash = ({ className }) => <MultiPathIcon className={className} paths={["M4 9h16", "M4 15h16", "M10 3L8 21", "M16 3l-2 18"]} />;
+
+// Format date to YYYY-MM-DD using LOCAL time (not UTC)
+// This prevents the bug where late-night entries get saved to the wrong day
+const toLocalDateKey = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 // Haptic feedback helper
 const triggerHaptic = () => {
@@ -66,6 +89,84 @@ const triggerHaptic = () => {
     navigator.vibrate([15, 40, 50]); // Success pattern
   }
 };
+
+// Get progress bar color based on percentage
+const getProgressColor = (percentage) => {
+  if (percentage < 50) return '#f97316'; // orange
+  if (percentage < 75) return '#eab308'; // yellow
+  const greenProgress = (percentage - 75) / 25;
+  const r = Math.round(134 - (134 - 34) * greenProgress);
+  const g = Math.round(239 - (239 - 197) * greenProgress);
+  const b = Math.round(172 - (172 - 94) * greenProgress);
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
+// Progress bar component - MUST be outside main component for stable React reference
+const ProgressBar = memo(({ percentage, darkMode }) => {
+  const color = getProgressColor(percentage);
+  const bgColor = darkMode ? '#334155' : '#e2e8f0';
+  
+  return (
+    <div style={{ height: '6px', width: '100%', backgroundColor: bgColor, overflow: 'hidden' }}>
+      <div 
+        style={{ 
+          height: '6px',
+          width: `${percentage}%`,
+          backgroundColor: color,
+          transition: 'width 0.6s ease-out, background-color 0.4s ease-out'
+        }} 
+      />
+    </div>
+  );
+});
+
+// Mini progress bar for group headers
+const MiniProgressBar = memo(({ percentage, darkMode }) => {
+  const color = getProgressColor(percentage);
+  const bgColor = darkMode ? '#334155' : '#e2e8f0';
+  
+  return (
+    <div style={{ height: '4px', width: '48px', backgroundColor: bgColor, borderRadius: '2px', overflow: 'hidden' }}>
+      <div 
+        style={{ 
+          height: '4px',
+          width: `${percentage}%`,
+          backgroundColor: color,
+          borderRadius: '2px',
+          transition: 'width 0.6s ease-out, background-color 0.4s ease-out'
+        }} 
+      />
+    </div>
+  );
+});
+
+// Mini sparkline for journal slider trends
+const MiniSparkline = memo(({ data, color = '#6366f1', height = 20, width = 40 }) => {
+  const validData = data.filter(d => d !== null);
+  if (validData.length < 2) return null;
+  
+  const max = Math.max(...validData);
+  const min = Math.min(...validData);
+  const range = max - min || 1;
+  
+  const points = data.map((val, i) => {
+    if (val === null) return null;
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((val - min) / range) * (height - 4) - 2;
+    return { x, y };
+  }).filter(p => p !== null);
+  
+  if (points.length < 2) return null;
+  
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  
+  return (
+    <svg width={width} height={height} style={{ opacity: 0.5 }}>
+      <path d={pathD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="2" fill={color} />
+    </svg>
+  );
+});
 
 const GoalTrackerApp = () => {
   // ============================================
@@ -154,6 +255,44 @@ const GoalTrackerApp = () => {
     };
   }, [appState, isLoaded]);
 
+  // Save immediately when app goes to background (prevents data loss on iOS)
+  useEffect(() => {
+    if (!isLoaded) return;
+    
+    const saveImmediately = () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+      try {
+        localStorage.setItem('goalTrackerData', JSON.stringify(appState));
+      } catch (e) {
+        console.error('Failed to save on visibility change:', e);
+      }
+    };
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        saveImmediately();
+      }
+    };
+    
+    // Also save on page unload (backup for iOS)
+    const handleBeforeUnload = () => {
+      saveImmediately();
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', saveImmediately);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', saveImmediately);
+    };
+  }, [appState, isLoaded]);
+
   // ============================================
   // STATE HELPERS
   // ============================================
@@ -174,8 +313,17 @@ const GoalTrackerApp = () => {
   const setDarkMode = useCallback((value) => updateState('darkMode', value), [updateState]);
   const setCategories = useCallback((value) => updateState('categories', value), [updateState]);
 
-  const formatDate = useCallback((date) => date.toISOString().split('T')[0], []);
+  // Use local time for date keys (not UTC) to prevent timezone bugs
+  const formatDate = useCallback((date) => toLocalDateKey(date), []);
   const getDateKey = useCallback((date) => formatDate(date), [formatDate]);
+
+  // Check if a date is today
+  const isToday = useCallback((date) => {
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear();
+  }, []);
 
   // Animation helper
   const triggerTaskAnimation = useCallback((taskKey) => {
@@ -216,14 +364,38 @@ const GoalTrackerApp = () => {
   }, [setGoals, setDailyTasks]);
 
   // ============================================
+  // WEEK HELPERS (must be before task management)
+  // ============================================
+  const getWeekRange = useCallback((date) => {
+    const day = date.getDay(); // 0 = Sunday
+    const weekStart = new Date(date);
+    weekStart.setDate(date.getDate() - day); // Go back to Sunday
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6); // Saturday
+    weekEnd.setHours(23, 59, 59, 999);
+    return { weekStart, weekEnd };
+  }, []);
+
+  // Get a week key for weekly points goal tracking
+  const getWeekKey = useCallback((date) => {
+    const { weekStart } = getWeekRange(date);
+    return `week-${toLocalDateKey(weekStart)}`;
+  }, [getWeekRange]);
+
+  // ============================================
   // TASK MANAGEMENT
   // ============================================
-  const toggleTask = useCallback((dateKey, goalId, taskId, checkIndex = 0, task = null) => {
+  const toggleTask = useCallback((dateKey, goalId, taskId, checkIndex = 0, task = null, goal = null) => {
+    // For weekly points goals, use week key instead of date key
+    const isWeeklyPointsGoal = goal?.goalType === 'points' && goal?.pointTargetFrequency === 'weekly';
+    const storageKey = isWeeklyPointsGoal ? getWeekKey(new Date(dateKey)) : dateKey;
+    
     const taskKey = `${goalId}-${taskId}-${checkIndex}`;
-    const currentValue = dailyTasks[dateKey]?.[taskKey];
+    const currentValue = dailyTasks[storageKey]?.[taskKey];
 
     if (currentValue) {
-      setDailyTasks(prev => ({ ...prev, [dateKey]: { ...prev[dateKey], [taskKey]: false } }));
+      setDailyTasks(prev => ({ ...prev, [storageKey]: { ...prev[storageKey], [taskKey]: false } }));
       return;
     }
 
@@ -231,12 +403,12 @@ const GoalTrackerApp = () => {
     triggerTaskAnimation(taskKey);
 
     if (task && task.promptForNote) {
-      setShowCompletionModal({ dateKey, goalId, taskId, checkIndex, task });
+      setShowCompletionModal({ dateKey: storageKey, goalId, taskId, checkIndex, task });
       return;
     }
 
-    setDailyTasks(prev => ({ ...prev, [dateKey]: { ...prev[dateKey], [taskKey]: true } }));
-  }, [dailyTasks, setDailyTasks, triggerTaskAnimation]);
+    setDailyTasks(prev => ({ ...prev, [storageKey]: { ...prev[storageKey], [taskKey]: true } }));
+  }, [dailyTasks, setDailyTasks, triggerTaskAnimation, getWeekKey]);
 
   const saveTaskCompletion = useCallback((dateKey, goalId, taskId, checkIndex, note, photo) => {
     const taskKey = `${goalId}-${taskId}-${checkIndex}`;
@@ -252,21 +424,131 @@ const GoalTrackerApp = () => {
     setShowCompletionModal(null);
   }, [setDailyTasks, setTaskCompletions]);
 
-  const getTaskCompletionCount = useCallback((dateKey, goalId, taskId, totalChecks) => {
-    const tasks = dailyTasks[dateKey] || {};
+  // Set variable task value (for slider and counter task types)
+  const setVariableTaskValue = useCallback((dateKey, goalId, taskId, valueType, newValue, goal = null) => {
+    // For weekly points goals, use week key
+    const isWeeklyPointsGoal = goal?.goalType === 'points' && goal?.pointTargetFrequency === 'weekly';
+    const storageKey = isWeeklyPointsGoal ? getWeekKey(new Date(dateKey)) : dateKey;
+    
+    const taskKey = `${goalId}-${taskId}-${valueType}`; // e.g., "123-456-value" or "123-456-count"
+    
+    setDailyTasks(prev => ({ 
+      ...prev, 
+      [storageKey]: { 
+        ...prev[storageKey], 
+        [taskKey]: Math.max(0, newValue) 
+      } 
+    }));
+  }, [setDailyTasks, getWeekKey]);
+
+  // Get variable task value
+  const getVariableTaskValue = useCallback((dateKey, goalId, taskId, valueType, goal = null) => {
+    const isWeeklyPointsGoal = goal?.goalType === 'points' && goal?.pointTargetFrequency === 'weekly';
+    const storageKey = isWeeklyPointsGoal ? getWeekKey(new Date(dateKey)) : dateKey;
+    
+    const taskKey = `${goalId}-${taskId}-${valueType}`;
+    return dailyTasks[storageKey]?.[taskKey] || 0;
+  }, [dailyTasks, getWeekKey]);
+
+  const getTaskCompletionCount = useCallback((dateKey, goalId, taskId, totalChecks, goal = null) => {
+    // For weekly points goals, use week key
+    const isWeeklyPointsGoal = goal?.goalType === 'points' && goal?.pointTargetFrequency === 'weekly';
+    const storageKey = isWeeklyPointsGoal ? getWeekKey(new Date(dateKey)) : dateKey;
+    
+    const tasks = dailyTasks[storageKey] || {};
     let count = 0;
     for (let i = 0; i < totalChecks; i++) {
       if (tasks[`${goalId}-${taskId}-${i}`]) count++;
     }
     return count;
-  }, [dailyTasks]);
+  }, [dailyTasks, getWeekKey]);
 
-  const isTaskCompleted = useCallback((dateKey, goalId, taskId) => {
-    const tasks = dailyTasks[dateKey] || {};
+  const isTaskCompleted = useCallback((dateKey, goalId, taskId, goal = null) => {
+    // For weekly points goals, use week key
+    const isWeeklyPointsGoal = goal?.goalType === 'points' && goal?.pointTargetFrequency === 'weekly';
+    const storageKey = isWeeklyPointsGoal ? getWeekKey(new Date(dateKey)) : dateKey;
+    
+    const tasks = dailyTasks[storageKey] || {};
     const newKey = `${goalId}-${taskId}-0`;
     if (tasks[newKey] !== undefined) return tasks[newKey];
     return tasks[goalId] || false;
+  }, [dailyTasks, getWeekKey]);
+
+  // ============================================
+  // POINTS CALCULATION
+  // ============================================
+  // Calculate points earned for a goal - dateKey for daily, weekKey for weekly
+  const calculatePointsEarnedForDate = useCallback((dateKey, goal) => {
+    if (goal.goalType !== 'points' || !goal.tasks) return 0;
+    
+    // For weekly points goals, we don't calculate by date - use calculatePointsEarnedForWeek
+    if (goal.pointTargetFrequency === 'weekly') return 0;
+    
+    let totalPoints = 0;
+    goal.tasks.forEach(task => {
+      const taskType = task.taskType || 'checkbox';
+      
+      if (taskType === 'checkbox') {
+        // Simple checkbox - checked = pointValue points
+        const pointValue = task.pointValue || 1;
+        if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-0`]) {
+          totalPoints += pointValue;
+        }
+      } else if (taskType === 'slider') {
+        // Slider - value * pointsPerUnit
+        const value = dailyTasks[dateKey]?.[`${goal.id}-${task.id}-value`] || 0;
+        const pointsPerUnit = task.pointsPerUnit || 1;
+        totalPoints += value * pointsPerUnit;
+      } else if (taskType === 'counter') {
+        // Counter - floor(count / unitsPerPoint) * pointsPerUnit
+        const count = dailyTasks[dateKey]?.[`${goal.id}-${task.id}-count`] || 0;
+        const unitsPerPoint = task.unitsPerPoint || 1;
+        const pointsPerUnit = task.pointsPerUnit || 1;
+        totalPoints += Math.floor(count / unitsPerPoint) * pointsPerUnit;
+      }
+    });
+    return totalPoints;
   }, [dailyTasks]);
+
+  // Calculate points earned for weekly points goals using week key
+  const calculatePointsEarnedForWeek = useCallback((weekKey, goal) => {
+    if (goal.goalType !== 'points' || !goal.tasks) return 0;
+    if (goal.pointTargetFrequency !== 'weekly') return 0;
+    
+    let totalPoints = 0;
+    goal.tasks.forEach(task => {
+      const taskType = task.taskType || 'checkbox';
+      
+      if (taskType === 'checkbox') {
+        const pointValue = task.pointValue || 1;
+        if (dailyTasks[weekKey]?.[`${goal.id}-${task.id}-0`]) {
+          totalPoints += pointValue;
+        }
+      } else if (taskType === 'slider') {
+        const value = dailyTasks[weekKey]?.[`${goal.id}-${task.id}-value`] || 0;
+        const pointsPerUnit = task.pointsPerUnit || 1;
+        totalPoints += value * pointsPerUnit;
+      } else if (taskType === 'counter') {
+        const count = dailyTasks[weekKey]?.[`${goal.id}-${task.id}-count`] || 0;
+        const unitsPerPoint = task.unitsPerPoint || 1;
+        const pointsPerUnit = task.pointsPerUnit || 1;
+        totalPoints += Math.floor(count / unitsPerPoint) * pointsPerUnit;
+      }
+    });
+    return totalPoints;
+  }, [dailyTasks]);
+
+  // Generic points calculation that handles both daily and weekly
+  const calculatePointsEarned = useCallback((dateKey, goal, weekKeyOverride = null) => {
+    if (goal.goalType !== 'points' || !goal.tasks) return 0;
+    
+    if (goal.pointTargetFrequency === 'weekly') {
+      const weekKey = weekKeyOverride || getWeekKey(new Date(dateKey));
+      return calculatePointsEarnedForWeek(weekKey, goal);
+    }
+    
+    return calculatePointsEarnedForDate(dateKey, goal);
+  }, [calculatePointsEarnedForDate, calculatePointsEarnedForWeek, getWeekKey]);
 
   // ============================================
   // PHOTO & MEDIA
@@ -300,18 +582,6 @@ const GoalTrackerApp = () => {
   // ============================================
   // MEMOIZED CALCULATIONS
   // ============================================
-  const getWeekRange = useCallback((date) => {
-    const day = date.getDay();
-    const diff = date.getDate() - day;
-    const monday = new Date(date);
-    monday.setDate(diff);
-    monday.setHours(0, 0, 0, 0);
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
-    return { monday, sunday };
-  }, []);
-
   const goalProgressCache = useMemo(() => {
     const cache = {};
     const today = new Date();
@@ -323,7 +593,7 @@ const GoalTrackerApp = () => {
       for (let i = 0; i < daysPassed; i++) {
         const date = new Date(startOfYear);
         date.setDate(date.getDate() + i);
-        const dateKey = date.toISOString().split('T')[0];
+        const dateKey = toLocalDateKey(date);
         const tasks = dailyTasks[dateKey] || {};
         const hasCompletion = Object.keys(tasks).some(key => 
           key === goal.id || key.startsWith(`${goal.id}-`)
@@ -344,10 +614,10 @@ const GoalTrackerApp = () => {
   }, [goalProgressCache]);
 
   const calculateWeeklyProgress = useCallback((task, goalId, date) => {
-    const { monday, sunday } = getWeekRange(date);
+    const { weekStart, weekEnd } = getWeekRange(date);
     let completedCount = 0;
-    for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
-      const dateKey = d.toISOString().split('T')[0];
+    for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+      const dateKey = toLocalDateKey(d);
       if (isTaskCompleted(dateKey, goalId, task.id)) completedCount++;
     }
     const target = task.weeklyTarget || 4;
@@ -359,8 +629,23 @@ const GoalTrackerApp = () => {
   const dailyProgress = useMemo(() => {
     let totalTasks = 0;
     let completedTasks = 0;
+    let totalPoints = 0;
+    let earnedPoints = 0;
+    
     goals.forEach(goal => {
       if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+      
+      // Handle daily points goals
+      if (goal.goalType === 'points' && (!goal.pointTargetFrequency || goal.pointTargetFrequency === 'daily')) {
+        totalPoints += goal.pointTarget || 10;
+        earnedPoints += calculatePointsEarnedForDate(selectedDateKey, goal);
+        return;
+      }
+      
+      // Skip weekly points goals and other points goals
+      if (goal.goalType === 'points') return;
+      
+      // Handle checkbox goals
       goal.tasks.forEach(task => {
         if (!task.frequency || task.frequency === 'daily') {
           const checksPerDay = task.dailyChecks || 1;
@@ -371,17 +656,35 @@ const GoalTrackerApp = () => {
         }
       });
     });
+    
+    // Combine checkbox progress and points progress
+    const checkboxPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    const pointsPercentage = totalPoints > 0 ? Math.min(100, (earnedPoints / totalPoints) * 100) : 0;
+    
+    // Weighted average based on whether we have both types
+    let percentage = 0;
+    if (totalTasks > 0 && totalPoints > 0) {
+      percentage = Math.round((checkboxPercentage + pointsPercentage) / 2);
+    } else if (totalTasks > 0) {
+      percentage = Math.round(checkboxPercentage);
+    } else if (totalPoints > 0) {
+      percentage = Math.round(pointsPercentage);
+    }
+    
     return {
       completed: completedTasks,
       total: totalTasks,
-      percentage: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+      earnedPoints,
+      totalPoints,
+      percentage
     };
-  }, [goals, dailyTasks, selectedDateKey]);
+  }, [goals, dailyTasks, selectedDateKey, calculatePointsEarnedForDate]);
 
   const calculateDailyProgress = useCallback((dateKey) => {
     let totalTasks = 0;
     let completedTasks = 0;
     goals.forEach(goal => {
+      if (goal.goalType === 'points') return;
       if (!goal.tasks || !Array.isArray(goal.tasks)) return;
       goal.tasks.forEach(task => {
         if (!task.frequency || task.frequency === 'daily') {
@@ -401,17 +704,32 @@ const GoalTrackerApp = () => {
   }, [goals, dailyTasks]);
 
   const weeklyOverallProgress = useMemo(() => {
-    const { monday, sunday } = getWeekRange(selectedDate);
+    const { weekStart, weekEnd } = getWeekRange(selectedDate);
+    const weekKey = getWeekKey(selectedDate);
     let totalExpected = 0;
     let totalCompleted = 0;
+    let totalPoints = 0;
+    let earnedPoints = 0;
 
     goals.forEach(goal => {
       if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+      
+      // Handle weekly points goals
+      if (goal.goalType === 'points' && goal.pointTargetFrequency === 'weekly') {
+        totalPoints += goal.pointTarget || 10;
+        earnedPoints += calculatePointsEarnedForWeek(weekKey, goal);
+        return;
+      }
+      
+      // Skip daily points goals
+      if (goal.goalType === 'points') return;
+      
+      // Handle checkbox goals
       goal.tasks.forEach(task => {
         if (!task.frequency || task.frequency === 'daily') {
           const checksPerDay = task.dailyChecks || 1;
-          for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
-            const dateKey = d.toISOString().split('T')[0];
+          for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+            const dateKey = toLocalDateKey(d);
             totalExpected += checksPerDay;
             for (let i = 0; i < checksPerDay; i++) {
               if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) totalCompleted++;
@@ -420,19 +738,35 @@ const GoalTrackerApp = () => {
         } else if (task.frequency === 'weekly') {
           const target = task.weeklyTarget || 4;
           totalExpected += target;
-          for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
-            const dateKey = d.toISOString().split('T')[0];
+          for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+            const dateKey = toLocalDateKey(d);
             if (isTaskCompleted(dateKey, goal.id, task.id)) totalCompleted++;
           }
         }
       });
     });
+    
+    // Combine checkbox progress and points progress
+    const checkboxPercentage = totalExpected > 0 ? (totalCompleted / totalExpected) * 100 : 0;
+    const pointsPercentage = totalPoints > 0 ? Math.min(100, (earnedPoints / totalPoints) * 100) : 0;
+    
+    let percentage = 0;
+    if (totalExpected > 0 && totalPoints > 0) {
+      percentage = Math.round((checkboxPercentage + pointsPercentage) / 2);
+    } else if (totalExpected > 0) {
+      percentage = Math.round(checkboxPercentage);
+    } else if (totalPoints > 0) {
+      percentage = Math.round(pointsPercentage);
+    }
+    
     return {
       completed: totalCompleted,
       total: totalExpected,
-      percentage: totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0
+      earnedPoints,
+      totalPoints,
+      percentage
     };
-  }, [goals, dailyTasks, selectedDate, getWeekRange, isTaskCompleted]);
+  }, [goals, dailyTasks, selectedDate, getWeekRange, getWeekKey, isTaskCompleted, calculatePointsEarnedForWeek]);
 
   // ============================================
   // THEME CLASSES - Clean Navy Design
@@ -456,7 +790,7 @@ const GoalTrackerApp = () => {
     // Accents
     accent: darkMode ? 'bg-slate-200 text-slate-900' : 'bg-slate-700 text-white',
     accentMuted: darkMode ? 'bg-slate-700' : 'bg-slate-200',
-    checkDone: darkMode ? 'text-slate-200' : 'text-slate-700',
+    checkDone: darkMode ? 'text-slate-500' : 'text-slate-400',
     checkUndone: darkMode ? 'text-slate-600' : 'text-slate-300',
     
     // Progress
@@ -479,7 +813,7 @@ const GoalTrackerApp = () => {
       setPrompts([...prompts, {
         id: Date.now(),
         type,
-        label: type === 'text' ? 'New prompt' : type === 'yesno' ? 'Yes or no question' : 'Rate something',
+        label: type === 'text' ? 'New text prompt' : type === 'yesno' ? 'New yes/no question' : 'New rating',
         placeholder: type === 'text' ? 'Write here...' : '',
         min: type === 'slider' ? 0 : undefined,
         max: type === 'slider' ? 10 : undefined
@@ -498,56 +832,108 @@ const GoalTrackerApp = () => {
 
     return (
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className={`${theme.cardBg} rounded-2xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl`}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className={`text-base font-semibold ${theme.textPrimary}`}>Journal Settings</h3>
-            <button onClick={onCancel} className={`p-1 rounded-lg hover:${theme.inputBg}`}>
+        <div className={`${theme.cardBg} rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-xl flex flex-col`}>
+          {/* Header */}
+          <div className={`px-5 py-4 border-b ${theme.border} flex items-center justify-between flex-shrink-0`}>
+            <h3 className={`text-base font-semibold ${theme.textPrimary}`}>Journal Prompts</h3>
+            <button onClick={onCancel} className="p-1 rounded-lg">
               <X className={`w-5 h-5 ${theme.textMuted}`} />
             </button>
           </div>
-          <div className="space-y-3 mb-5">
+          
+          {/* Add Buttons */}
+          <div className={`px-5 py-3 border-b ${theme.border} flex-shrink-0`}>
+            <p className={`text-xs font-medium mb-2 ${theme.textMuted}`}>Add prompt</p>
             <div className="flex gap-2">
               <button onClick={() => addPrompt('text')} className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium ${theme.btnSecondary}`}>+ Text</button>
               <button onClick={() => addPrompt('slider')} className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium ${theme.btnSecondary}`}>+ Slider</button>
               <button onClick={() => addPrompt('yesno')} className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium ${theme.btnSecondary}`}>+ Yes/No</button>
             </div>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {prompts.map((prompt, index) => (
-                <div key={prompt.id} className={`p-3 rounded-lg ${theme.inputBg}`}>
-                  <div className="flex items-start gap-2">
-                    <div className="flex flex-col gap-1">
-                      <button onClick={() => movePrompt(index, -1)} disabled={index === 0} className={`p-0.5 rounded ${index === 0 ? 'opacity-30' : ''}`}>
-                        <ChevronLeft className="w-3 h-3 rotate-90" />
-                      </button>
-                      <button onClick={() => movePrompt(index, 1)} disabled={index === prompts.length - 1} className={`p-0.5 rounded ${index === prompts.length - 1 ? 'opacity-30' : ''}`}>
-                        <ChevronRight className="w-3 h-3 rotate-90" />
-                      </button>
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <input type="text" value={prompt.label} onChange={(e) => updatePrompt(prompt.id, 'label', e.target.value)} className={`w-full rounded-lg px-2 py-1.5 text-sm ${theme.cardBg} ${theme.textPrimary}`} />
-                      {prompt.type === 'text' && <input type="text" value={prompt.placeholder} onChange={(e) => updatePrompt(prompt.id, 'placeholder', e.target.value)} placeholder="Placeholder" className={`w-full rounded-lg px-2 py-1.5 text-sm ${theme.cardBg} ${theme.textSecondary}`} />}
-                      {prompt.type === 'slider' && (
-                        <div className="flex gap-2 items-center text-xs">
-                          <span className={theme.textMuted}>Min:</span>
-                          <input type="number" value={prompt.min} onChange={(e) => updatePrompt(prompt.id, 'min', parseInt(e.target.value))} className={`w-12 rounded px-1.5 py-1 ${theme.cardBg} ${theme.textPrimary}`} />
-                          <span className={theme.textMuted}>Max:</span>
-                          <input type="number" value={prompt.max} onChange={(e) => updatePrompt(prompt.id, 'max', parseInt(e.target.value))} className={`w-12 rounded px-1.5 py-1 ${theme.cardBg} ${theme.textPrimary}`} />
-                        </div>
-                      )}
-                      {prompt.type === 'yesno' && (
-                        <p className={`text-xs ${theme.textMuted}`}>Yes/No question</p>
-                      )}
-                    </div>
-                    <button onClick={() => deletePrompt(prompt.id)} className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></button>
-                  </div>
-                </div>
-              ))}
-              {prompts.length === 0 && <p className={`text-center py-6 text-sm ${theme.textMuted}`}>No prompts yet</p>}
-            </div>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => onSave({ prompts })} className={`flex-1 py-2 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>Save</button>
-            <button onClick={onCancel} className={`px-4 py-2 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Cancel</button>
+          
+          {/* Prompts List */}
+          <div className="flex-1 overflow-y-auto px-5 py-3">
+            {prompts.length === 0 ? (
+              <p className={`text-center py-8 text-sm ${theme.textMuted}`}>No prompts yet</p>
+            ) : (
+              <div className="space-y-2">
+                {prompts.map((prompt, index) => (
+                  <div key={prompt.id} className={`rounded-xl border ${theme.border} overflow-hidden`}>
+                    <div className={`flex items-center gap-2 p-3 ${theme.inputBg}`}>
+                      {/* Reorder */}
+                      <div className="flex flex-col gap-0.5">
+                        <button onClick={() => movePrompt(index, -1)} disabled={index === 0} className={index === 0 ? 'opacity-30' : ''}>
+                          <ChevronUp className={`w-3 h-3 ${theme.textMuted}`} />
+                        </button>
+                        <button onClick={() => movePrompt(index, 1)} disabled={index === prompts.length - 1} className={index === prompts.length - 1 ? 'opacity-30' : ''}>
+                          <ChevronDown className={`w-3 h-3 ${theme.textMuted}`} />
+                        </button>
+                      </div>
+                      
+                      {/* Type badge */}
+                      <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${theme.btnSecondary}`}>
+                        {prompt.type}
+                      </span>
+                      
+                      {/* Label input */}
+                      <input
+                        type="text"
+                        value={prompt.label}
+                        onChange={(e) => updatePrompt(prompt.id, 'label', e.target.value)}
+                        className={`flex-1 px-2 py-1 rounded text-sm ${theme.cardBg} ${theme.textPrimary} border ${theme.border}`}
+                      />
+                      
+                      {/* Delete */}
+                      <button onClick={() => deletePrompt(prompt.id)} className="p-1 text-red-500">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    
+                    {/* Type-specific settings */}
+                    {prompt.type === 'text' && (
+                      <div className={`px-3 pb-3 pt-1`}>
+                        <label className={`text-xs ${theme.textMuted}`}>Placeholder</label>
+                        <input
+                          type="text"
+                          value={prompt.placeholder || ''}
+                          onChange={(e) => updatePrompt(prompt.id, 'placeholder', e.target.value)}
+                          className={`w-full mt-1 px-2 py-1.5 rounded text-sm ${theme.cardBg} ${theme.textPrimary} border ${theme.border}`}
+                        />
+                      </div>
+                    )}
+                    
+                    {prompt.type === 'slider' && (
+                      <div className={`px-3 pb-3 pt-1 flex gap-3`}>
+                        <div className="flex-1">
+                          <label className={`text-xs ${theme.textMuted}`}>Min</label>
+                          <input
+                            type="number"
+                            value={prompt.min || 0}
+                            onChange={(e) => updatePrompt(prompt.id, 'min', parseInt(e.target.value))}
+                            className={`w-full mt-1 px-2 py-1.5 rounded text-sm ${theme.cardBg} ${theme.textPrimary} border ${theme.border}`}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className={`text-xs ${theme.textMuted}`}>Max</label>
+                          <input
+                            type="number"
+                            value={prompt.max || 10}
+                            onChange={(e) => updatePrompt(prompt.id, 'max', parseInt(e.target.value))}
+                            className={`w-full mt-1 px-2 py-1.5 rounded text-sm ${theme.cardBg} ${theme.textPrimary} border ${theme.border}`}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Footer */}
+          <div className={`px-5 py-4 border-t ${theme.border} flex gap-2 flex-shrink-0`}>
+            <button onClick={() => onSave({ prompts })} className={`flex-1 py-2.5 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>Save</button>
+            <button onClick={onCancel} className={`px-4 py-2.5 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Cancel</button>
           </div>
         </div>
       </div>
@@ -692,85 +1078,647 @@ const GoalTrackerApp = () => {
     );
   };
 
+  // ============================================
+  // GOAL FORM - OPTION E CARD-BASED DESIGN
+  // ============================================
   const GoalForm = ({ goal, onSave, onCancel }) => {
+    const isEditing = !!goal;
+    
     const migrateOldGoal = (oldGoal) => {
       if (!oldGoal) return null;
-      if (oldGoal.tasks && Array.isArray(oldGoal.tasks)) return oldGoal;
-      return { ...oldGoal, tasks: [{ id: Date.now(), action: oldGoal.dailyAction || '', frequency: oldGoal.frequency || 'daily', weeklyTarget: oldGoal.weeklyTarget || 4, dailyChecks: 1 }] };
+      if (oldGoal.tasks && Array.isArray(oldGoal.tasks)) {
+        // Ensure all tasks have the new fields
+        const migratedTasks = oldGoal.tasks.map(task => ({
+          ...task,
+          importance: task.importance || 'medium',
+          difficulty: task.difficulty || 'medium',
+          timeEstimate: task.timeEstimate || 15
+        }));
+        return { ...oldGoal, tasks: migratedTasks, motivation: oldGoal.motivation || '' };
+      }
+      return { ...oldGoal, motivation: '', tasks: [{ 
+        id: Date.now(), 
+        action: oldGoal.dailyAction || '', 
+        frequency: oldGoal.frequency || 'daily', 
+        weeklyTarget: oldGoal.weeklyTarget || 4, 
+        dailyChecks: 1, 
+        pointValue: 1,
+        importance: 'medium',
+        difficulty: 'medium',
+        timeEstimate: 15
+      }] };
     };
+    
     const migratedGoal = goal ? migrateOldGoal(goal) : null;
     const [formData, setFormData] = useState(migratedGoal || {
-      title: '', yearlyGoal: '', checkpoint: 'weekly', checkpointValue: '', category: 'personal',
-      tasks: [{ id: Date.now(), action: '', frequency: 'daily', weeklyTarget: 4, dailyChecks: 1 }]
+      title: '', 
+      yearlyGoal: '', 
+      motivation: '',
+      checkpoint: 'weekly', 
+      checkpointValue: '', 
+      category: 'personal',
+      goalType: 'checkbox',
+      pointTarget: 10,
+      pointTargetFrequency: 'daily',
+      tasks: [{ 
+        id: Date.now(), 
+        action: '', 
+        frequency: 'daily', 
+        weeklyTarget: 4, 
+        dailyChecks: 1, 
+        pointValue: 1,
+        importance: 'medium',
+        difficulty: 'medium',
+        timeEstimate: 15
+      }]
     });
+
+    // Helper function to update a task field
+    const updateTask = (index, field, value) => {
+      const newTasks = [...formData.tasks];
+      newTasks[index] = { ...newTasks[index], [field]: value };
+      setFormData({ ...formData, tasks: newTasks });
+    };
+
+    // Card wrapper style (inline to avoid re-render issues)
+    const cardClass = `p-3 rounded-xl ${theme.cardBg} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`;
+    const cardHeaderClass = "flex items-center gap-2 mb-2";
+
+    // Metrics Row - defined as a function that returns JSX
+    const renderMetricsRow = (task, index, showTime = true) => (
+      <div className={`grid ${showTime ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
+        {/* Importance */}
+        <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-slate-200'}`}>
+          <div className="flex items-center gap-1 mb-1">
+            <Flame className="w-3 h-3 text-orange-500" />
+            <span className={`text-[10px] ${theme.textMuted} uppercase tracking-wider`}>Priority</span>
+          </div>
+          <select 
+            value={task.importance || 'medium'} 
+            onChange={(e) => updateTask(index, 'importance', e.target.value)}
+            className={`w-full text-xs font-medium ${theme.textPrimary} bg-transparent border-none outline-none -ml-0.5`}
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+        
+        {/* Difficulty */}
+        <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-slate-200'}`}>
+          <div className="flex items-center gap-1 mb-1">
+            <Zap className="w-3 h-3 text-purple-500" />
+            <span className={`text-[10px] ${theme.textMuted} uppercase tracking-wider`}>Effort</span>
+          </div>
+          <select 
+            value={task.difficulty || 'medium'} 
+            onChange={(e) => updateTask(index, 'difficulty', e.target.value)}
+            className={`w-full text-xs font-medium ${theme.textPrimary} bg-transparent border-none outline-none -ml-0.5`}
+          >
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        
+        {/* Time Estimate */}
+        {showTime && (
+          <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700' : 'bg-white'} border ${darkMode ? 'border-slate-600' : 'border-slate-200'}`}>
+            <div className="flex items-center gap-1 mb-1">
+              <Clock className="w-3 h-3 text-blue-500" />
+              <span className={`text-[10px] ${theme.textMuted} uppercase tracking-wider`}>Time</span>
+            </div>
+            <div className="flex items-baseline">
+              <input 
+                type="text"
+                inputMode="numeric"
+                value={task.timeEstimate || ''} 
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d+$/.test(val)) {
+                    updateTask(index, 'timeEstimate', val === '' ? '' : parseInt(val));
+                  }
+                }}
+                className={`w-8 text-xs font-medium ${theme.textPrimary} bg-transparent border-none outline-none`}
+              />
+              <span className={`text-[10px] ${theme.textMuted}`}>min</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+
+    // Compact Metrics Row - for edit mode
+    const renderCompactMetricsRow = (task, index) => (
+      <div className="flex items-center gap-2 flex-wrap mt-2">
+        <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${darkMode ? 'bg-orange-900/30' : 'bg-orange-50'}`}>
+          <Flame className="w-3 h-3 text-orange-500" />
+          <select 
+            value={task.importance || 'medium'} 
+            onChange={(e) => updateTask(index, 'importance', e.target.value)}
+            className={`bg-transparent border-none outline-none font-medium ${darkMode ? 'text-orange-400' : 'text-orange-700'}`}
+          >
+            <option value="low">Low</option>
+            <option value="medium">Med</option>
+            <option value="high">High</option>
+            <option value="critical">Crit</option>
+          </select>
+        </div>
+        <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${darkMode ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
+          <Zap className="w-3 h-3 text-purple-500" />
+          <select 
+            value={task.difficulty || 'medium'} 
+            onChange={(e) => updateTask(index, 'difficulty', e.target.value)}
+            className={`bg-transparent border-none outline-none font-medium ${darkMode ? 'text-purple-400' : 'text-purple-700'}`}
+          >
+            <option value="easy">Easy</option>
+            <option value="medium">Med</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${darkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
+          <Clock className="w-3 h-3 text-blue-500" />
+          <input 
+            type="text"
+            inputMode="numeric"
+            value={task.timeEstimate || ''} 
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '' || /^\d+$/.test(val)) {
+                updateTask(index, 'timeEstimate', val === '' ? '' : parseInt(val));
+              }
+            }}
+            className={`w-6 bg-transparent border-none outline-none font-medium ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}
+          />
+          <span className={darkMode ? 'text-blue-400' : 'text-blue-600'}>m</span>
+        </div>
+      </div>
+    );
+
+    // Task Type Badge - as function
+    const renderTaskTypeBadge = (type) => {
+      const config = {
+        checkbox: { Icon: CheckCircle2, bg: 'bg-green-100', color: 'text-green-600', label: 'Checkbox' },
+        slider: { Icon: Sliders, bg: 'bg-blue-100', color: 'text-blue-600', label: 'Slider' },
+        counter: { Icon: Hash, bg: 'bg-purple-100', color: 'text-purple-600', label: 'Counter' }
+      };
+      const c = config[type] || config.checkbox;
+      return (
+        <div className={`flex items-center gap-1 px-2 py-0.5 rounded ${darkMode ? 'bg-slate-700' : c.bg}`}>
+          <c.Icon className={`w-3 h-3 ${c.color}`} />
+          <span className={`text-[10px] font-medium uppercase ${c.color}`}>{c.label}</span>
+        </div>
+      );
+    };
 
     return (
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className={`${theme.cardBg} rounded-2xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl`}>
-          <h3 className={`text-base font-semibold mb-4 ${theme.textPrimary}`}>{goal ? 'Edit Goal' : 'New Goal'}</h3>
-          <div className="space-y-3">
-            <div>
-              <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Goal Title</label>
-              <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`} placeholder="Improve gum health" />
-            </div>
-            <div>
-              <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Yearly Goal</label>
-              <input type="text" value={formData.yearlyGoal} onChange={(e) => setFormData({ ...formData, yearlyGoal: e.target.value })} className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`} placeholder="No cavities" />
-            </div>
-            <div>
-              <label className={`block text-xs font-medium mb-1 ${theme.textMuted}`}>Category</label>
-              <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className={`w-full rounded-lg px-3 py-2 text-sm ${theme.inputBg} ${theme.textPrimary}`}>
-                {(categories || []).map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className={`pt-3 border-t ${theme.divider}`}>
-              <div className="flex items-center justify-between mb-2">
-                <label className={`text-xs font-medium ${theme.textMuted}`}>Tasks</label>
-                <button type="button" onClick={() => setFormData({ ...formData, tasks: [...formData.tasks, { id: Date.now(), action: '', frequency: 'daily', weeklyTarget: 4, dailyChecks: 1 }] })} className={`text-xs px-2 py-1 rounded-lg font-medium ${theme.btnSecondary}`}>+ Add</button>
+        <div 
+          className={`${theme.cardBg} rounded-2xl w-full max-w-md shadow-xl`}
+          style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+        >
+          {/* Fixed Header */}
+          <div className="px-5 pt-5 pb-3" style={{ flexShrink: 0 }}>
+            <h3 className={`text-base font-semibold ${theme.textPrimary}`}>{isEditing ? 'Edit Goal' : 'New Goal'}</h3>
+          </div>
+          
+          {/* Scrollable Content */}
+          <div className="px-5 pb-4" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+            <div className="space-y-3">
+              
+              {/* Goal Title Card - INLINE */}
+              <div className={cardClass}>
+                <div className={cardHeaderClass}>
+                  <div className={`w-7 h-7 rounded-lg ${darkMode ? 'bg-indigo-900/50' : 'bg-indigo-100'} flex items-center justify-center`}>
+                    <Target className="w-4 h-4 text-indigo-500" />
+                  </div>
+                  <span className={`text-xs font-medium ${theme.textSecondary}`}>Goal</span>
+                </div>
+                <input 
+                  type="text" 
+                  value={formData.title} 
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className={`w-full text-sm font-medium ${theme.textPrimary} bg-transparent border-none outline-none`}
+                  placeholder="What do you want to achieve?"
+                />
               </div>
-              <div className="space-y-2">
+
+              {/* Yearly Target Card - INLINE */}
+              <div className={cardClass}>
+                <div className={cardHeaderClass}>
+                  <div className={`w-7 h-7 rounded-lg ${darkMode ? 'bg-amber-900/50' : 'bg-amber-100'} flex items-center justify-center`}>
+                    <Trophy className="w-4 h-4 text-amber-500" />
+                  </div>
+                  <span className={`text-xs font-medium ${theme.textSecondary}`}>Yearly Target</span>
+                  <span className={`text-xs ${theme.textMuted} ml-auto`}>(optional)</span>
+                </div>
+                <input 
+                  type="text" 
+                  value={formData.yearlyGoal} 
+                  onChange={(e) => setFormData({ ...formData, yearlyGoal: e.target.value })}
+                  className={`w-full text-sm ${theme.textSecondary} bg-transparent border-none outline-none`}
+                  placeholder="What's the big picture outcome?"
+                />
+              </div>
+
+              {/* Category Card - INLINE */}
+              <div className={cardClass}>
+                <div className={cardHeaderClass}>
+                  <div className={`w-7 h-7 rounded-lg ${darkMode ? 'bg-emerald-900/50' : 'bg-emerald-100'} flex items-center justify-center`}>
+                    <Book className="w-4 h-4 text-emerald-500" />
+                  </div>
+                  <span className={`text-xs font-medium ${theme.textSecondary}`}>Category</span>
+                </div>
+                <select 
+                  value={formData.category} 
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className={`w-full text-sm font-medium ${theme.textPrimary} bg-transparent border-none outline-none -ml-1`}
+                >
+                  {(categories || []).map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Goal Type Selector */}
+              <div className={`p-3 rounded-xl ${theme.cardBg} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-xs font-medium ${theme.textSecondary}`}>Goal Type</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, goalType: 'checkbox' })}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${
+                      formData.goalType === 'checkbox' ? theme.btnPrimary : theme.btnSecondary
+                    }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Checkbox
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, goalType: 'points' })}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${
+                      formData.goalType === 'points' ? theme.btnPrimary : theme.btnSecondary
+                    }`}
+                  >
+                    <Star className="w-4 h-4" />
+                    Points
+                  </button>
+                </div>
+              </div>
+
+              {/* Points Target (only for points goals) - INLINE */}
+              {formData.goalType === 'points' && (
+                <div className={cardClass}>
+                  <div className={cardHeaderClass}>
+                    <div className={`w-7 h-7 rounded-lg ${darkMode ? 'bg-amber-900/50' : 'bg-amber-100'} flex items-center justify-center`}>
+                      <Star className="w-4 h-4 text-amber-500" />
+                    </div>
+                    <span className={`text-xs font-medium ${theme.textSecondary}`}>Points Target</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-amber-500" />
+                    <input 
+                      type="text" 
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={formData.pointTarget || ''} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d+$/.test(val)) {
+                          setFormData({ ...formData, pointTarget: val === '' ? '' : parseInt(val) });
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (!e.target.value || parseInt(e.target.value) < 1) {
+                          setFormData({ ...formData, pointTarget: 1 });
+                        }
+                      }}
+                      className={`w-16 text-lg font-bold ${theme.textPrimary} bg-transparent border-none outline-none`}
+                    />
+                    <span className={`text-sm ${theme.textMuted}`}>points per</span>
+                    <select 
+                      value={formData.pointTargetFrequency} 
+                      onChange={(e) => setFormData({ ...formData, pointTargetFrequency: e.target.value })}
+                      className={`text-sm font-medium ${theme.textPrimary} ${theme.inputBg} rounded-lg px-2 py-1 border-none`}
+                    >
+                      <option value="daily">day</option>
+                      <option value="weekly">week</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* Why / Motivation Card - INLINE */}
+              <div className={cardClass}>
+                <div className={cardHeaderClass}>
+                  <div className={`w-7 h-7 rounded-lg ${darkMode ? 'bg-rose-900/50' : 'bg-rose-100'} flex items-center justify-center`}>
+                    <Heart className="w-4 h-4 text-rose-500" />
+                  </div>
+                  <span className={`text-xs font-medium ${theme.textSecondary}`}>Why This Matters</span>
+                  <span className={`text-xs ${theme.textMuted} ml-auto`}>(optional)</span>
+                </div>
+                <textarea 
+                  value={formData.motivation || ''}
+                  onChange={(e) => setFormData({ ...formData, motivation: e.target.value })}
+                  className={`w-full text-sm ${theme.textSecondary} bg-transparent border-none outline-none resize-none`}
+                  rows={2}
+                  placeholder="Connect this goal to your deeper purpose..."
+                />
+              </div>
+
+              {/* Tasks Divider */}
+              <div className="flex items-center gap-2 py-2">
+                <div className={`flex-1 h-px ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
+                <span className={`text-xs font-medium ${theme.textMuted}`}>
+                  {formData.goalType === 'points' ? 'POINT-EARNING TASKS' : 'TASKS'}
+                </span>
+                <div className={`flex-1 h-px ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
+              </div>
+
+              {/* Tasks List */}
+              <div className="space-y-3">
                 {formData.tasks.map((task, index) => (
-                  <div key={task.id} className={`p-2.5 rounded-lg ${theme.inputBg}`}>
-                    <div className="space-y-2">
-                      <div className="flex items-start gap-2">
-                        <input type="text" value={task.action} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].action = e.target.value; setFormData({ ...formData, tasks: newTasks }); }} className={`flex-1 rounded-lg px-2 py-1.5 text-sm ${theme.cardBg} ${theme.textPrimary}`} placeholder="Brush teeth" />
-                        {formData.tasks.length > 1 && <button type="button" onClick={() => setFormData({ ...formData, tasks: formData.tasks.filter((_, i) => i !== index) })} className="p-1 text-red-500"><X className="w-4 h-4" /></button>}
+                  <div key={task.id} className={`p-3 rounded-xl ${theme.inputBg} border ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                    
+                    {/* Task Type Badge (for points goals) */}
+                    {formData.goalType === 'points' && (
+                      <div className="flex items-center justify-between mb-2">
+                        {renderTaskTypeBadge(task.taskType || 'checkbox')}
+                        {formData.tasks.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => setFormData({ ...formData, tasks: formData.tasks.filter((_, i) => i !== index) })}
+                            className="p-1 text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                    )}
+
+                    {/* Task Name */}
+                    <div className="flex items-start gap-2 mb-3">
+                      <input 
+                        type="text" 
+                        value={task.action} 
+                        onChange={(e) => updateTask(index, 'action', e.target.value)}
+                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${theme.cardBg} ${theme.textPrimary} border ${darkMode ? 'border-slate-600' : 'border-slate-200'}`}
+                        placeholder="What's the action?"
+                      />
+                      {formData.goalType !== 'points' && formData.tasks.length > 1 && (
+                        <button 
+                          type="button" 
+                          onClick={() => setFormData({ ...formData, tasks: formData.tasks.filter((_, i) => i !== index) })}
+                          className="p-2 text-red-400 hover:text-red-500"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Metrics Row - use compact for edit mode, full for create */}
+                    {isEditing ? (
+                      renderCompactMetricsRow(task, index)
+                    ) : (
+                      renderMetricsRow(task, index, formData.goalType !== 'points' || task.taskType === 'checkbox' || !task.taskType)
+                    )}
+
+                    {/* Points Goal Specific Fields */}
+                    {formData.goalType === 'points' && (
+                      <div className="mt-3 space-y-2">
+                        {/* Task Type Selector */}
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs ${theme.textMuted}`}>Type:</span>
+                          <select 
+                            value={task.taskType || 'checkbox'} 
+                            onChange={(e) => { 
+                              const newTasks = [...formData.tasks]; 
+                              newTasks[index].taskType = e.target.value; 
+                              if (e.target.value === 'slider') {
+                                newTasks[index].maxValue = newTasks[index].maxValue || 10;
+                                newTasks[index].pointsPerUnit = newTasks[index].pointsPerUnit || 1;
+                              } else if (e.target.value === 'counter') {
+                                newTasks[index].unitsPerPoint = newTasks[index].unitsPerPoint || 1;
+                                newTasks[index].pointsPerUnit = newTasks[index].pointsPerUnit || 1;
+                              }
+                              setFormData({ ...formData, tasks: newTasks }); 
+                            }} 
+                            className={`flex-1 rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary} border ${darkMode ? 'border-slate-600' : 'border-slate-200'}`}
+                          >
+                            <option value="checkbox">Checkbox (+X pts)</option>
+                            <option value="slider">Slider (0 to max)</option>
+                            <option value="counter">Counter (+/−)</option>
+                          </select>
+                        </div>
+
+                        {/* Checkbox type - point value */}
+                        {(!task.taskType || task.taskType === 'checkbox') && (
+                          <div className={`flex items-center gap-2 p-2 rounded-lg ${darkMode ? 'bg-amber-900/20' : 'bg-amber-50'}`}>
+                            <Star className="w-4 h-4 text-amber-500" />
+                            <span className={`text-xs ${darkMode ? 'text-amber-400' : 'text-amber-700'}`}>Earns</span>
+                            <input 
+                              type="text" 
+                              inputMode="numeric"
+                              value={task.pointValue || ''} 
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === '' || /^\d+$/.test(val)) {
+                                  updateTask(index, 'pointValue', val === '' ? '' : parseInt(val));
+                                }
+                              }}
+                              onBlur={(e) => {
+                                if (!e.target.value || parseInt(e.target.value) < 1) {
+                                  updateTask(index, 'pointValue', 1);
+                                }
+                              }}
+                              className={`w-12 text-sm font-bold ${darkMode ? 'text-amber-400 bg-slate-800' : 'text-amber-700 bg-white'} rounded px-2 py-0.5 border ${darkMode ? 'border-amber-800' : 'border-amber-200'}`}
+                            />
+                            <span className={`text-xs ${darkMode ? 'text-amber-400' : 'text-amber-700'}`}>points when done</span>
+                          </div>
+                        )}
+
+                        {/* Slider type config */}
+                        {task.taskType === 'slider' && (
+                          <div className="space-y-2">
+                            <div className={`p-2 rounded-lg ${darkMode ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
+                              <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+                                <span>Track 0 to</span>
+                                <input 
+                                  type="text" 
+                                  inputMode="numeric"
+                                  value={task.maxValue || ''} 
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === '' || /^\d+$/.test(val)) {
+                                      updateTask(index, 'maxValue', val === '' ? '' : parseInt(val));
+                                    }
+                                  }}
+                                  className={`w-12 text-sm font-bold ${darkMode ? 'bg-slate-800 text-blue-400' : 'bg-white text-blue-700'} rounded px-2 py-0.5 border ${darkMode ? 'border-blue-800' : 'border-blue-200'}`}
+                                />
+                              </div>
+                            </div>
+                            <div className={`flex items-center gap-2 p-2 rounded-lg ${darkMode ? 'bg-amber-900/20' : 'bg-amber-50'}`}>
+                              <Star className="w-4 h-4 text-amber-500" />
+                              <span className={`text-xs ${darkMode ? 'text-amber-400' : 'text-amber-700'}`}>Each unit earns</span>
+                              <input 
+                                type="text" 
+                                inputMode="numeric"
+                                value={task.pointsPerUnit || ''} 
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val === '' || /^\d+$/.test(val)) {
+                                    updateTask(index, 'pointsPerUnit', val === '' ? '' : parseInt(val));
+                                  }
+                                }}
+                                className={`w-10 text-sm font-bold ${darkMode ? 'text-amber-400 bg-slate-800' : 'text-amber-700 bg-white'} rounded px-2 py-0.5 border ${darkMode ? 'border-amber-800' : 'border-amber-200'}`}
+                              />
+                              <span className={`text-xs ${darkMode ? 'text-amber-400' : 'text-amber-700'}`}>point(s)</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Counter type config */}
+                        {task.taskType === 'counter' && (
+                          <div className="space-y-2">
+                            <div className={`p-2 rounded-lg ${darkMode ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
+                              <div className={`flex items-center gap-1 text-xs ${darkMode ? 'text-purple-400' : 'text-purple-700'} flex-wrap`}>
+                                <span>Every</span>
+                                <input 
+                                  type="text" 
+                                  inputMode="numeric"
+                                  value={task.unitsPerPoint || ''} 
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === '' || /^\d+$/.test(val)) {
+                                      updateTask(index, 'unitsPerPoint', val === '' ? '' : parseInt(val));
+                                    }
+                                  }}
+                                  className={`w-10 text-sm font-bold ${darkMode ? 'bg-slate-800 text-purple-400' : 'bg-white text-purple-700'} rounded px-2 py-0.5 border ${darkMode ? 'border-purple-800' : 'border-purple-200'}`}
+                                />
+                                <input 
+                                  type="text" 
+                                  value={task.unitLabel || ''} 
+                                  onChange={(e) => updateTask(index, 'unitLabel', e.target.value)}
+                                  placeholder="min"
+                                  className={`w-12 text-sm ${darkMode ? 'bg-slate-800 text-purple-400' : 'bg-white text-purple-700'} rounded px-2 py-0.5 border ${darkMode ? 'border-purple-800' : 'border-purple-200'}`}
+                                />
+                                <span>=</span>
+                                <Star className="w-3.5 h-3.5 text-amber-500" />
+                                <input 
+                                  type="text" 
+                                  inputMode="numeric"
+                                  value={task.pointsPerUnit || ''} 
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === '' || /^\d+$/.test(val)) {
+                                      updateTask(index, 'pointsPerUnit', val === '' ? '' : parseInt(val));
+                                    }
+                                  }}
+                                  className={`w-10 text-sm font-bold ${darkMode ? 'bg-slate-800 text-amber-400' : 'bg-white text-amber-700'} rounded px-2 py-0.5 border ${darkMode ? 'border-amber-800' : 'border-amber-200'}`}
+                                />
+                                <span>pts</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Frequency (checkbox goals only) */}
+                    {formData.goalType !== 'points' && (
+                      <div className="grid grid-cols-2 gap-2 mt-3">
                         <div>
-                          <label className={`block text-xs mb-1 ${theme.textMuted}`}>Frequency</label>
-                          <select value={task.frequency} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].frequency = e.target.value; setFormData({ ...formData, tasks: newTasks }); }} className={`w-full rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary}`}>
+                          <label className={`block text-[10px] ${theme.textMuted} uppercase tracking-wider mb-1`}>Frequency</label>
+                          <select 
+                            value={task.frequency} 
+                            onChange={(e) => updateTask(index, 'frequency', e.target.value)}
+                            className={`w-full rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary} border ${darkMode ? 'border-slate-600' : 'border-slate-200'}`}
+                          >
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
                           </select>
                         </div>
-                        {task.frequency === 'weekly' ? (
-                          <div>
-                            <label className={`block text-xs mb-1 ${theme.textMuted}`}>Target/week</label>
-                            <input type="number" min="1" max="7" value={task.weeklyTarget} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].weeklyTarget = parseInt(e.target.value) || 1; setFormData({ ...formData, tasks: newTasks }); }} className={`w-full rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary}`} />
-                          </div>
-                        ) : (
-                          <div>
-                            <label className={`block text-xs mb-1 ${theme.textMuted}`}>Times/day</label>
-                            <input type="number" min="1" max="10" value={task.dailyChecks} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].dailyChecks = parseInt(e.target.value) || 1; setFormData({ ...formData, tasks: newTasks }); }} className={`w-full rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary}`} />
-                          </div>
-                        )}
+                        <div>
+                          <label className={`block text-[10px] ${theme.textMuted} uppercase tracking-wider mb-1`}>
+                            {task.frequency === 'weekly' ? 'Target/week' : 'Times/day'}
+                          </label>
+                          <input 
+                            type="text" 
+                            inputMode="numeric"
+                            value={task.frequency === 'weekly' ? (task.weeklyTarget || '') : (task.dailyChecks || '')} 
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^\d+$/.test(val)) {
+                                const field = task.frequency === 'weekly' ? 'weeklyTarget' : 'dailyChecks';
+                                const max = task.frequency === 'weekly' ? 7 : 10;
+                                updateTask(index, field, val === '' ? '' : Math.min(max, parseInt(val)));
+                              }
+                            }}
+                            onBlur={(e) => {
+                              if (!e.target.value || parseInt(e.target.value) < 1) {
+                                const field = task.frequency === 'weekly' ? 'weeklyTarget' : 'dailyChecks';
+                                updateTask(index, field, 1);
+                              }
+                            }}
+                            className={`w-full rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary} border ${darkMode ? 'border-slate-600' : 'border-slate-200'}`}
+                          />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" id={`prompt-${task.id}`} checked={task.promptForNote || false} onChange={(e) => { const newTasks = [...formData.tasks]; newTasks[index].promptForNote = e.target.checked; setFormData({ ...formData, tasks: newTasks }); }} className="w-3.5 h-3.5 rounded" />
-                        <label htmlFor={`prompt-${task.id}`} className={`text-xs ${theme.textMuted}`}>Prompt for note/photo</label>
-                      </div>
+                    )}
+
+                    {/* Prompt for note/photo */}
+                    <div className="flex items-center gap-2 mt-3">
+                      <input 
+                        type="checkbox" 
+                        id={`prompt-${task.id}`} 
+                        checked={task.promptForNote || false} 
+                        onChange={(e) => updateTask(index, 'promptForNote', e.target.checked)}
+                        className="w-3.5 h-3.5 rounded" 
+                      />
+                      <label htmlFor={`prompt-${task.id}`} className={`text-xs ${theme.textMuted}`}>Prompt for note/photo</label>
                     </div>
                   </div>
                 ))}
               </div>
+
+              {/* Add Task Button */}
+              <button 
+                type="button"
+                onClick={() => setFormData({ 
+                  ...formData, 
+                  tasks: [...formData.tasks, { 
+                    id: Date.now(), 
+                    action: '', 
+                    frequency: 'daily', 
+                    weeklyTarget: 4, 
+                    dailyChecks: 1, 
+                    pointValue: 1,
+                    importance: 'medium',
+                    difficulty: 'medium',
+                    timeEstimate: 15
+                  }] 
+                })}
+                className={`w-full py-2.5 rounded-xl border-2 border-dashed ${darkMode ? 'border-slate-600 text-slate-400 hover:border-slate-500' : 'border-slate-300 text-slate-500 hover:border-slate-400'} text-sm font-medium flex items-center justify-center gap-2`}
+              >
+                <Plus className="w-4 h-4" />
+                Add Task
+              </button>
+
             </div>
           </div>
-          <div className="flex gap-2 mt-4">
-            <button onClick={() => onSave(formData)} className={`flex-1 py-2 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>Save Goal</button>
-            <button onClick={onCancel} className={`px-4 py-2 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Cancel</button>
+          
+          {/* Fixed Footer */}
+          <div className={`px-5 pb-5 pt-4 border-t ${theme.divider}`} style={{ flexShrink: 0 }}>
+            <div className="flex gap-2">
+              <button onClick={() => onSave(formData)} className={`flex-1 py-2.5 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>
+                {isEditing ? 'Save Changes' : 'Create Goal'}
+              </button>
+              <button onClick={onCancel} className={`px-4 py-2.5 rounded-lg text-sm font-medium ${theme.btnSecondary}`}>Cancel</button>
+            </div>
           </div>
         </div>
       </div>
@@ -819,13 +1767,13 @@ const GoalTrackerApp = () => {
               const date = new Date(year, month, day);
               const dateKey = getDateKey(date);
               const progress = calculateDailyProgress(dateKey);
-              const isToday = formatDate(date) === formatDate(new Date());
+              const isTodayDate = formatDate(date) === formatDate(new Date());
               const hasJournal = journalConfig.prompts.some(p => { const v = journalEntries[`${dateKey}-${p.id}`]; return v && (typeof v === 'string' ? v.trim().length > 0 : true); });
               const hasPhoto = dailyPhotos[dateKey];
               
               return (
-                <button key={day} onClick={() => goToDay(day)} className={`aspect-square rounded-lg p-1 relative flex flex-col items-center justify-center transition-all ${isToday ? `ring-2 ${darkMode ? 'ring-slate-400' : 'ring-slate-700'}` : ''} ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}>
-                  <span className={`text-sm font-medium ${isToday ? theme.textPrimary : theme.textSecondary}`}>{day}</span>
+                <button key={day} onClick={() => goToDay(day)} className={`aspect-square rounded-lg p-1 relative flex flex-col items-center justify-center transition-all ${isTodayDate ? `ring-2 ${darkMode ? 'ring-slate-400' : 'ring-slate-700'}` : ''} ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}>
+                  <span className={`text-sm font-medium ${isTodayDate ? theme.textPrimary : theme.textSecondary}`}>{day}</span>
                   {progress.total > 0 && (
                     <div className={`w-5 h-1 rounded-full mt-0.5 ${theme.progressBg}`}>
                       <div className={`h-full rounded-full ${progress.percentage === 100 ? theme.progressSuccess : theme.progressFill}`} style={{ width: `${progress.percentage}%` }} />
@@ -855,160 +1803,540 @@ const GoalTrackerApp = () => {
   };
 
   // ============================================
-  // DAILY VIEW - Compact Clean Navy Design
+  // DAILY VIEW - Unified Design with Points Goals
   // ============================================
   const DailyView = () => {
     const dateKey = selectedDateKey;
     const todayMedia = media[dateKey] || [];
     const [showMediaForm, setShowMediaForm] = useState(false);
     const [mediaForm, setMediaForm] = useState({ type: 'book', title: '', notes: '' });
+    const [collapsedGoals, setCollapsedGoals] = useState(new Set());
     const changeDate = (days) => { const newDate = new Date(selectedDate); newDate.setDate(newDate.getDate() + days); setSelectedDate(newDate); };
 
-    // Get all daily tasks
-    const dailyTasksList = goals.flatMap(goal => {
-      if (!goal.tasks || !Array.isArray(goal.tasks)) return [];
-      return goal.tasks.filter(t => !t.frequency || t.frequency === 'daily').map(task => ({ goal, task }));
-    });
+    const toggleGoalCollapse = (goalId) => {
+      setCollapsedGoals(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(goalId)) {
+          newSet.delete(goalId);
+        } else {
+          newSet.add(goalId);
+        }
+        return newSet;
+      });
+    };
 
-    // Get all weekly tasks
-    const weeklyTasksList = goals.flatMap(goal => {
-      if (!goal.tasks || !Array.isArray(goal.tasks)) return [];
-      return goal.tasks.filter(t => t.frequency === 'weekly').map(task => ({ goal, task }));
-    });
+    // Build unified task list sorted by category (including daily points goals)
+    const buildUnifiedTaskList = () => {
+      const items = [];
+      
+      goals.forEach(goal => {
+        if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+        
+        // Handle points-based goals with daily target
+        if (goal.goalType === 'points') {
+          if (goal.pointTargetFrequency !== 'daily' && goal.pointTargetFrequency !== undefined) return;
+          
+          const category = categories.find(c => c.id === goal.category);
+          const categoryColor = category?.color || '#64748b';
+          const categoryOrder = categories.findIndex(c => c.id === goal.category);
+          
+          const pointsEarned = calculatePointsEarnedForDate(dateKey, goal);
+          const pointTarget = goal.pointTarget || 10;
+          const percentage = Math.min(100, Math.round((pointsEarned / pointTarget) * 100));
+          
+          items.push({
+            type: 'points',
+            goal,
+            tasks: goal.tasks,
+            categoryColor,
+            categoryOrder: categoryOrder === -1 ? 999 : categoryOrder,
+            pointsEarned,
+            pointTarget,
+            percentage,
+            isDaily: true,
+            isPointsGoal: true
+          });
+          return;
+        }
+        
+        // Handle checkbox goals
+        const goalDailyTasks = goal.tasks.filter(t => !t.frequency || t.frequency === 'daily');
+        if (goalDailyTasks.length === 0) return;
+        
+        const category = categories.find(c => c.id === goal.category);
+        const categoryColor = category?.color || '#64748b';
+        const categoryOrder = categories.findIndex(c => c.id === goal.category);
+        
+        let totalChecks = 0;
+        let completedChecks = 0;
+        goalDailyTasks.forEach(task => {
+          const checks = task.dailyChecks || 1;
+          totalChecks += checks;
+          completedChecks += getTaskCompletionCount(dateKey, goal.id, task.id, checks);
+        });
+        const percentage = totalChecks > 0 ? Math.round((completedChecks / totalChecks) * 100) : 0;
+        
+        items.push({
+          type: goalDailyTasks.length === 1 ? 'single' : 'group',
+          goal,
+          tasks: goalDailyTasks,
+          categoryColor,
+          categoryOrder: categoryOrder === -1 ? 999 : categoryOrder,
+          percentage,
+          completedChecks,
+          totalChecks,
+          isDaily: true,
+          isPointsGoal: false
+        });
+      });
+      
+      // Sort: by category first, then singles before groups within each category
+      items.sort((a, b) => {
+        // Primary sort by category
+        if (a.categoryOrder !== b.categoryOrder) {
+          return a.categoryOrder - b.categoryOrder;
+        }
+        // Within same category, singles come before groups/points
+        const aIsSingle = a.type === 'single';
+        const bIsSingle = b.type === 'single';
+        if (aIsSingle && !bIsSingle) return -1;
+        if (!aIsSingle && bIsSingle) return 1;
+        return 0;
+      });
+      return items;
+    };
+
+    // Build unified weekly task list sorted by category (including weekly points goals)
+    const buildUnifiedWeeklyTaskList = () => {
+      const items = [];
+      const weekKey = getWeekKey(selectedDate);
+      
+      goals.forEach(goal => {
+        if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+        
+        // Handle points-based goals with weekly target
+        if (goal.goalType === 'points') {
+          if (goal.pointTargetFrequency !== 'weekly') return;
+          
+          const category = categories.find(c => c.id === goal.category);
+          const categoryColor = category?.color || '#64748b';
+          const categoryOrder = categories.findIndex(c => c.id === goal.category);
+          
+          // Calculate weekly points using weekKey (data is stored by week, not by day)
+          const weeklyPointsEarned = calculatePointsEarnedForWeek(weekKey, goal);
+          
+          const pointTarget = goal.pointTarget || 10;
+          const percentage = Math.min(100, Math.round((weeklyPointsEarned / pointTarget) * 100));
+          
+          items.push({
+            type: 'points',
+            goal,
+            tasks: goal.tasks,
+            categoryColor,
+            categoryOrder: categoryOrder === -1 ? 999 : categoryOrder,
+            pointsEarned: weeklyPointsEarned,
+            pointTarget,
+            percentage,
+            isDaily: false,
+            isPointsGoal: true
+          });
+          return;
+        }
+        
+        // Handle checkbox goals
+        const goalWeeklyTasks = goal.tasks.filter(t => t.frequency === 'weekly');
+        if (goalWeeklyTasks.length === 0) return;
+        
+        const category = categories.find(c => c.id === goal.category);
+        const categoryColor = category?.color || '#64748b';
+        const categoryOrder = categories.findIndex(c => c.id === goal.category);
+        
+        let totalTarget = 0;
+        let totalCompleted = 0;
+        goalWeeklyTasks.forEach(task => {
+          const progress = calculateWeeklyProgress(task, goal.id, selectedDate);
+          totalTarget += progress.target;
+          totalCompleted += progress.completed;
+        });
+        const percentage = totalTarget > 0 ? Math.round((totalCompleted / totalTarget) * 100) : 0;
+        
+        items.push({
+          type: goalWeeklyTasks.length === 1 ? 'single' : 'group',
+          goal,
+          tasks: goalWeeklyTasks,
+          categoryColor,
+          categoryOrder: categoryOrder === -1 ? 999 : categoryOrder,
+          percentage,
+          totalCompleted,
+          totalTarget,
+          isDaily: false,
+          isPointsGoal: false
+        });
+      });
+      
+      // Sort: by category first, then singles before groups within each category
+      items.sort((a, b) => {
+        // Primary sort by category
+        if (a.categoryOrder !== b.categoryOrder) {
+          return a.categoryOrder - b.categoryOrder;
+        }
+        // Within same category, singles come before groups/points
+        const aIsSingle = a.type === 'single';
+        const bIsSingle = b.type === 'single';
+        if (aIsSingle && !bIsSingle) return -1;
+        if (!aIsSingle && bIsSingle) return 1;
+        return 0;
+      });
+      return items;
+    };
+
+    const dailyItems = buildUnifiedTaskList();
+    const weeklyItems = buildUnifiedWeeklyTaskList();
+
+    // Check if task/goal is fully complete
+    const isGoalComplete = (item) => {
+      if (item.isPointsGoal) {
+        return item.pointsEarned >= item.pointTarget;
+      }
+      if (item.isDaily) {
+        return item.completedChecks === item.totalChecks && item.totalChecks > 0;
+      } else {
+        return item.totalCompleted >= item.totalTarget && item.totalTarget > 0;
+      }
+    };
+
+    // Render task row for unified list
+    const renderTaskRow = (goal, task, isDaily, isLast, isChild = false, categoryColor, isPointsGoal = false, showBorder = true) => {
+      // For weekly points goals, use week key for storage
+      const isWeeklyPointsGoal = goal?.goalType === 'points' && goal?.pointTargetFrequency === 'weekly';
+      const storageKey = isWeeklyPointsGoal ? getWeekKey(selectedDate) : dateKey;
+      
+      // Get task type for points goals
+      const taskType = isPointsGoal ? (task.taskType || 'checkbox') : 'checkbox';
+      
+      // For points goals, tasks don't have individual daily checks - just one checkbox each
+      const totalChecks = isPointsGoal ? 1 : (isDaily ? (task.dailyChecks || 1) : 1);
+      const completedCount = isPointsGoal 
+        ? (dailyTasks[storageKey]?.[`${goal.id}-${task.id}-0`] ? 1 : 0)
+        : (isDaily 
+            ? getTaskCompletionCount(dateKey, goal.id, task.id, totalChecks, goal)
+            : (isTaskCompleted(dateKey, goal.id, task.id, goal) ? 1 : 0));
+      const weekProgress = (!isDaily && !isPointsGoal) ? calculateWeeklyProgress(task, goal.id, selectedDate) : null;
+      const isComplete = completedCount === totalChecks;
+      
+      // Keep category border color unfaded for completed tasks
+      const borderColor = categoryColor;
+      
+      // A7 style: completed tasks get darker background + inset shadow
+      const completedBg = isComplete ? 'rgba(100, 116, 139, 0.12)' : 'transparent';
+      const completedShadow = isComplete ? 'inset 0 2px 4px rgba(0,0,0,0.04)' : 'none';
+      
+      // Child rows (subtasks) don't have a left border
+      const rowStyle = isChild 
+        ? { paddingLeft: '2rem', backgroundColor: completedBg, boxShadow: completedShadow }
+        : { borderLeft: `3px solid ${borderColor}`, paddingLeft: '0.75rem', backgroundColor: completedBg, boxShadow: completedShadow };
+
+      // Handle slider task type for points goals
+      if (isPointsGoal && taskType === 'slider') {
+        const maxValue = task.maxValue || 10;
+        const pointsPerUnit = task.pointsPerUnit || 1;
+        const currentValue = getVariableTaskValue(dateKey, goal.id, task.id, 'value', goal);
+        const earnedPoints = currentValue * pointsPerUnit;
+        const sliderHasValue = currentValue > 0;
+        
+        // A7 style for slider
+        const sliderBg = sliderHasValue ? 'rgba(100, 116, 139, 0.12)' : 'transparent';
+        const sliderShadow = sliderHasValue ? 'inset 0 2px 4px rgba(0,0,0,0.04)' : 'none';
+        const sliderRowStyle = isChild 
+          ? { paddingLeft: '2rem', backgroundColor: sliderBg, boxShadow: sliderShadow }
+          : { borderLeft: `3px solid ${borderColor}`, paddingLeft: '0.75rem', backgroundColor: sliderBg, boxShadow: sliderShadow };
+        
+        return (
+          <div 
+            key={task.id}
+            className="py-2.5"
+            style={sliderRowStyle}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className={`text-sm ${currentValue > 0 ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+              <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${earnedPoints > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                +{earnedPoints}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mr-3">
+              <input
+                type="range"
+                min="0"
+                max={maxValue}
+                value={currentValue}
+                onChange={(e) => setVariableTaskValue(dateKey, goal.id, task.id, 'value', parseInt(e.target.value), goal)}
+                className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                style={{ background: darkMode ? '#334155' : '#e2e8f0' }}
+              />
+              <span className={`text-xs font-medium w-10 text-right ${theme.textSecondary}`}>{currentValue}/{maxValue}</span>
+            </div>
+          </div>
+        );
+      }
+
+      // Handle counter task type for points goals
+      if (isPointsGoal && taskType === 'counter') {
+        const unitsPerPoint = task.unitsPerPoint || 1;
+        const pointsPerUnit = task.pointsPerUnit || 1;
+        const unitLabel = task.unitLabel || '';
+        const currentCount = getVariableTaskValue(dateKey, goal.id, task.id, 'count', goal);
+        const earnedPoints = Math.floor(currentCount / unitsPerPoint) * pointsPerUnit;
+        const counterHasValue = currentCount > 0;
+        
+        // A7 style for counter
+        const counterBg = counterHasValue ? 'rgba(100, 116, 139, 0.12)' : 'transparent';
+        const counterShadow = counterHasValue ? 'inset 0 2px 4px rgba(0,0,0,0.04)' : 'none';
+        const counterRowStyle = isChild 
+          ? { paddingLeft: '2rem', backgroundColor: counterBg, boxShadow: counterShadow }
+          : { borderLeft: `3px solid ${borderColor}`, paddingLeft: '0.75rem', backgroundColor: counterBg, boxShadow: counterShadow };
+        
+        return (
+          <div 
+            key={task.id}
+            className="py-2.5"
+            style={counterRowStyle}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`text-sm flex-1 ${currentCount > 0 ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+              <div className="flex items-center gap-2 mr-3">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setVariableTaskValue(dateKey, goal.id, task.id, 'count', currentCount - unitsPerPoint, goal); }}
+                  className={`w-7 h-7 rounded-full flex items-center justify-center ${darkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-200 text-slate-600'}`}
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <span className={`text-sm font-medium min-w-[3rem] text-center ${theme.textPrimary}`}>
+                  {currentCount}{unitLabel ? ` ${unitLabel}` : ''}
+                </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setVariableTaskValue(dateKey, goal.id, task.id, 'count', currentCount + unitsPerPoint, goal); }}
+                  className={`w-7 h-7 rounded-full flex items-center justify-center ${darkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-200 text-slate-600'}`}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+                <span className={`text-xs font-medium px-1.5 py-0.5 rounded ml-1 ${earnedPoints > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                  +{earnedPoints}
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Single checkbox row (daily tasks with 1 check, or checkbox points goal tasks)
+      if ((isDaily && totalChecks === 1) || isPointsGoal) {
+        const taskKey = `${goal.id}-${task.id}-0`;
+        const isChecked = dailyTasks[storageKey]?.[taskKey];
+        return (
+          <div 
+            key={task.id}
+            className={`flex items-center gap-3 py-2.5 cursor-pointer ${animatingTasks[taskKey] ? 'task-row-animate' : ''}`}
+            style={rowStyle}
+            onClick={() => toggleTask(dateKey, goal.id, task.id, 0, task, goal)}
+          >
+            <span className={`text-sm flex-1 ${isChecked ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+            {isPointsGoal && (
+              <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${isChecked ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                +{task.pointValue || 1}
+              </span>
+            )}
+            {taskCompletions[`${storageKey}-${goal.id}-${task.id}-0`] && (
+              <button onClick={(e) => { e.stopPropagation(); setViewingCompletion({ completion: taskCompletions[`${storageKey}-${goal.id}-${task.id}-0`], taskName: task.action }); }} className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0" />
+            )}
+            <div className={`flex-shrink-0 mr-3 ${animatingTasks[taskKey] ? 'checkbox-animate' : ''}`}>
+              {isChecked ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+              ) : (
+                <Circle className={`w-5 h-5 ${theme.checkUndone}`} />
+              )}
+            </div>
+          </div>
+        );
+      } else if (isDaily) {
+        // Multiple checkbox daily task (checkbox goals only)
+        const rowAnimating = Array.from({ length: totalChecks }).some((_, i) => animatingTasks[`${goal.id}-${task.id}-${i}`]);
+        return (
+          <div 
+            key={task.id}
+            className={`flex items-center gap-3 py-2.5 ${rowAnimating ? 'task-row-animate' : ''}`}
+            style={rowStyle}
+          >
+            <span className={`text-sm flex-1 ${isComplete ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+            <span className={`text-xs ${theme.textMuted}`}>{completedCount}/{totalChecks}</span>
+            <div className="flex gap-1.5 flex-shrink-0 mr-3">
+              {Array.from({ length: totalChecks }).map((_, checkIndex) => {
+                const taskKey = `${goal.id}-${task.id}-${checkIndex}`;
+                const isChecked = dailyTasks[dateKey]?.[taskKey];
+                return (
+                  <button 
+                    key={checkIndex} 
+                    onClick={() => toggleTask(dateKey, goal.id, task.id, checkIndex, task, goal)}
+                    className={animatingTasks[taskKey] ? 'checkbox-animate' : ''}
+                  >
+                    {isChecked ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                    ) : (
+                      <Circle className={`w-5 h-5 ${theme.checkUndone}`} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      } else {
+        // Weekly checkbox task
+        const isCheckedToday = isTaskCompleted(dateKey, goal.id, task.id, goal);
+        const taskKey = `${goal.id}-${task.id}-0`;
+        return (
+          <div 
+            key={task.id}
+            className={`flex items-center gap-3 py-2.5 cursor-pointer ${animatingTasks[taskKey] ? 'task-row-animate' : ''}`}
+            style={rowStyle}
+            onClick={() => toggleTask(dateKey, goal.id, task.id, 0, task, goal)}
+          >
+            <span className={`text-sm flex-1 ${isCheckedToday ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+            <span className={`text-xs ${theme.textMuted}`}>{weekProgress.completed}/{weekProgress.target}</span>
+            <div className={`flex-shrink-0 mr-3 ${animatingTasks[taskKey] ? 'checkbox-animate' : ''}`}>
+              {isCheckedToday ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+              ) : (
+                <Circle className={`w-5 h-5 ${theme.checkUndone}`} />
+              )}
+            </div>
+          </div>
+        );
+      }
+    };
 
     return (
       <div className="space-y-4">
-        {/* Date Navigator */}
+        {/* Date Navigator - Option 12 Style */}
         <div className="flex items-center justify-between py-2">
           <button onClick={() => changeDate(-1)} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
             <ChevronLeft className="w-4 h-4" />
           </button>
           <div className="text-center">
-            <p className={`text-lg font-semibold ${theme.textPrimary}`}>{selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
-            <p className={`text-xs ${theme.textMuted}`}>{selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}</p>
+            {isToday(selectedDate) && (
+              <p className="text-xs font-medium text-emerald-600 uppercase tracking-wider">Today</p>
+            )}
+            <p className={`text-lg font-semibold ${theme.textPrimary}`}>
+              {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+            </p>
+            <p className={`text-xs ${theme.textMuted}`}>
+              {selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}
+            </p>
           </div>
           <button onClick={() => changeDate(1)} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Daily Tasks Section */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Daily Tasks</p>
-            <p className={`text-xs ${theme.textSecondary}`}>{dailyProgress.percentage}%</p>
-          </div>
-          <div className={`h-1 ${theme.progressBg} rounded-full mb-3`}>
-            <div className={`h-full rounded-full transition-all ${dailyProgress.percentage === 100 ? theme.progressSuccess : theme.progressFill}`} style={{ width: `${dailyProgress.percentage}%` }} />
-          </div>
-
-          {dailyTasksList.length === 0 ? (
-            <div className={`${theme.cardBg} rounded-xl shadow-sm p-6 text-center`}>
-              <p className={`text-sm ${theme.textMuted}`}>No daily tasks yet</p>
-              <button onClick={() => setShowGoalForm(true)} className={`mt-2 text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>+ Add a goal</button>
-            </div>
-          ) : (
-            <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
-              {dailyTasksList.map(({ goal, task }, index) => {
-                const totalChecks = task.dailyChecks || 1;
-                const completedCount = getTaskCompletionCount(dateKey, goal.id, task.id, totalChecks);
-                
-                return (
-                  <div key={`${goal.id}-${task.id}`} className={`${index !== dailyTasksList.length - 1 ? `border-b ${theme.divider}` : ''}`}>
-                    {totalChecks === 1 ? (
-                      // Single checkbox - with animation
-                      <div 
-                        className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer ${animatingTasks[`${goal.id}-${task.id}-0`] ? 'task-row-animate' : ''}`}
-                        onClick={() => toggleTask(dateKey, goal.id, task.id, 0, task)}
-                      >
-                        <div className={`flex-shrink-0 ${animatingTasks[`${goal.id}-${task.id}-0`] ? 'checkbox-animate' : ''}`}>
-                          {dailyTasks[dateKey]?.[`${goal.id}-${task.id}-0`] ? (
-                            <CheckCircle2 className={`w-5 h-5 ${theme.checkDone}`} />
-                          ) : (
-                            <Circle className={`w-5 h-5 ${theme.checkUndone}`} />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm truncate ${dailyTasks[dateKey]?.[`${goal.id}-${task.id}-0`] ? theme.textSecondary : theme.textPrimary}`}>{task.action}</p>
-                        </div>
-                        {taskCompletions[`${dateKey}-${goal.id}-${task.id}-0`] && (
-                          <button onClick={(e) => { e.stopPropagation(); setViewingCompletion({ completion: taskCompletions[`${dateKey}-${goal.id}-${task.id}-0`], taskName: task.action }); }} className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0" />
-                        )}
-                      </div>
-                    ) : (
-                      // Multiple checkboxes - with animation on whole row
-                      (() => {
-                        const rowAnimating = Array.from({ length: totalChecks }).some((_, i) => animatingTasks[`${goal.id}-${task.id}-${i}`]);
-                        return (
-                          <div className={`flex items-center gap-3 px-3 py-2.5 ${rowAnimating ? 'task-row-animate' : ''}`}>
-                            <div className="flex gap-1.5 flex-shrink-0">
-                              {Array.from({ length: totalChecks }).map((_, checkIndex) => {
-                                const taskKey = `${goal.id}-${task.id}-${checkIndex}`;
-                                const isChecked = dailyTasks[dateKey]?.[taskKey];
-                                return (
-                                  <button 
-                                    key={checkIndex} 
-                                    onClick={() => toggleTask(dateKey, goal.id, task.id, checkIndex, task)}
-                                    className={animatingTasks[taskKey] ? 'checkbox-animate' : ''}
-                                  >
-                                    {isChecked ? (
-                                      <CheckCircle2 className={`w-5 h-5 ${theme.checkDone}`} />
-                                    ) : (
-                                      <Circle className={`w-5 h-5 ${theme.checkUndone}`} />
-                                    )}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-sm truncate ${completedCount === totalChecks ? theme.textSecondary : theme.textPrimary}`}>{task.action}</p>
-                            </div>
-                            <span className={`text-xs flex-shrink-0 ${theme.textMuted}`}>{completedCount}/{totalChecks}</span>
-                          </div>
-                        );
-                      })()
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Weekly Tasks Section */}
-        {weeklyTasksList.length > 0 && (
+        {/* Daily Tasks Section - Unified Card (including daily points goals) */}
+        {dailyItems.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Weekly Tasks</p>
-              <p className={`text-xs ${theme.textSecondary}`}>{weeklyOverallProgress.percentage}%</p>
-            </div>
-            <div className={`h-1 ${theme.progressBg} rounded-full mb-3`}>
-              <div className={`h-full rounded-full transition-all ${weeklyOverallProgress.percentage === 100 ? theme.progressSuccess : theme.progressFill}`} style={{ width: `${weeklyOverallProgress.percentage}%` }} />
+              <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Daily Tasks</p>
+              <p className={`text-xs ${theme.textSecondary}`}>{dailyProgress.percentage}%</p>
             </div>
 
             <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
-              {weeklyTasksList.map(({ goal, task }, index) => {
-                const weekProgress = calculateWeeklyProgress(task, goal.id, selectedDate);
-                const isCheckedToday = isTaskCompleted(dateKey, goal.id, task.id);
-                const taskKey = `${goal.id}-${task.id}-0`;
+              <ProgressBar percentage={dailyProgress.percentage} darkMode={darkMode} />
+              
+              {dailyItems.map((item, itemIndex) => {
+                const isCollapsed = collapsedGoals.has(`daily-${item.goal.id}`);
+                const goalComplete = isGoalComplete(item);
+                // Keep border color unfaded
+                const borderColor = item.categoryColor;
+                // A7 style for completed group headers
+                const headerBg = goalComplete ? 'rgba(100, 116, 139, 0.12)' : 'transparent';
+                const headerShadow = goalComplete ? 'inset 0 2px 4px rgba(0,0,0,0.04)' : 'none';
                 
-                return (
-                  <div 
-                    key={`${goal.id}-${task.id}`} 
-                    className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer ${index !== weeklyTasksList.length - 1 ? `border-b ${theme.divider}` : ''} ${animatingTasks[taskKey] ? 'task-row-animate' : ''}`}
-                    onClick={() => toggleTask(dateKey, goal.id, task.id, 0, task)}
-                  >
-                    <div className={`flex-shrink-0 ${animatingTasks[taskKey] ? 'checkbox-animate' : ''}`}>
-                      {isCheckedToday ? (
-                        <CheckCircle2 className={`w-5 h-5 ${theme.checkDone}`} />
-                      ) : (
-                        <Circle className={`w-5 h-5 ${theme.checkUndone}`} />
+                // Handle points-type goals
+                if (item.type === 'points') {
+                  return (
+                    <div key={item.goal.id} style={{ borderTop: itemIndex > 0 ? '4px solid' : 'none', borderTopColor: darkMode ? '#1e293b' : '#f1f5f9' }}>
+                      <button 
+                        onClick={() => toggleGoalCollapse(`daily-${item.goal.id}`)}
+                        className="w-full px-3 py-2 flex items-center gap-2"
+                        style={{ borderLeft: `3px solid ${borderColor}`, backgroundColor: headerBg, boxShadow: headerShadow }}
+                      >
+                        <ChevronDown className={`w-4 h-4 ${theme.textMuted} transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+                        <Star className="w-4 h-4 text-amber-500" />
+                        <span className={`text-sm font-medium flex-1 text-left ${goalComplete ? 'text-slate-600' : theme.textPrimary}`}>{item.goal.title}</span>
+                        <span className={`text-xs font-semibold ${goalComplete ? 'text-emerald-500' : theme.textSecondary}`}>
+                          {item.pointsEarned}/{item.pointTarget} {goalComplete && '✓'}
+                        </span>
+                      </button>
+                      
+                      {!isCollapsed && (
+                        <div className="relative">
+                          {/* Dotted connector line */}
+                          <div style={{ 
+                            position: 'absolute', 
+                            left: '11px', 
+                            top: 0, 
+                            bottom: 0, 
+                            width: '1px', 
+                            borderLeft: `1px dashed ${item.categoryColor}50` 
+                          }} />
+                          {item.tasks.map((task, idx) => (
+                            <div key={task.id} style={{ borderTop: `1px solid ${darkMode ? '#334155' : '#f1f5f9'}` }}>
+                              {renderTaskRow(item.goal, task, true, idx === item.tasks.length - 1, true, item.categoryColor, true)}
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm truncate ${isCheckedToday ? theme.textSecondary : theme.textPrimary}`}>{task.action}</p>
+                  );
+                }
+                
+                // Handle single-task checkbox goals
+                if (item.type === 'single') {
+                  const task = item.tasks[0];
+                  return (
+                    <div key={item.goal.id} style={{ borderTop: itemIndex > 0 ? '4px solid' : 'none', borderTopColor: darkMode ? '#1e293b' : '#f1f5f9' }}>
+                      {renderTaskRow(item.goal, task, true, true, false, item.categoryColor)}
                     </div>
-                    <span className={`text-xs flex-shrink-0 ${theme.textMuted}`}>{weekProgress.completed}/{weekProgress.target}</span>
+                  );
+                }
+                
+                // Handle multi-task checkbox goals (group)
+                return (
+                  <div key={item.goal.id} style={{ borderTop: itemIndex > 0 ? '4px solid' : 'none', borderTopColor: darkMode ? '#1e293b' : '#f1f5f9' }}>
+                    <button 
+                      onClick={() => toggleGoalCollapse(`daily-${item.goal.id}`)}
+                      className="w-full px-3 py-2 flex items-center gap-2"
+                      style={{ borderLeft: `3px solid ${borderColor}`, backgroundColor: headerBg, boxShadow: headerShadow }}
+                    >
+                      <ChevronDown className={`w-4 h-4 ${theme.textMuted} transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+                      <span className={`text-sm font-medium flex-1 text-left ${goalComplete ? 'text-slate-600' : theme.textPrimary}`}>{item.goal.title}</span>
+                      <MiniProgressBar percentage={item.percentage} darkMode={darkMode} />
+                    </button>
+                    
+                    {!isCollapsed && (
+                      <div className="relative">
+                        {/* Dotted connector line */}
+                        <div style={{ 
+                          position: 'absolute', 
+                          left: '11px', 
+                          top: 0, 
+                          bottom: 0, 
+                          width: '1px', 
+                          borderLeft: `1px dashed ${item.categoryColor}50` 
+                        }} />
+                        {item.tasks.map((task, idx) => (
+                          <div key={task.id} style={{ borderTop: `1px solid ${darkMode ? '#334155' : '#f1f5f9'}` }}>
+                            {renderTaskRow(item.goal, task, true, idx === item.tasks.length - 1, true, item.categoryColor)}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1016,81 +2344,411 @@ const GoalTrackerApp = () => {
           </div>
         )}
 
-        {/* Journal Section */}
+        {/* Empty State */}
+        {dailyItems.length === 0 && (
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-6 text-center`}>
+            <p className={`text-sm ${theme.textMuted}`}>No daily tasks yet</p>
+            <button onClick={() => setShowGoalForm(true)} className={`mt-2 text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>+ Add a goal</button>
+          </div>
+        )}
+
+        {/* Weekly Tasks Section (including weekly points goals) */}
+        {weeklyItems.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Weekly Tasks</p>
+              <p className={`text-xs ${theme.textSecondary}`}>{weeklyOverallProgress.percentage}%</p>
+            </div>
+
+            <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+              <ProgressBar percentage={weeklyOverallProgress.percentage} darkMode={darkMode} />
+              
+              {weeklyItems.map((item, itemIndex) => {
+                const isCollapsed = collapsedGoals.has(`weekly-${item.goal.id}`);
+                const goalComplete = isGoalComplete(item);
+                // Keep border color unfaded
+                const borderColor = item.categoryColor;
+                // A7 style for completed group headers
+                const headerBg = goalComplete ? 'rgba(100, 116, 139, 0.12)' : 'transparent';
+                const headerShadow = goalComplete ? 'inset 0 2px 4px rgba(0,0,0,0.04)' : 'none';
+                
+                // Handle points-type weekly goals
+                if (item.type === 'points') {
+                  return (
+                    <div key={item.goal.id} style={{ borderTop: itemIndex > 0 ? '4px solid' : 'none', borderTopColor: darkMode ? '#1e293b' : '#f1f5f9' }}>
+                      <button 
+                        onClick={() => toggleGoalCollapse(`weekly-${item.goal.id}`)}
+                        className="w-full px-3 py-2 flex items-center gap-2"
+                        style={{ borderLeft: `3px solid ${borderColor}`, backgroundColor: headerBg, boxShadow: headerShadow }}
+                      >
+                        <ChevronDown className={`w-4 h-4 ${theme.textMuted} transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+                        <Star className="w-4 h-4 text-amber-500" />
+                        <span className={`text-sm font-medium flex-1 text-left ${goalComplete ? 'text-slate-600' : theme.textPrimary}`}>{item.goal.title}</span>
+                        <span className={`text-xs font-semibold ${goalComplete ? 'text-emerald-500' : theme.textSecondary}`}>
+                          {item.pointsEarned}/{item.pointTarget} {goalComplete && '✓'}
+                        </span>
+                      </button>
+                      
+                      {!isCollapsed && (
+                        <div className="relative">
+                          {/* Dotted connector line */}
+                          <div style={{ 
+                            position: 'absolute', 
+                            left: '11px', 
+                            top: 0, 
+                            bottom: 0, 
+                            width: '1px', 
+                            borderLeft: `1px dashed ${item.categoryColor}50` 
+                          }} />
+                          {item.tasks.map((task, idx) => (
+                            <div key={task.id} style={{ borderTop: `1px solid ${darkMode ? '#334155' : '#f1f5f9'}` }}>
+                              {renderTaskRow(item.goal, task, true, idx === item.tasks.length - 1, true, item.categoryColor, true)}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                
+                // Handle single-task checkbox goals
+                if (item.type === 'single') {
+                  const task = item.tasks[0];
+                  return (
+                    <div key={item.goal.id} style={{ borderTop: itemIndex > 0 ? '4px solid' : 'none', borderTopColor: darkMode ? '#1e293b' : '#f1f5f9' }}>
+                      {renderTaskRow(item.goal, task, false, true, false, item.categoryColor)}
+                    </div>
+                  );
+                }
+                
+                // Handle multi-task checkbox goals (group)
+                return (
+                  <div key={item.goal.id} style={{ borderTop: itemIndex > 0 ? '4px solid' : 'none', borderTopColor: darkMode ? '#1e293b' : '#f1f5f9' }}>
+                    <button 
+                      onClick={() => toggleGoalCollapse(`weekly-${item.goal.id}`)}
+                      className="w-full px-3 py-2 flex items-center gap-2"
+                      style={{ borderLeft: `3px solid ${borderColor}`, backgroundColor: headerBg, boxShadow: headerShadow }}
+                    >
+                      <ChevronDown className={`w-4 h-4 ${theme.textMuted} transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+                      <span className={`text-sm font-medium flex-1 text-left ${goalComplete ? 'text-slate-600' : theme.textPrimary}`}>{item.goal.title}</span>
+                      <MiniProgressBar percentage={item.percentage} darkMode={darkMode} />
+                    </button>
+                    
+                    {!isCollapsed && (
+                      <div className="relative">
+                        {/* Dotted connector line */}
+                        <div style={{ 
+                          position: 'absolute', 
+                          left: '11px', 
+                          top: 0, 
+                          bottom: 0, 
+                          width: '1px', 
+                          borderLeft: `1px dashed ${item.categoryColor}50` 
+                        }} />
+                        {item.tasks.map((task, idx) => (
+                          <div key={task.id} style={{ borderTop: `1px solid ${darkMode ? '#334155' : '#f1f5f9'}` }}>
+                            {renderTaskRow(item.goal, task, false, idx === item.tasks.length - 1, true, item.categoryColor)}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Journal Section - Redesigned with card-per-prompt and insights */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Journal</p>
+            <div className="flex items-center gap-2">
+              <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Journal</p>
+              {(() => {
+                const filledCount = journalConfig.prompts.filter(prompt => {
+                  const val = journalEntries[`${dateKey}-${prompt.id}`];
+                  if (prompt.type === 'text') return val && val.trim().length > 0;
+                  if (prompt.type === 'slider') return val !== undefined;
+                  if (prompt.type === 'yesno') return val !== undefined;
+                  return false;
+                }).length;
+                const totalCount = journalConfig.prompts.length;
+                return totalCount > 0 ? (
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                    filledCount === totalCount 
+                      ? 'bg-emerald-500/10 text-emerald-500' 
+                      : `${darkMode ? 'bg-slate-700' : 'bg-slate-200'} ${theme.textSecondary}`
+                  }`}>
+                    {filledCount}/{totalCount}
+                  </span>
+                ) : null;
+              })()}
+            </div>
             <button onClick={() => setShowJournalSettings(true)} className={theme.textMuted}>
-              <Settings className="w-3.5 h-3.5" />
+              <Settings className="w-4 h-4" />
             </button>
           </div>
-          <div className={`${theme.cardBg} rounded-xl shadow-sm p-3 space-y-3`}>
-            {journalConfig.prompts.map((prompt) => {
+          
+          <div className="space-y-3">
+            {/* Text prompts - individual cards */}
+            {journalConfig.prompts.filter(p => p.type === 'text').map((prompt) => {
               const promptKey = `${dateKey}-${prompt.id}`;
-              const currentValue = journalEntries[promptKey] || '';
+              const value = journalEntries[promptKey] || '';
+              const hasContent = value.trim().length > 0;
               
-              if (prompt.type === 'text') {
-                return (
-                  <div key={prompt.id}>
-                    <p className={`text-xs mb-1 ${theme.textMuted}`}>{prompt.label}</p>
+              // Helper to get previous day's value
+              const getPrevValue = (daysAgo = 1) => {
+                const prevDate = new Date(selectedDate);
+                prevDate.setDate(prevDate.getDate() - daysAgo);
+                return journalEntries[`${toLocalDateKey(prevDate)}-${prompt.id}`];
+              };
+              
+              // Calculate writing streak
+              let writeStreak = 0;
+              for (let i = 1; i <= 30; i++) {
+                const prev = getPrevValue(i);
+                if (prev && prev.trim().length > 0) writeStreak++;
+                else break;
+              }
+              if (hasContent) writeStreak++;
+              
+              return (
+                <div key={prompt.id} className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                  <div className={`px-3 py-2.5 flex items-center justify-between border-b ${darkMode ? 'border-slate-700/50' : 'border-slate-100'}`}>
+                    <span className={`text-sm font-medium ${theme.textPrimary}`}>{prompt.label}</span>
+                    {writeStreak >= 3 && (
+                      <span className="text-xs flex items-center gap-1 text-orange-500">
+                        <Flame className="w-3 h-3" />
+                        {writeStreak} days
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-3">
                     <textarea
-                      value={currentValue}
+                      value={value}
                       onChange={(e) => setJournalEntries(prev => ({ ...prev, [promptKey]: e.target.value }))}
-                      placeholder={prompt.placeholder}
-                      className={`w-full rounded-lg px-2.5 py-2 text-sm min-h-[60px] resize-none ${theme.inputBg} ${theme.textPrimary}`}
+                      placeholder={prompt.placeholder || 'Write here...'}
+                      className={`w-full rounded-lg px-3 py-2.5 text-sm min-h-[100px] resize-none border ${theme.border} ${theme.inputBg} ${theme.textPrimary} focus:outline-none focus:ring-2 focus:ring-slate-300`}
                     />
                   </div>
-                );
-              } else if (prompt.type === 'slider') {
-                const sliderValue = currentValue || prompt.min || 0;
-                return (
-                  <div key={prompt.id}>
-                    <p className={`text-xs mb-1 ${theme.textMuted}`}>{prompt.label}</p>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="range"
-                        min={prompt.min || 0}
-                        max={prompt.max || 10}
-                        value={sliderValue}
-                        onChange={(e) => setJournalEntries(prev => ({ ...prev, [promptKey]: parseInt(e.target.value) }))}
-                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-                        style={{ background: darkMode ? '#334155' : '#e2e8f0' }}
-                      />
-                      <span className={`text-xs w-5 text-right ${theme.textSecondary}`}>{sliderValue}</span>
-                    </div>
-                  </div>
-                );
-              } else if (prompt.type === 'yesno') {
-                return (
-                  <div key={prompt.id}>
-                    <p className={`text-xs mb-2 ${theme.textMuted}`}>{prompt.label}</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setJournalEntries(prev => ({ ...prev, [promptKey]: 'yes' }))}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                          currentValue === 'yes'
-                            ? 'bg-emerald-500 text-white'
-                            : `${theme.inputBg} ${theme.textSecondary}`
-                        }`}
-                      >
-                        Yes
-                      </button>
-                      <button
-                        onClick={() => setJournalEntries(prev => ({ ...prev, [promptKey]: 'no' }))}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                          currentValue === 'no'
-                            ? 'bg-red-500 text-white'
-                            : `${theme.inputBg} ${theme.textSecondary}`
-                        }`}
-                      >
-                        No
-                      </button>
-                    </div>
-                  </div>
-                );
-              }
-              return null;
+                </div>
+              );
             })}
+            
+            {/* Slider prompts - individual cards */}
+            {journalConfig.prompts.filter(p => p.type === 'slider').map((prompt) => {
+              const promptKey = `${dateKey}-${prompt.id}`;
+              const currentValue = journalEntries[promptKey];
+              const value = currentValue !== undefined ? currentValue : prompt.min || 0;
+              const hasValue = currentValue !== undefined;
+              
+              // Helper to get previous day's value
+              const getPrevValue = (daysAgo = 1) => {
+                const prevDate = new Date(selectedDate);
+                prevDate.setDate(prevDate.getDate() - daysAgo);
+                return journalEntries[`${toLocalDateKey(prevDate)}-${prompt.id}`];
+              };
+              
+              const yesterdayValue = getPrevValue(1);
+              const min = prompt.min || 0;
+              const max = prompt.max || 10;
+              const percentage = ((value - min) / (max - min)) * 100;
+              const gradientColor = percentage < 33 ? '#f97316' : percentage < 66 ? '#eab308' : '#22c55e';
+              
+              // Get 7-day trend data
+              const trendData = [];
+              for (let i = 6; i >= 0; i--) {
+                trendData.push(getPrevValue(i) !== undefined ? getPrevValue(i) : null);
+              }
+              trendData.push(hasValue ? value : null);
+              
+              // Calculate 7-day average
+              const validTrend = trendData.filter(d => d !== null);
+              const average = validTrend.length > 0 ? (validTrend.reduce((a, b) => a + b, 0) / validTrend.length).toFixed(1) : null;
+              
+              // Comparison to yesterday
+              let comparison = null;
+              if (yesterdayValue !== undefined && hasValue) {
+                const diff = value - yesterdayValue;
+                if (diff > 0) comparison = { type: 'up', diff };
+                else if (diff < 0) comparison = { type: 'down', diff: Math.abs(diff) };
+                else comparison = { type: 'same' };
+              }
+              
+              return (
+                <div key={prompt.id} className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                  <div className={`px-3 py-2.5 flex items-center justify-between border-b ${darkMode ? 'border-slate-700/50' : 'border-slate-100'}`}>
+                    <span className={`text-sm font-medium ${theme.textPrimary}`}>{prompt.label}</span>
+                    <MiniSparkline data={trendData.slice(0, 7)} color={gradientColor} />
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs ${theme.textMuted}`}>{min}</span>
+                      <div className="flex-1 relative">
+                        {yesterdayValue !== undefined && (
+                          <div 
+                            className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 rounded-full bg-slate-400 opacity-40 z-0"
+                            style={{ left: `${((yesterdayValue - min) / (max - min)) * 100}%` }}
+                            title={`Yesterday: ${yesterdayValue}`}
+                          />
+                        )}
+                        <input
+                          type="range"
+                          min={min}
+                          max={max}
+                          value={value}
+                          onChange={(e) => setJournalEntries(prev => ({ ...prev, [promptKey]: parseInt(e.target.value) }))}
+                          className="w-full h-2 rounded-full appearance-none cursor-pointer relative z-10"
+                          style={{ 
+                            background: `linear-gradient(to right, ${gradientColor} 0%, ${gradientColor} ${percentage}%, ${darkMode ? '#334155' : '#e2e8f0'} ${percentage}%, ${darkMode ? '#334155' : '#e2e8f0'} 100%)` 
+                          }}
+                        />
+                      </div>
+                      <span className={`text-xs ${theme.textMuted}`}>{max}</span>
+                    </div>
+                    <div className="flex items-center justify-center mt-2">
+                      <span className="text-xl font-bold" style={{ color: gradientColor }}>{value}</span>
+                    </div>
+                  </div>
+                  {(comparison || average) && (
+                    <div className={`px-3 py-2 flex items-center justify-between border-t ${darkMode ? 'border-slate-700/50' : 'border-slate-100'}`} style={{ backgroundColor: darkMode ? 'rgba(51,65,85,0.3)' : 'rgba(248,250,252,0.8)' }}>
+                      {comparison ? (
+                        <span className={`text-xs flex items-center gap-1 ${
+                          comparison.type === 'up' ? 'text-emerald-500' : 
+                          comparison.type === 'down' ? 'text-amber-500' : 
+                          theme.textMuted
+                        }`}>
+                          {comparison.type === 'up' && <ChevronUp className="w-3 h-3" />}
+                          {comparison.type === 'down' && <ChevronDown className="w-3 h-3" />}
+                          {comparison.type === 'same' && <Minus className="w-3 h-3" />}
+                          {comparison.type === 'up' ? `+${comparison.diff}` : comparison.type === 'down' ? `-${comparison.diff}` : 'Same as'} yesterday
+                        </span>
+                      ) : <span />}
+                      {average && (
+                        <span className={`text-xs ${theme.textMuted}`}>7-day avg: {average}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            
+            {/* Yes/No prompts - grouped together in one card */}
+            {(() => {
+              const yesNoPrompts = journalConfig.prompts.filter(p => p.type === 'yesno');
+              if (yesNoPrompts.length === 0) return null;
+              
+              // Helper to get previous day's value for a prompt
+              const getPrevValue = (promptId, daysAgo = 1) => {
+                const prevDate = new Date(selectedDate);
+                prevDate.setDate(prevDate.getDate() - daysAgo);
+                return journalEntries[`${toLocalDateKey(prevDate)}-${promptId}`];
+              };
+              
+              // Calculate streak for a prompt
+              const calculateStreak = (promptId) => {
+                const value = journalEntries[`${dateKey}-${promptId}`];
+                let streak = 0;
+                let checkDate = new Date(selectedDate);
+                
+                if (value === undefined) {
+                  // No entry today, start checking from yesterday
+                  checkDate.setDate(checkDate.getDate() - 1);
+                } else if (value !== 'yes') {
+                  // Today is 'no', streak is 0
+                  return { current: 0, wasStreak: getPrevValue(promptId, 1) === 'yes' };
+                } else {
+                  // Today is 'yes' - count 1 for today, then check backwards from yesterday
+                  streak = 1;
+                  checkDate.setDate(checkDate.getDate() - 1);
+                }
+                
+                for (let i = 0; i < 365; i++) {
+                  const checkKey = `${toLocalDateKey(checkDate)}-${promptId}`;
+                  if (journalEntries[checkKey] === 'yes') {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                  } else {
+                    break;
+                  }
+                }
+                
+                return { current: streak, wasStreak: false };
+              };
+              
+              // Calculate weekly yes count for a prompt (last 7 days including today)
+              const getWeeklyYesCount = (promptId) => {
+                let count = 0;
+                // i=0 is today, i=6 is 6 days ago (7 days total)
+                for (let i = 0; i < 7; i++) {
+                  if (getPrevValue(promptId, i) === 'yes') count++;
+                }
+                return count;
+              };
+              
+              return (
+                <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                  {yesNoPrompts.map((prompt, index) => {
+                    const promptKey = `${dateKey}-${prompt.id}`;
+                    const value = journalEntries[promptKey];
+                    const streak = calculateStreak(prompt.id);
+                    const weeklyYes = getWeeklyYesCount(prompt.id);
+                    const isLast = index === yesNoPrompts.length - 1;
+                    
+                    return (
+                      <div 
+                        key={prompt.id} 
+                        className={`px-3 py-2 flex items-center gap-2 ${!isLast ? `border-b ${darkMode ? 'border-slate-700/50' : 'border-slate-100'}` : ''}`}
+                      >
+                        <span className={`text-sm flex-1 truncate ${theme.textPrimary}`}>{prompt.label}</span>
+                        {/* Streak indicator - compact */}
+                        {streak.current >= 2 && value === 'yes' && (
+                          <span className="text-xs text-orange-500 flex items-center gap-0.5 flex-shrink-0">
+                            <Flame className="w-3 h-3" />
+                            {streak.current}
+                          </span>
+                        )}
+                        {streak.wasStreak && (
+                          <span className="text-xs text-rose-500 flex-shrink-0">!</span>
+                        )}
+                        <span className={`text-xs w-6 text-right flex-shrink-0 ${theme.textMuted}`}>{weeklyYes}/7</span>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            onClick={() => setJournalEntries(prev => ({ ...prev, [promptKey]: value === 'yes' ? undefined : 'yes' }))}
+                            className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
+                              value === 'yes'
+                                ? 'bg-emerald-500 text-white'
+                                : `${theme.inputBg} ${theme.textMuted} hover:text-emerald-500`
+                            }`}
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setJournalEntries(prev => ({ ...prev, [promptKey]: value === 'no' ? undefined : 'no' }))}
+                            className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
+                              value === 'no'
+                                ? 'bg-rose-500 text-white'
+                                : `${theme.inputBg} ${theme.textMuted} hover:text-rose-500`
+                            }`}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+            
+            {journalConfig.prompts.length === 0 && (
+              <div className={`${theme.cardBg} rounded-xl shadow-sm p-6 text-center`}>
+                <p className={`text-sm ${theme.textMuted} mb-2`}>No journal prompts</p>
+                <button onClick={() => setShowJournalSettings(true)} className={`text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                  + Add prompts
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1194,8 +2852,20 @@ const GoalTrackerApp = () => {
   // PROGRESS VIEW - Card Stack with Time Period
   // ============================================
   const ProgressView = () => {
-    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [expandedCategories, setExpandedCategories] = useState(new Set());
     const [timePeriod, setTimePeriod] = useState('1M');
+    
+    const toggleCategory = (categoryId) => {
+      setExpandedCategories(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(categoryId)) {
+          newSet.delete(categoryId);
+        } else {
+          newSet.add(categoryId);
+        }
+        return newSet;
+      });
+    };
     
     const timePeriods = [
       { id: '1W', label: '1W', days: 7 },
@@ -1208,7 +2878,6 @@ const GoalTrackerApp = () => {
     
     const currentPeriod = timePeriods.find(p => p.id === timePeriod);
     
-    // Calculate progress for a category over the selected time period
     const calculateCategoryProgress = useCallback((categoryId) => {
       const categoryGoals = goals.filter(g => g.category === categoryId);
       if (categoryGoals.length === 0) return { percentage: 0, goalsCount: 0, totalDays: 0, completedDays: 0, goals: [] };
@@ -1218,7 +2887,6 @@ const GoalTrackerApp = () => {
       
       let periodStart;
       if (currentPeriod.days === null) {
-        // ALL time - find earliest goal creation date
         const earliestGoal = categoryGoals.reduce((earliest, goal) => {
           const created = goal.createdAt ? new Date(goal.createdAt) : new Date();
           return created < earliest ? created : earliest;
@@ -1243,7 +2911,7 @@ const GoalTrackerApp = () => {
         
         goal.tasks.forEach(task => {
           for (let d = new Date(periodStart); d <= today; d.setDate(d.getDate() + 1)) {
-            const dateKey = d.toISOString().split('T')[0];
+            const dateKey = toLocalDateKey(d);
             
             if (!task.frequency || task.frequency === 'daily') {
               const checksPerDay = task.dailyChecks || 1;
@@ -1252,7 +2920,6 @@ const GoalTrackerApp = () => {
                 if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) goalCompleted++;
               }
             } else if (task.frequency === 'weekly') {
-              // For weekly tasks, only count on the last day of each week in period
               if (d.getDay() === 0 || d.getTime() === today.getTime()) {
                 const weekStart = new Date(d);
                 weekStart.setDate(d.getDate() - d.getDay());
@@ -1262,7 +2929,7 @@ const GoalTrackerApp = () => {
                 goalExpected += target;
                 
                 for (let wd = new Date(weekStart); wd <= d; wd.setDate(wd.getDate() + 1)) {
-                  const wdKey = wd.toISOString().split('T')[0];
+                  const wdKey = toLocalDateKey(wd);
                   if (dailyTasks[wdKey]?.[`${goal.id}-${task.id}-0`]) goalCompleted++;
                 }
               }
@@ -1296,7 +2963,6 @@ const GoalTrackerApp = () => {
       };
     }, [goals, dailyTasks, currentPeriod]);
     
-    // Calculate chart data points for a category
     const calculateChartData = useCallback((categoryId) => {
       const categoryGoals = goals.filter(g => g.category === categoryId);
       if (categoryGoals.length === 0) return [];
@@ -1309,7 +2975,6 @@ const GoalTrackerApp = () => {
       let pointInterval;
       
       if (currentPeriod.days === null) {
-        // ALL time
         const earliestGoal = categoryGoals.reduce((earliest, goal) => {
           const created = goal.createdAt ? new Date(goal.createdAt) : new Date();
           return created < earliest ? created : earliest;
@@ -1354,7 +3019,7 @@ const GoalTrackerApp = () => {
           
           goal.tasks.forEach(task => {
             for (let d = new Date(pointStart); d <= pointEnd; d.setDate(d.getDate() + 1)) {
-              const dateKey = d.toISOString().split('T')[0];
+              const dateKey = toLocalDateKey(d);
               
               if (!task.frequency || task.frequency === 'daily') {
                 const checksPerDay = task.dailyChecks || 1;
@@ -1375,9 +3040,8 @@ const GoalTrackerApp = () => {
       return dataPoints;
     }, [goals, dailyTasks, currentPeriod]);
     
-    // Mini chart component
     const MiniChart = ({ data, color, height = 60, showLabels = false }) => {
-      if (!data || data.length < 2) return <div className={`h-${height} flex items-center justify-center`}><p className={`text-xs ${theme.textMuted}`}>Not enough data</p></div>;
+      if (!data || data.length < 2) return <div style={{ height }} className="flex items-center justify-center"><p className={`text-xs ${theme.textMuted}`}>Not enough data</p></div>;
       
       const max = 100;
       const width = 200;
@@ -1420,14 +3084,12 @@ const GoalTrackerApp = () => {
       );
     };
     
-    // Get categories that have goals
     const activeCategories = (categories || []).filter(cat => 
       goals.some(g => g.category === cat.id)
     );
 
     return (
       <div className="space-y-3">
-        {/* Header */}
         <div className="flex items-center justify-between py-2">
           <div>
             <h2 className={`text-lg font-semibold ${theme.textPrimary}`}>Progress</h2>
@@ -1438,7 +3100,6 @@ const GoalTrackerApp = () => {
           </button>
         </div>
         
-        {/* Time Period Selector */}
         <div className={`${theme.cardBg} rounded-xl shadow-sm p-1 flex gap-1`}>
           {timePeriods.map(period => (
             <button
@@ -1467,16 +3128,14 @@ const GoalTrackerApp = () => {
             {activeCategories.map(category => {
               const progress = calculateCategoryProgress(category.id);
               const chartData = calculateChartData(category.id);
-              const isExpanded = expandedCategory === category.id;
+              const isExpanded = expandedCategories.has(category.id);
               
               return (
                 <div key={category.id} className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
-                  {/* Category Header */}
                   <button 
-                    onClick={() => setExpandedCategory(isExpanded ? null : category.id)}
+                    onClick={() => toggleCategory(category.id)}
                     className="w-full p-4 flex items-center gap-3"
                   >
-                    {/* Percentage Badge */}
                     <div 
                       className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" 
                       style={{ backgroundColor: `${category.color}15` }}
@@ -1484,13 +3143,11 @@ const GoalTrackerApp = () => {
                       <span className="text-base font-bold" style={{ color: category.color }}>{progress.percentage}%</span>
                     </div>
                     
-                    {/* Category Info */}
                     <div className="flex-1 text-left min-w-0">
                       <h3 className={`font-semibold text-sm ${theme.textPrimary}`}>{category.name}</h3>
                       <p className={`text-xs ${theme.textMuted}`}>{progress.goalsCount} goal{progress.goalsCount !== 1 ? 's' : ''}</p>
                     </div>
                     
-                    {/* Mini Sparkline */}
                     <div className="w-16 h-8 flex-shrink-0">
                       <MiniChart data={chartData} color={category.color} height={32} />
                     </div>
@@ -1498,10 +3155,8 @@ const GoalTrackerApp = () => {
                     <ChevronRight className={`w-4 h-4 flex-shrink-0 ${theme.textMuted} transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                   </button>
                   
-                  {/* Expanded Content */}
                   {isExpanded && (
                     <div className={`px-4 pb-4 border-t ${theme.divider}`}>
-                      {/* Larger Chart */}
                       <div className="py-3">
                         <div className="flex items-center justify-between mb-2">
                           <p className={`text-xs font-medium ${theme.textMuted}`}>
@@ -1516,13 +3171,15 @@ const GoalTrackerApp = () => {
                         <MiniChart data={chartData} color={category.color} height={100} showLabels />
                       </div>
                       
-                      {/* Goals List */}
                       <div className="space-y-2 mt-2">
                         <p className={`text-xs font-medium ${theme.textMuted}`}>Goals</p>
                         {progress.goals.map(goal => (
                           <div key={goal.id} className={`p-3 rounded-lg ${theme.inputBg}`}>
                             <div className="flex justify-between mb-1.5">
-                              <span className={`text-sm font-medium ${theme.textPrimary}`}>{goal.title}</span>
+                              <div className="flex items-center gap-1.5">
+                                {goal.goalType === 'points' && <Star className="w-3.5 h-3.5 text-amber-500" />}
+                                <span className={`text-sm font-medium ${theme.textPrimary}`}>{goal.title}</span>
+                              </div>
                               <span className="text-sm font-bold" style={{ color: category.color }}>{goal.percentage}%</span>
                             </div>
                             <div className={`h-1.5 rounded-full mb-1.5 ${theme.progressBg}`}>
@@ -1551,7 +3208,6 @@ const GoalTrackerApp = () => {
               );
             })}
 
-            {/* Uncategorized goals */}
             {goals.filter(g => !activeCategories.some(c => c.id === g.category)).length > 0 && (
               <div className={`${theme.cardBg} rounded-xl shadow-sm p-4`}>
                 <h3 className={`font-semibold text-sm mb-3 ${theme.textPrimary}`}>Uncategorized</h3>
@@ -1602,23 +3258,21 @@ const GoalTrackerApp = () => {
           background: ${darkMode ? '#e2e8f0' : '#334155'};
           cursor: pointer;
         }
-        @keyframes shrinkBounceBg {
+        @keyframes taskGlow {
           0% { transform: scale(1); background-color: transparent; }
-          15% { transform: scale(0.975); background-color: rgba(16, 185, 129, 0.15); }
-          40% { transform: scale(1.012); background-color: rgba(16, 185, 129, 0.2); }
-          60% { transform: scale(0.995); background-color: rgba(16, 185, 129, 0.12); }
-          80% { transform: scale(1.003); background-color: rgba(16, 185, 129, 0.05); }
+          20% { transform: scale(0.98); background-color: rgba(34, 197, 94, 0.2); }
+          40% { transform: scale(1); background-color: rgba(34, 197, 94, 0.3); }
+          60% { transform: scale(1); background-color: rgba(34, 197, 94, 0.2); }
+          80% { transform: scale(1); background-color: rgba(34, 197, 94, 0.08); }
           100% { transform: scale(1); background-color: transparent; }
         }
-        @keyframes morphCheckbox {
+        @keyframes checkPop {
           0% { transform: scale(1); }
-          30% { transform: scale(0.8); }
-          60% { transform: scale(1.1); }
-          80% { transform: scale(0.95); }
+          40% { transform: scale(0.85); }
           100% { transform: scale(1); }
         }
-        .task-row-animate { animation: shrinkBounceBg 1.2s ease-out; }
-        .checkbox-animate { animation: morphCheckbox 0.7s ease-out; }
+        .task-row-animate { animation: taskGlow 1.2s ease-out; }
+        .checkbox-animate { animation: checkPop 0.35s ease-out; }
       `}</style>
       
       {/* Sticky Header */}
@@ -1665,10 +3319,10 @@ const GoalTrackerApp = () => {
   );
 };
 
-
-    // Mount the app
+    // Render the app
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<GoalTrackerApp />);
   </script>
 </body>
 </html>
+
