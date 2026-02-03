@@ -2,77 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
   <title>Life Tracker</title>
-  
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- React 18 -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  
-  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
+  <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
   <style>
-    html, body {
-      overscroll-behavior: none;
-      -webkit-overflow-scrolling: touch;
+    * { -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; overscroll-behavior: none; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif; }
+    @supports (padding-top: env(safe-area-inset-top)) {
+      .safe-top { padding-top: env(safe-area-inset-top); }
+      .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
     }
+    input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; touch-action: pan-x; }
+    input[type="range"]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; margin-top: -7px; }
+    .touch-pan-y { touch-action: pan-y; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  
-  <script type="text/babel">
-    // Destructure from React
-    const { useState, useEffect, useMemo, useCallback, useRef, memo } = React;
-    
-    // Define icons as simple SVG components (instead of using lucide-react CDN)
-    const Icon = ({ d, className = "w-4 h-4", strokeWidth = 2 }) => (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-        <path d={d} />
-      </svg>
-    );
-    
-    const MultiPathIcon = ({ paths, className = "w-4 h-4", strokeWidth = 2 }) => (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-        {paths.map((p, i) => typeof p === 'string' ? <path key={i} d={p} /> : p)}
-      </svg>
-    );
-
-    // Icon definitions
-    const Camera = ({ className }) => <MultiPathIcon className={className} paths={["M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z", <circle key="c" cx="12" cy="13" r="4" />]} />;
-    const Book = ({ className }) => <MultiPathIcon className={className} paths={["M4 19.5A2.5 2.5 0 0 1 6.5 17H20", "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"]} />;
-    const Music = ({ className }) => <MultiPathIcon className={className} paths={["M9 18V5l12-2v13", <circle key="c1" cx="6" cy="18" r="3" />, <circle key="c2" cx="18" cy="16" r="3" />]} />;
-    const Film = ({ className }) => <MultiPathIcon className={className} paths={[<rect key="r" x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />, "M7 2v20", "M17 2v20", "M2 12h20", "M2 7h5", "M2 17h5", "M17 17h5", "M17 7h5"]} />;
-    const Target = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c1" cx="12" cy="12" r="10" />, <circle key="c2" cx="12" cy="12" r="6" />, <circle key="c3" cx="12" cy="12" r="2" />]} />;
-    const CheckCircle2 = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="10" />, "M9 12l2 2 4-4"]} />;
-    const Check = ({ className }) => <Icon className={className} d="M20 6L9 17l-5-5" />;
-    const Circle = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="10" />]} />;
-    const Plus = ({ className }) => <MultiPathIcon className={className} paths={["M12 5v14", "M5 12h14"]} />;
-    const Minus = ({ className }) => <Icon className={className} d="M5 12h14" />;
-    const X = ({ className }) => <MultiPathIcon className={className} paths={["M18 6L6 18", "M6 6l12 12"]} />;
-    const ChevronLeft = ({ className }) => <Icon className={className} d="M15 18l-6-6 6-6" />;
-    const ChevronRight = ({ className }) => <Icon className={className} d="M9 18l6-6-6-6" />;
-    const ChevronUp = ({ className }) => <Icon className={className} d="M18 15l-6-6-6 6" />;
-    const ChevronDown = ({ className }) => <Icon className={className} d="M6 9l6 6 6-6" />;
-    const Trash2 = ({ className }) => <MultiPathIcon className={className} paths={["M3 6h18", "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", "M10 11v6", "M14 11v6"]} />;
-    const Settings = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="3" />, "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"]} />;
-    const Sun = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="5" />, "M12 1v2", "M12 21v2", "M4.22 4.22l1.42 1.42", "M18.36 18.36l1.42 1.42", "M1 12h2", "M21 12h2", "M4.22 19.78l1.42-1.42", "M18.36 5.64l1.42-1.42"]} />;
-    const Moon = ({ className }) => <Icon className={className} d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />;
-    const Star = ({ className }) => <Icon className={className} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />;
-    const Flame = ({ className }) => <Icon className={className} d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />;
-    const Zap = ({ className }) => <Icon className={className} d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />;
-    const Clock = ({ className }) => <MultiPathIcon className={className} paths={[<circle key="c" cx="12" cy="12" r="10" />, "M12 6v6l4 2"]} />;
-    const Heart = ({ className }) => <Icon className={className} d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />;
-    const Trophy = ({ className }) => <MultiPathIcon className={className} paths={["M6 9H4.5a2.5 2.5 0 0 1 0-5H6", "M18 9h1.5a2.5 2.5 0 0 0 0-5H18", "M4 22h16", "M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22", "M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22", "M18 2H6v7a6 6 0 0 0 12 0V2Z"]} />;
-    const Sliders = ({ className }) => <MultiPathIcon className={className} paths={["M4 21v-7", "M4 10V3", "M12 21v-9", "M12 8V3", "M20 21v-5", "M20 12V3", "M1 14h6", "M9 8h6", "M17 16h6"]} />;
-    const Hash = ({ className }) => <MultiPathIcon className={className} paths={["M4 9h16", "M4 15h16", "M10 3L8 21", "M16 3l-2 18"]} />;
+  <script type="text/babel" data-presets="react">
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { Camera, Book, Music, Film, Target, CheckCircle2, Check, Circle, Plus, Minus, X, ChevronLeft, ChevronRight, ChevronUp, Trash2, Settings, Sun, Moon, ChevronDown, Star, Flame, Zap, Clock, Heart, Trophy, Sliders, Hash } from 'lucide-react';
 
 // Format date to YYYY-MM-DD using LOCAL time (not UTC)
 // This prevents the bug where late-night entries get saved to the wrong day
@@ -102,7 +59,7 @@ const getProgressColor = (percentage) => {
 };
 
 // Progress bar component - MUST be outside main component for stable React reference
-const ProgressBar = memo(({ percentage, darkMode }) => {
+const ProgressBar = React.memo(({ percentage, darkMode }) => {
   const color = getProgressColor(percentage);
   const bgColor = darkMode ? '#334155' : '#e2e8f0';
   
@@ -121,7 +78,7 @@ const ProgressBar = memo(({ percentage, darkMode }) => {
 });
 
 // Mini progress bar for group headers
-const MiniProgressBar = memo(({ percentage, darkMode }) => {
+const MiniProgressBar = React.memo(({ percentage, darkMode }) => {
   const color = getProgressColor(percentage);
   const bgColor = darkMode ? '#334155' : '#e2e8f0';
   
@@ -141,7 +98,7 @@ const MiniProgressBar = memo(({ percentage, darkMode }) => {
 });
 
 // Mini sparkline for journal slider trends
-const MiniSparkline = memo(({ data, color = '#6366f1', height = 20, width = 40 }) => {
+const MiniSparkline = React.memo(({ data, color = '#6366f1', height = 20, width = 40 }) => {
   const validData = data.filter(d => d !== null);
   if (validData.length < 2) return null;
   
@@ -186,6 +143,7 @@ const GoalTrackerApp = () => {
     dailyPhotos: {},
     media: {},
     darkMode: false,
+    monthlyIntentions: {},
     categories: [
       { id: 'personal', name: 'Personal Growth', color: '#6366f1' },
       { id: 'health', name: 'Health & Fitness', color: '#10b981' },
@@ -197,6 +155,7 @@ const GoalTrackerApp = () => {
   });
 
   const [currentView, setCurrentView] = useState('daily');
+  const [calendarMode, setCalendarMode] = useState('week'); // 'week', 'month', 'year'
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCompletionModal, setShowCompletionModal] = useState(null);
@@ -209,7 +168,7 @@ const GoalTrackerApp = () => {
   const [animatingTasks, setAnimatingTasks] = useState({});
   const [showCategorySettings, setShowCategorySettings] = useState(false);
 
-  const { goals, dailyTasks, taskCompletions, journalEntries, journalConfig, dailyPhotos, media, darkMode, categories } = appState;
+  const { goals, dailyTasks, taskCompletions, journalEntries, journalConfig, dailyPhotos, media, darkMode, monthlyIntentions, categories } = appState;
 
   // ============================================
   // PERSISTENCE
@@ -311,6 +270,7 @@ const GoalTrackerApp = () => {
   const setDailyPhotos = useCallback((value) => updateState('dailyPhotos', value), [updateState]);
   const setMedia = useCallback((value) => updateState('media', value), [updateState]);
   const setDarkMode = useCallback((value) => updateState('darkMode', value), [updateState]);
+  const setMonthlyIntentions = useCallback((value) => updateState('monthlyIntentions', value), [updateState]);
   const setCategories = useCallback((value) => updateState('categories', value), [updateState]);
 
   // Use local time for date keys (not UTC) to prevent timezone bugs
@@ -474,6 +434,16 @@ const GoalTrackerApp = () => {
     return tasks[goalId] || false;
   }, [dailyTasks, getWeekKey]);
 
+  // Check if a scheduled task should appear on a given date
+  const isTaskScheduledForDate = useCallback((task, date) => {
+    if (!task.frequency || task.frequency === 'daily') return true;
+    if (task.frequency === 'scheduled') {
+      const dayOfWeek = (typeof date === 'string' ? new Date(date + 'T12:00:00') : date).getDay();
+      return (task.scheduledDays || []).includes(dayOfWeek);
+    }
+    return false; // weekly tasks handled separately
+  }, []);
+
   // ============================================
   // POINTS CALCULATION
   // ============================================
@@ -585,13 +555,17 @@ const GoalTrackerApp = () => {
   const goalProgressCache = useMemo(() => {
     const cache = {};
     const today = new Date();
-    const startOfYear = new Date(today.getFullYear(), 0, 1);
-    const daysPassed = Math.floor((today - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+    today.setHours(23, 59, 59, 999);
 
     goals.forEach(goal => {
+      // Use goal creation date, fallback to Jan 1st for legacy goals
+      const goalStart = goal.createdAt ? new Date(goal.createdAt) : new Date(today.getFullYear(), 0, 1);
+      goalStart.setHours(0, 0, 0, 0);
+      const daysPassed = Math.floor((today - goalStart) / (1000 * 60 * 60 * 24)) + 1;
+
       let completedDays = 0;
       for (let i = 0; i < daysPassed; i++) {
-        const date = new Date(startOfYear);
+        const date = new Date(goalStart);
         date.setDate(date.getDate() + i);
         const dateKey = toLocalDateKey(date);
         const tasks = dailyTasks[dateKey] || {};
@@ -647,7 +621,8 @@ const GoalTrackerApp = () => {
       
       // Handle checkbox goals
       goal.tasks.forEach(task => {
-        if (!task.frequency || task.frequency === 'daily') {
+        if ((!task.frequency || task.frequency === 'daily') || 
+            (task.frequency === 'scheduled' && isTaskScheduledForDate(task, selectedDate))) {
           const checksPerDay = task.dailyChecks || 1;
           totalTasks += checksPerDay;
           for (let i = 0; i < checksPerDay; i++) {
@@ -687,7 +662,8 @@ const GoalTrackerApp = () => {
       if (goal.goalType === 'points') return;
       if (!goal.tasks || !Array.isArray(goal.tasks)) return;
       goal.tasks.forEach(task => {
-        if (!task.frequency || task.frequency === 'daily') {
+        if ((!task.frequency || task.frequency === 'daily') ||
+            (task.frequency === 'scheduled' && isTaskScheduledForDate(task, dateKey))) {
           const checksPerDay = task.dailyChecks || 1;
           totalTasks += checksPerDay;
           for (let i = 0; i < checksPerDay; i++) {
@@ -701,7 +677,7 @@ const GoalTrackerApp = () => {
       total: totalTasks,
       percentage: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
     };
-  }, [goals, dailyTasks]);
+  }, [goals, dailyTasks, isTaskScheduledForDate]);
 
   const weeklyOverallProgress = useMemo(() => {
     const { weekStart, weekEnd } = getWeekRange(selectedDate);
@@ -733,6 +709,17 @@ const GoalTrackerApp = () => {
             totalExpected += checksPerDay;
             for (let i = 0; i < checksPerDay; i++) {
               if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) totalCompleted++;
+            }
+          }
+        } else if (task.frequency === 'scheduled') {
+          const checksPerDay = task.dailyChecks || 1;
+          for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+            if (isTaskScheduledForDate(task, d)) {
+              const dateKey = toLocalDateKey(d);
+              totalExpected += checksPerDay;
+              for (let i = 0; i < checksPerDay; i++) {
+                if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) totalCompleted++;
+              }
             }
           }
         } else if (task.frequency === 'weekly') {
@@ -1640,8 +1627,39 @@ const GoalTrackerApp = () => {
                           >
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
+                            <option value="scheduled">Scheduled</option>
                           </select>
                         </div>
+                        {task.frequency === 'scheduled' ? (
+                          <div className="col-span-1">
+                            <label className={`block text-[10px] ${theme.textMuted} uppercase tracking-wider mb-1`}>Days</label>
+                            <div className="flex gap-1">
+                              {['S','M','T','W','T','F','S'].map((dayLabel, dayIndex) => {
+                                const isSelected = (task.scheduledDays || []).includes(dayIndex);
+                                return (
+                                  <button
+                                    key={dayIndex}
+                                    type="button"
+                                    onClick={() => {
+                                      const current = task.scheduledDays || [];
+                                      const updated = isSelected 
+                                        ? current.filter(d => d !== dayIndex)
+                                        : [...current, dayIndex].sort();
+                                      updateTask(index, 'scheduledDays', updated);
+                                    }}
+                                    className={`w-7 h-7 rounded-full text-[10px] font-medium transition-all ${
+                                      isSelected 
+                                        ? (darkMode ? 'bg-slate-200 text-slate-900' : 'bg-slate-700 text-white')
+                                        : (darkMode ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-400')
+                                    }`}
+                                  >
+                                    {dayLabel}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : (
                         <div>
                           <label className={`block text-[10px] ${theme.textMuted} uppercase tracking-wider mb-1`}>
                             {task.frequency === 'weekly' ? 'Target/week' : 'Times/day'}
@@ -1667,6 +1685,7 @@ const GoalTrackerApp = () => {
                             className={`w-full rounded-lg px-2 py-1.5 text-xs ${theme.cardBg} ${theme.textPrimary} border ${darkMode ? 'border-slate-600' : 'border-slate-200'}`}
                           />
                         </div>
+                        )}
                       </div>
                     )}
 
@@ -1726,78 +1745,940 @@ const GoalTrackerApp = () => {
   };
 
   // ============================================
-  // CALENDAR VIEW
+  // CALENDAR VIEW (Week / Month / Year)
   // ============================================
+  const getHeatColor = useCallback((pct) => {
+    if (pct === 0) return darkMode ? '#1e293b' : '#f1f5f9';
+    if (pct < 50) return '#fb923c';
+    if (pct < 75) return '#facc15';
+    const t = (pct - 75) / 25;
+    const r = Math.round(134 - (134 - 34) * t);
+    const g = Math.round(239 - (239 - 197) * t);
+    const b = Math.round(172 - (172 - 94) * t);
+    return `rgb(${r}, ${g}, ${b})`;
+  }, [darkMode]);
+
+  const getHeatTextColor = useCallback((pct, isFuture) => {
+    if (isFuture) return darkMode ? '#475569' : '#cbd5e1';
+    if (pct >= 75) return '#166534';
+    if (pct >= 50) return '#854d0e';
+    if (pct > 0) return '#9a3412';
+    return darkMode ? '#94a3b8' : '#64748b';
+  }, [darkMode]);
+
+  const getHeatSubColor = useCallback((pct) => {
+    if (pct >= 75) return '#15803d';
+    return darkMode ? '#64748b' : '#94a3b8';
+  }, [darkMode]);
+
   const CalendarView = () => {
-    const year = calendarDate.getFullYear();
-    const month = calendarDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-    const days = [];
-    for (let i = 0; i < startingDayOfWeek; i++) days.push(null);
-    for (let day = 1; day <= daysInMonth; day++) days.push(day);
-    const changeMonth = (offset) => { const newDate = new Date(calendarDate); newDate.setMonth(newDate.getMonth() + offset); setCalendarDate(newDate); };
-    const goToDay = (day) => { setSelectedDate(new Date(year, month, day)); setCurrentView('daily'); };
+    const goToDay = (date) => { setSelectedDate(date); setCurrentView('daily'); };
+    const todayKey = toLocalDateKey(new Date());
+
+    // ---- Date navigation helpers ----
+    const changeWeek = (offset) => {
+      const newDate = new Date(calendarDate);
+      newDate.setDate(newDate.getDate() + offset * 7);
+      setCalendarDate(newDate);
+    };
+    const changeMonth = (offset) => {
+      const newDate = new Date(calendarDate);
+      newDate.setMonth(newDate.getMonth() + offset);
+      setCalendarDate(newDate);
+    };
+    const changeYear = (offset) => {
+      const newDate = new Date(calendarDate);
+      newDate.setFullYear(newDate.getFullYear() + offset);
+      setCalendarDate(newDate);
+    };
+
+    // ---- Week data ----
+    const getWeekDays = () => {
+      const { weekStart } = getWeekRange(calendarDate);
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart);
+        d.setDate(weekStart.getDate() + i);
+        const dateKey = toLocalDateKey(d);
+        const progress = calculateDailyProgress(dateKey);
+        const isFuture = dateKey > todayKey;
+        const isToday = dateKey === todayKey;
+        const hasJournal = journalConfig.prompts.some(p => { const v = journalEntries[`${dateKey}-${p.id}`]; return v && (typeof v === 'string' ? v.trim().length > 0 : true); });
+        const hasPhoto = !!dailyPhotos[dateKey];
+        // Scheduled tasks for this day
+        const scheduledTasks = [];
+        goals.forEach(g => {
+          if (!g.tasks) return;
+          g.tasks.forEach(t => {
+            if (t.frequency === 'scheduled' && isTaskScheduledForDate(t, d)) {
+              scheduledTasks.push(t.action);
+            }
+          });
+        });
+        days.push({ date: d, dateKey, label: d.toLocaleDateString('en-US', { weekday: 'short' }), dayNum: d.getDate(), progress, isFuture, isToday, hasJournal, hasPhoto, scheduledTasks });
+      }
+      return days;
+    };
+
+    const weekDays = calendarMode === 'week' ? getWeekDays() : [];
+
+    // ---- Week header label ----
+    const getWeekLabel = () => {
+      if (weekDays.length === 0) return '';
+      const s = weekDays[0].date;
+      const e = weekDays[6].date;
+      if (s.getMonth() === e.getMonth()) {
+        return `${s.toLocaleDateString('en-US', { month: 'long' })} ${s.getDate()} – ${e.getDate()}`;
+      }
+      return `${s.toLocaleDateString('en-US', { month: 'long' })} ${s.getDate()} – ${e.toLocaleDateString('en-US', { month: 'long' })} ${e.getDate()}`;
+    };
+
+    // Check if showing current week/month/year
+    const isCurrentWeek = () => {
+      const today = new Date();
+      const { weekStart: currentWeekStart } = getWeekRange(today);
+      const { weekStart: viewingWeekStart } = getWeekRange(calendarDate);
+      return toLocalDateKey(currentWeekStart) === toLocalDateKey(viewingWeekStart);
+    };
+
+    // ---- Navigation label ----
+    const navLabel = calendarMode === 'week' ? getWeekLabel()
+      : calendarMode === 'month' ? calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      : `${calendarDate.getFullYear()}`;
+    
+    const isThisWeek = calendarMode === 'week' && isCurrentWeek();
+    const navSub = calendarMode === 'week' 
+      ? (isThisWeek ? 'This week' : calendarDate.getFullYear().toString())
+      : calendarMode === 'month' ? '' : '';
+
+    const navPrev = () => { calendarMode === 'week' ? changeWeek(-1) : calendarMode === 'month' ? changeMonth(-1) : changeYear(-1); };
+    const navNext = () => { calendarMode === 'week' ? changeWeek(1) : calendarMode === 'month' ? changeMonth(1) : changeYear(1); };
+
+    // ==== WEEKLY VIEW ====
+    const WeeklyCalendar = () => {
+      const weekTotal = weekDays.reduce((s, d) => s + d.progress.total, 0);
+      const weekDone = weekDays.reduce((s, d) => s + d.progress.completed, 0);
+      const weekPct = weekTotal > 0 ? Math.round(weekDone / weekTotal * 100) : 0;
+      const journalDays = weekDays.filter(d => d.hasJournal).length;
+      const photoDays = weekDays.filter(d => d.hasPhoto).length;
+      const scheduledDays = weekDays.filter(d => d.scheduledTasks.length > 0);
+
+      // Journal slider prompts
+      const sliderPrompts = journalConfig.prompts.filter(p => p.type === 'slider');
+
+      // Category progress for this week
+      const categoryProgress = (categories || []).map(cat => {
+        const catGoals = goals.filter(g => g.category === cat.id && g.goalType !== 'points');
+        if (catGoals.length === 0) return null;
+        let totalAll = 0, totalDone = 0;
+        const dailyBars = weekDays.map(day => {
+          let dayTotal = 0, dayDone = 0;
+          catGoals.forEach(goal => {
+            if (!goal.tasks) return;
+            goal.tasks.forEach(task => {
+              if ((!task.frequency || task.frequency === 'daily') || (task.frequency === 'scheduled' && isTaskScheduledForDate(task, day.date))) {
+                const checks = task.dailyChecks || 1;
+                dayTotal += checks;
+                for (let c = 0; c < checks; c++) {
+                  if (dailyTasks[day.dateKey]?.[`${goal.id}-${task.id}-${c}`]) dayDone++;
+                }
+              }
+            });
+          });
+          totalAll += dayTotal;
+          totalDone += dayDone;
+          return dayTotal > 0 ? dayDone / dayTotal : 0;
+        });
+        const pct = totalAll > 0 ? Math.round(totalDone / totalAll * 100) : 0;
+        return { ...cat, pct, dailyBars };
+      }).filter(Boolean);
+
+      return (
+        <>
+          {/* Heat map calendar card */}
+          <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+            <div className="p-3 pb-2.5">
+              <div className="grid grid-cols-7 gap-1.5">
+                {weekDays.map((day, i) => {
+                  const pct = day.progress.percentage;
+                  const bgColor = day.isFuture ? (darkMode ? '#0f172a' : '#f8fafc') : getHeatColor(pct);
+                  const textColor = getHeatTextColor(pct, day.isFuture);
+                  const subColor = getHeatSubColor(pct);
+                  return (
+                    <div key={i} onClick={() => goToDay(day.date)} className="text-center cursor-pointer">
+                      <div style={{ fontSize: 10, fontWeight: 600, marginBottom: 3, color: day.isToday ? '#6366f1' : (darkMode ? '#64748b' : '#94a3b8') }}>
+                        {day.label}
+                      </div>
+                      <div style={{
+                        borderRadius: 10, background: bgColor, padding: '10px 2px 8px',
+                        border: day.isToday ? '2px solid #6366f1' : '2px solid transparent',
+                        transition: 'all 0.3s'
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, lineHeight: 1, color: textColor }}>
+                          {day.dayNum}
+                        </div>
+                        {!day.isFuture && day.progress.total > 0 && (
+                          <div style={{ fontSize: 9, color: subColor, fontWeight: 600, marginTop: 3 }}>
+                            {day.progress.completed}/{day.progress.total}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Summary strip */}
+            <div className={`px-3.5 py-2.5 border-t ${theme.divider} flex justify-around`}>
+              {[
+                { value: `${weekPct}%`, label: 'complete' },
+                { value: `${journalDays}/7`, label: 'journaled' },
+                { value: `${photoDays}/7`, label: 'photos' },
+              ].map((s, i) => (
+                <div key={i} className="text-center">
+                  <div className={`text-base font-bold ${theme.textPrimary}`}>{s.value}</div>
+                  <div className={`text-[9px] ${theme.textMuted}`}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Scheduled tasks */}
+          {scheduledDays.length > 0 && (
+            <div>
+              <p className={`text-[11px] font-semibold uppercase tracking-wider mb-2 ml-1 ${theme.textMuted}`}>Scheduled</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                {scheduledDays.map((day, i) => (
+                  <div key={i} className={`flex items-center gap-2.5 px-3.5 py-2.5 ${i < scheduledDays.length - 1 ? `border-b ${theme.divider}` : ''}`}
+                    style={{ opacity: day.isFuture ? 0.6 : 1 }}>
+                    <div className={`w-8 h-8 rounded-lg flex flex-col items-center justify-center flex-shrink-0 ${day.isToday ? 'bg-indigo-50' : theme.inputBg}`}
+                      style={day.isToday ? { background: darkMode ? '#312e81' : '#eef2ff' } : {}}>
+                      <div style={{ fontSize: 8, fontWeight: 600, color: day.isToday ? '#6366f1' : (darkMode ? '#64748b' : '#94a3b8'), lineHeight: 1 }}>{day.label}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: day.isToday ? '#6366f1' : (darkMode ? '#cbd5e1' : '#475569'), lineHeight: 1.2 }}>{day.dayNum}</div>
+                    </div>
+                    <div className="flex-1 flex flex-wrap gap-1">
+                      {day.scheduledTasks.map((s, j) => (
+                        <span key={j} className={`text-xs px-2.5 py-0.5 rounded-lg font-medium ${theme.inputBg} ${theme.textSecondary}`}>{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Journal slider trends (bar charts) */}
+          {sliderPrompts.length > 0 && (
+            <div>
+              <p className={`text-[11px] font-semibold uppercase tracking-wider mb-2 ml-1 ${theme.textMuted}`}>Journal Trends</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm p-3.5`}>
+                {sliderPrompts.map((slider, sliderIdx) => {
+                  const values = weekDays.map(d => {
+                    const v = journalEntries[`${d.dateKey}-${slider.id}`];
+                    return v !== undefined && v !== '' ? Number(v) : null;
+                  });
+                  const validValues = values.filter(v => v !== null);
+                  const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : null;
+                  const maxVal = slider.max || 10;
+
+                  return (
+                    <div key={slider.id} className={sliderIdx < sliderPrompts.length - 1 ? 'mb-4' : ''}>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className={`text-xs font-semibold ${theme.textSecondary}`}>{slider.label}</span>
+                        {avg && <span className={`text-xs font-bold ${theme.textPrimary}`}>avg {avg}</span>}
+                      </div>
+                      <div className="flex items-end gap-1.5" style={{ height: 44 }}>
+                        {weekDays.map((day, i) => {
+                          const val = values[i];
+                          const h = val !== null ? (val / maxVal) * 40 : 0;
+                          const pctOfMax = val !== null ? val / maxVal : 0;
+                          const barColor = pctOfMax >= 0.7 ? '#86efac' : pctOfMax >= 0.5 ? '#fde68a' : pctOfMax > 0 ? '#fdba74' : (darkMode ? '#1e293b' : '#f1f5f9');
+                          return (
+                            <div key={i} className="flex-1 flex flex-col items-center">
+                              {val !== null && <div className={`text-[9px] font-semibold mb-0.5 ${theme.textMuted}`}>{val}</div>}
+                              <div style={{
+                                width: '100%', height: Math.max(h, 3), borderRadius: 4,
+                                background: barColor, transition: 'height 0.5s'
+                              }} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex gap-1.5 mt-1">
+                        {weekDays.map((d, i) => (
+                          <div key={i} className={`flex-1 text-center text-[9px] font-medium ${theme.textMuted}`}>{d.label.charAt(0)}</div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Categories with rhythm bars */}
+          {categoryProgress.length > 0 && (
+            <div>
+              <p className={`text-[11px] font-semibold uppercase tracking-wider mb-2 ml-1 ${theme.textMuted}`}>Categories</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm py-1`}>
+                {categoryProgress.map((cat) => (
+                  <div key={cat.id} className="flex items-center gap-2 px-3.5 py-2">
+                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                    <span className={`text-xs font-medium flex-1 truncate ${theme.textSecondary}`}>{cat.name}</span>
+                    <div className="flex gap-0.5 flex-shrink-0">
+                      {cat.dailyBars.map((pct, i) => (
+                        <div key={i} style={{
+                          width: 8, height: 18, borderRadius: 3,
+                          background: pct === 0 ? (darkMode ? '#1e293b' : '#f1f5f9') : cat.color,
+                          opacity: pct === 0 ? 1 : 0.3 + pct * 0.7
+                        }} />
+                      ))}
+                    </div>
+                    <span className={`text-[11px] font-bold w-8 text-right flex-shrink-0 ${theme.textPrimary}`}>{cat.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      );
+    };
+
+    // ==== MONTHLY VIEW ====
+    const MonthlyCalendar = () => {
+      const year = calendarDate.getFullYear();
+      const month = calendarDate.getMonth();
+      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDayOfWeek = firstDay.getDay();
+      
+      // Previous month for comparison
+      const prevMonthDate = new Date(year, month - 1, 1);
+      const prevMonthKey = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}`;
+      const prevMonthName = prevMonthDate.toLocaleDateString('en-US', { month: 'long' });
+      
+      // Local state for intention editing
+      const [isEditingIntention, setIsEditingIntention] = useState(false);
+      const [intentionDraft, setIntentionDraft] = useState(monthlyIntentions[monthKey] || '');
+      
+      // Build calendar cells
+      const cells = [];
+      for (let i = 0; i < startingDayOfWeek; i++) cells.push(null);
+      for (let day = 1; day <= daysInMonth; day++) cells.push(day);
+      
+      // Calculate days passed (for current month, it's today; for past months, it's all days)
+      const today = new Date();
+      const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+      const daysPassed = isCurrentMonth ? today.getDate() : daysInMonth;
+      
+      // Build day data with stats
+      const dayData = [];
+      let totalCompleted = 0, totalExpected = 0, daysWithActivity = 0, daysJournaled = 0;
+      let bestDay = { day: 1, pct: 0 }, perfectDays = 0, currentStreak = 0, longestStreak = 0, tempStreak = 0;
+      const distribution = { high: 0, medium: 0, low: 0, zero: 0 };
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dateKey = toLocalDateKey(date);
+        const isFuture = dateKey > todayKey;
+        const progress = calculateDailyProgress(dateKey);
+        const hasJournal = journalConfig.prompts.some(p => { 
+          const v = journalEntries[`${dateKey}-${p.id}`]; 
+          return v && (typeof v === 'string' ? v.trim().length > 0 : true); 
+        });
+        
+        dayData.push({ day, dateKey, progress, isFuture, isToday: dateKey === todayKey, hasJournal });
+        
+        if (!isFuture) {
+          totalCompleted += progress.completed;
+          totalExpected += progress.total;
+          if (progress.completed > 0) daysWithActivity++;
+          if (hasJournal) daysJournaled++;
+          
+          const pct = progress.percentage;
+          if (pct > bestDay.pct) bestDay = { day, pct };
+          if (pct === 100) perfectDays++;
+          
+          // Distribution
+          if (pct >= 80) distribution.high++;
+          else if (pct >= 50) distribution.medium++;
+          else if (pct > 0) distribution.low++;
+          else distribution.zero++;
+          
+          // Streak calculation
+          if (pct > 0) {
+            tempStreak++;
+            if (tempStreak > longestStreak) longestStreak = tempStreak;
+          } else {
+            tempStreak = 0;
+          }
+        }
+      }
+      
+      // Current streak (counting back from today/end of month)
+      for (let day = daysPassed; day >= 1; day--) {
+        const dateKey = toLocalDateKey(new Date(year, month, day));
+        const progress = calculateDailyProgress(dateKey);
+        if (progress.percentage > 0) currentStreak++;
+        else break;
+      }
+      
+      const overallPct = totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0;
+      const consistencyScore = daysPassed > 0 ? Math.round((daysWithActivity / daysPassed) * 100) : 0;
+      
+      // Previous month stats for comparison
+      const prevMonthLastDay = new Date(prevMonthDate.getFullYear(), prevMonthDate.getMonth() + 1, 0).getDate();
+      let prevCompleted = 0, prevExpected = 0, prevDaysWithActivity = 0;
+      for (let day = 1; day <= prevMonthLastDay; day++) {
+        const dateKey = toLocalDateKey(new Date(prevMonthDate.getFullYear(), prevMonthDate.getMonth(), day));
+        const progress = calculateDailyProgress(dateKey);
+        prevCompleted += progress.completed;
+        prevExpected += progress.total;
+        if (progress.completed > 0) prevDaysWithActivity++;
+      }
+      const prevOverallPct = prevExpected > 0 ? Math.round((prevCompleted / prevExpected) * 100) : 0;
+      const prevConsistency = prevMonthLastDay > 0 ? Math.round((prevDaysWithActivity / prevMonthLastDay) * 100) : 0;
+      const pctChange = overallPct - prevOverallPct;
+      const consistencyChange = consistencyScore - prevConsistency;
+      
+      // Build weeks data
+      const weeksData = [];
+      let weekStart = new Date(year, month, 1);
+      // Adjust to Sunday start
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      
+      while (weekStart.getMonth() <= month || (weekStart.getMonth() === 0 && month === 11)) {
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        
+        // Only include weeks that have days in this month
+        if (weekEnd.getMonth() < month && weekEnd.getFullYear() === year) {
+          weekStart.setDate(weekStart.getDate() + 7);
+          continue;
+        }
+        if (weekStart.getMonth() > month && weekStart.getFullYear() === year) break;
+        if (weekStart.getFullYear() > year) break;
+        
+        let weekCompleted = 0, weekExpected = 0;
+        const weekIsFuture = toLocalDateKey(weekStart) > todayKey;
+        
+        for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+          if (d.getMonth() !== month) continue;
+          const dateKey = toLocalDateKey(d);
+          if (dateKey > todayKey) continue;
+          const progress = calculateDailyProgress(dateKey);
+          weekCompleted += progress.completed;
+          weekExpected += progress.total;
+        }
+        
+        const weekPct = weekExpected > 0 ? Math.round((weekCompleted / weekExpected) * 100) : 0;
+        const startLabel = `${weekStart.toLocaleDateString('en-US', { month: 'short' })} ${weekStart.getDate()}`;
+        const endLabel = `${weekEnd.toLocaleDateString('en-US', { month: 'short' })} ${weekEnd.getDate()}`;
+        
+        weeksData.push({ startLabel, endLabel, percentage: weekPct, completed: weekCompleted, total: weekExpected, isFuture: weekIsFuture });
+        weekStart.setDate(weekStart.getDate() + 7);
+        
+        if (weeksData.length > 6) break; // Safety limit
+      }
+      
+      const bestWeekPct = Math.max(...weeksData.filter(w => !w.isFuture).map(w => w.percentage), 0);
+      
+      // Journal slider trends (weekly averages)
+      const sliderPrompts = journalConfig.prompts.filter(p => p.type === 'slider');
+      const journalTrends = sliderPrompts.map(prompt => {
+        const weeklyAvgs = weeksData.map((week, wi) => {
+          if (week.isFuture) return null;
+          let sum = 0, count = 0;
+          const ws = new Date(year, month, 1);
+          ws.setDate(ws.getDate() - ws.getDay() + wi * 7);
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(ws);
+            d.setDate(ws.getDate() + i);
+            if (d.getMonth() !== month) continue;
+            const dateKey = toLocalDateKey(d);
+            if (dateKey > todayKey) continue;
+            const val = journalEntries[`${dateKey}-${prompt.id}`];
+            if (val !== undefined && val !== null && val !== '') {
+              sum += Number(val);
+              count++;
+            }
+          }
+          return count > 0 ? Math.round((sum / count) * 10) / 10 : null;
+        });
+        return { label: prompt.label, weeklyAvgs, max: prompt.max || 10 };
+      });
+      
+      // Category progress (weekly)
+      const categoryProgress = categories.map(cat => {
+        const catGoals = goals.filter(g => g.category === cat.id);
+        if (catGoals.length === 0) return null;
+        
+        const weeklyPcts = weeksData.map((week, wi) => {
+          if (week.isFuture) return 0;
+          let completed = 0, expected = 0;
+          const ws = new Date(year, month, 1);
+          ws.setDate(ws.getDate() - ws.getDay() + wi * 7);
+          
+          catGoals.forEach(goal => {
+            if (!goal.tasks) return;
+            goal.tasks.forEach(task => {
+              for (let i = 0; i < 7; i++) {
+                const d = new Date(ws);
+                d.setDate(ws.getDate() + i);
+                if (d.getMonth() !== month) continue;
+                const dateKey = toLocalDateKey(d);
+                if (dateKey > todayKey) continue;
+                
+                if (!task.frequency || task.frequency === 'daily') {
+                  const checks = task.dailyChecks || 1;
+                  expected += checks;
+                  for (let c = 0; c < checks; c++) {
+                    if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) completed++;
+                  }
+                } else if (task.frequency === 'scheduled' && isTaskScheduledForDate(task, d)) {
+                  expected++;
+                  if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-0`]) completed++;
+                }
+              }
+            });
+          });
+          
+          return expected > 0 ? Math.round((completed / expected) * 100) : 0;
+        });
+        
+        const avgPct = weeklyPcts.filter(p => p > 0).length > 0
+          ? Math.round(weeklyPcts.filter(p => p > 0).reduce((a, b) => a + b, 0) / weeklyPcts.filter(p => p > 0).length)
+          : 0;
+        
+        return { ...cat, weeklyPcts, avgPct };
+      }).filter(Boolean);
+      
+      // Find worst performing goal (needs attention)
+      const goalPerformance = goals.map(goal => {
+        if (!goal.tasks || goal.tasks.length === 0) return null;
+        let completed = 0, expected = 0;
+        
+        for (let day = 1; day <= daysPassed; day++) {
+          const dateKey = toLocalDateKey(new Date(year, month, day));
+          goal.tasks.forEach(task => {
+            if (!task.frequency || task.frequency === 'daily') {
+              const checks = task.dailyChecks || 1;
+              expected += checks;
+              for (let c = 0; c < checks; c++) {
+                if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) completed++;
+              }
+            } else if (task.frequency === 'scheduled') {
+              const d = new Date(year, month, day);
+              if (isTaskScheduledForDate(task, d)) {
+                expected++;
+                if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-0`]) completed++;
+              }
+            }
+          });
+        }
+        
+        const pct = expected > 0 ? Math.round((completed / expected) * 100) : 100;
+        const cat = categories.find(c => c.id === goal.category);
+        return { ...goal, pct, categoryName: cat?.name || 'Uncategorized', categoryColor: cat?.color || '#64748b' };
+      }).filter(Boolean);
+      
+      const worstGoal = goalPerformance.length > 0 
+        ? goalPerformance.reduce((min, g) => g.pct < min.pct ? g : min, goalPerformance[0])
+        : null;
+      
+      // Save intention
+      const saveIntention = () => {
+        setMonthlyIntentions(prev => ({ ...prev, [monthKey]: intentionDraft }));
+        setIsEditingIntention(false);
+      };
+
+      return (
+        <div className="space-y-3">
+          {/* Monthly Intention */}
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-3.5`}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">🎯</span>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.textMuted}`}>Monthly Intention</span>
+              </div>
+              <button 
+                onClick={() => {
+                  if (isEditingIntention) saveIntention();
+                  else {
+                    setIntentionDraft(monthlyIntentions[monthKey] || '');
+                    setIsEditingIntention(true);
+                  }
+                }}
+                className="text-[10px] font-semibold text-indigo-500"
+              >
+                {isEditingIntention ? 'Save' : 'Edit'}
+              </button>
+            </div>
+            {isEditingIntention ? (
+              <textarea
+                value={intentionDraft}
+                onChange={(e) => setIntentionDraft(e.target.value)}
+                placeholder="What's your focus this month?"
+                className={`w-full rounded-lg px-3 py-2 text-sm resize-none ${theme.inputBg} ${theme.textPrimary}`}
+                rows={2}
+                autoFocus
+              />
+            ) : (
+              <p className={`text-[13px] leading-relaxed ${monthlyIntentions[monthKey] ? theme.textSecondary : theme.textMuted}`}>
+                {monthlyIntentions[monthKey] || <span className="italic">Tap edit to set your monthly intention...</span>}
+              </p>
+            )}
+          </div>
+
+          {/* Calendar + Summary */}
+          <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+            {/* Calendar Grid */}
+            <div className="p-3">
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                  <div key={i} className={`text-center text-[10px] font-semibold py-1 ${theme.textMuted}`}>{d}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {cells.map((day, index) => {
+                  if (!day) return <div key={`empty-${index}`} className="aspect-square" />;
+                  const dd = dayData[day - 1];
+                  const pct = dd.progress.percentage;
+                  const bgColor = dd.isFuture ? (darkMode ? '#0f172a' : '#f8fafc') : getHeatColor(pct);
+                  const textColor = getHeatTextColor(pct, dd.isFuture);
+                  return (
+                    <button key={day} onClick={() => goToDay(new Date(year, month, day))}
+                      className="aspect-square flex items-center justify-center transition-all"
+                      style={{ borderRadius: 8, background: bgColor, border: dd.isToday ? '2px solid #6366f1' : '2px solid transparent' }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: textColor }}>{day}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Summary Strip */}
+            <div className={`px-3.5 py-2.5 border-t ${theme.divider}`}>
+              <div className={`text-[11px] font-bold uppercase tracking-wider text-center mb-2.5 ${theme.textSecondary}`}>
+                vs {prevMonthName}
+              </div>
+              <div className="flex justify-around">
+                {[
+                  { value: `${overallPct}%`, label: 'complete', change: pctChange },
+                  { value: `${consistencyScore}%`, label: 'consistency', change: consistencyChange },
+                  { value: `${daysJournaled}/${daysPassed}`, label: 'journaled' },
+                  { value: `${currentStreak}d`, label: 'streak' },
+                ].map((s, i) => (
+                  <div key={i} className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <span className={`text-[15px] font-bold ${theme.textPrimary}`}>{s.value}</span>
+                      {s.change !== undefined && (
+                        <span className={`text-[9px] font-bold px-1 py-0.5 rounded ${
+                          s.change >= 0 ? 'text-emerald-600 bg-emerald-100' : 'text-red-600 bg-red-100'
+                        } ${darkMode && (s.change >= 0 ? 'bg-emerald-900/50 text-emerald-400' : 'bg-red-900/50 text-red-400')}`}>
+                          {s.change >= 0 ? '+' : ''}{s.change}%
+                        </span>
+                      )}
+                    </div>
+                    <div className={`text-[9px] ${theme.textMuted}`}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Day Distribution */}
+          <div>
+            <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Day Distribution</p>
+            <div className={`${theme.cardBg} rounded-xl shadow-sm p-3.5`}>
+              <div className="flex items-end gap-2 h-20 mb-2">
+                {[
+                  { label: '80-100%', count: distribution.high, color: '#22c55e' },
+                  { label: '50-79%', count: distribution.medium, color: '#facc15' },
+                  { label: '1-49%', count: distribution.low, color: '#fb923c' },
+                  { label: '0%', count: distribution.zero, color: darkMode ? '#334155' : '#e2e8f0' },
+                ].map((bucket, i) => {
+                  const maxCount = Math.max(distribution.high, distribution.medium, distribution.low, distribution.zero, 1);
+                  const height = (bucket.count / maxCount) * 60;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center">
+                      <span className={`text-[11px] font-bold mb-1 ${theme.textPrimary}`}>{bucket.count}</span>
+                      <div className="w-full rounded-md" style={{ height: Math.max(height, 4), background: bucket.color }} />
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex gap-2">
+                {['80-100%', '50-79%', '1-49%', '0%'].map((label, i) => (
+                  <div key={i} className={`flex-1 text-center text-[9px] font-medium ${theme.textMuted}`}>{label}</div>
+                ))}
+              </div>
+              <div className={`text-center mt-2.5 text-[10px] ${theme.textSecondary}`}>
+                <span className="font-semibold">{distribution.high}</span> great days, <span className="font-semibold">{distribution.medium}</span> good days
+              </div>
+            </div>
+          </div>
+
+          {/* Weeks */}
+          <div>
+            <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Weeks</p>
+            <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+              {weeksData.map((week, i) => {
+                const barColor = week.isFuture ? (darkMode ? '#334155' : '#e2e8f0') : getHeatColor(week.percentage);
+                const isBest = !week.isFuture && week.percentage === bestWeekPct && week.percentage > 0;
+                return (
+                  <div key={i} className={`px-3.5 py-3 ${i < weeksData.length - 1 ? `border-b ${theme.divider}` : ''} ${week.isFuture ? 'opacity-50' : ''}`}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[13px] font-semibold ${theme.textPrimary}`}>{week.startLabel} – {week.endLabel}</span>
+                        {isBest && <span className="text-[9px] font-semibold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">BEST</span>}
+                      </div>
+                      <span className={`text-[13px] font-bold ${week.isFuture ? theme.textMuted : theme.textPrimary}`}>{week.percentage}%</span>
+                    </div>
+                    <div className={`h-1.5 rounded-full ${theme.progressBg}`}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${week.percentage}%`, background: barColor }} />
+                    </div>
+                    {!week.isFuture && week.total > 0 && (
+                      <p className={`text-[10px] mt-1 ${theme.textMuted}`}>{week.completed} of {week.total} tasks</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Highlights */}
+          <div>
+            <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Highlights</p>
+            <div className={`${theme.cardBg} rounded-xl shadow-sm p-3.5`}>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { icon: '🏆', value: bestDay.pct > 0 ? `${calendarDate.toLocaleDateString('en-US', { month: 'short' })} ${bestDay.day}` : '-', label: `Best day (${bestDay.pct}%)` },
+                  { icon: '✨', value: perfectDays, label: 'Perfect days' },
+                  { icon: '🔥', value: `${longestStreak}d`, label: 'Longest streak' },
+                  { icon: '✓', value: totalCompleted, label: 'Tasks done' },
+                ].map((h, i) => (
+                  <div key={i} className={`flex items-center gap-2.5 p-2.5 rounded-lg ${theme.inputBg}`}>
+                    <span className="text-base">{h.icon}</span>
+                    <div>
+                      <div className={`text-sm font-bold ${theme.textPrimary}`}>{h.value}</div>
+                      <div className={`text-[9px] ${theme.textMuted}`}>{h.label}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Journal Trends */}
+          {journalTrends.length > 0 && (
+            <div>
+              <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Journal Trends</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm p-3.5`}>
+                {journalTrends.map((trend, ti) => {
+                  const validAvgs = trend.weeklyAvgs.filter(v => v !== null);
+                  const overallAvg = validAvgs.length > 0 ? (validAvgs.reduce((a, b) => a + b, 0) / validAvgs.length).toFixed(1) : null;
+                  return (
+                    <div key={ti} className={ti < journalTrends.length - 1 ? 'mb-4' : ''}>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className={`text-xs font-semibold ${theme.textSecondary}`}>{trend.label}</span>
+                        {overallAvg && <span className={`text-[11px] font-bold ${theme.textPrimary}`}>avg {overallAvg}</span>}
+                      </div>
+                      <div className="flex items-end gap-2 h-12">
+                        {trend.weeklyAvgs.map((avg, i) => {
+                          const h = avg !== null ? (avg / trend.max) * 44 : 0;
+                          const pctOfMax = avg !== null ? avg / trend.max : 0;
+                          const barColor = pctOfMax >= 0.7 ? '#86efac' : pctOfMax >= 0.5 ? '#fde68a' : pctOfMax > 0 ? '#fdba74' : (darkMode ? '#1e293b' : '#f1f5f9');
+                          return (
+                            <div key={i} className="flex-1 flex flex-col items-center">
+                              {avg !== null && <span className={`text-[9px] font-semibold mb-0.5 ${theme.textMuted}`}>{avg}</span>}
+                              <div className="w-full rounded" style={{ height: Math.max(h, 4), background: barColor }} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex gap-2 mt-1">
+                        {weeksData.map((_, i) => (
+                          <div key={i} className={`flex-1 text-center text-[9px] font-medium ${theme.textMuted}`}>Wk {i + 1}</div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Categories */}
+          {categoryProgress.length > 0 && (
+            <div>
+              <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Categories</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm py-1.5`}>
+                {categoryProgress.map((cat) => (
+                  <div key={cat.id} className="flex items-center gap-2.5 px-3.5 py-2.5">
+                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: cat.color }} />
+                    <span className={`text-xs font-medium flex-1 ${theme.textSecondary}`}>{cat.name}</span>
+                    <div className="flex gap-1 flex-shrink-0">
+                      {cat.weeklyPcts.map((pct, i) => (
+                        <div key={i} className="w-3.5 h-6 rounded" style={{
+                          background: pct === 0 ? (darkMode ? '#0f172a' : '#f1f5f9') : cat.color,
+                          opacity: pct === 0 ? 1 : 0.3 + (pct / 100) * 0.7
+                        }} />
+                      ))}
+                    </div>
+                    <span className={`text-[11px] font-bold w-8 text-right ${theme.textPrimary}`}>{cat.avgPct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Goal Needing Attention */}
+          {worstGoal && worstGoal.pct < 60 && (
+            <div className="rounded-xl p-3.5" style={{ 
+              background: `linear-gradient(135deg, ${worstGoal.categoryColor}15, ${worstGoal.categoryColor}05)`,
+              border: `1px solid ${worstGoal.categoryColor}30`
+            }}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm">⚠️</span>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.textMuted}`}>Needs Attention</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className={`text-sm font-semibold ${theme.textPrimary}`}>{worstGoal.title}</div>
+                  <div className={`text-[11px] ${theme.textMuted}`}>{worstGoal.categoryName}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xl font-extrabold" style={{ color: worstGoal.categoryColor }}>{worstGoal.pct}%</div>
+                  <div className={`text-[9px] ${theme.textMuted}`}>this month</div>
+                </div>
+              </div>
+              <div className="mt-2.5 h-1.5 rounded-full" style={{ background: `${worstGoal.categoryColor}20` }}>
+                <div className="h-full rounded-full" style={{ width: `${worstGoal.pct}%`, background: worstGoal.categoryColor }} />
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ==== YEARLY VIEW ====
+    const YearlyCalendar = () => {
+      const year = calendarDate.getFullYear();
+      const jan1 = new Date(year, 0, 1);
+      const startOffset = jan1.getDay(); // 0=Sun
+      const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+      const totalDays = isLeap ? 366 : 365;
+
+      // Build weeks (columns) of 7 days
+      const weeks = [];
+      let currentWeek = [];
+      // Pad first week
+      for (let i = 0; i < startOffset; i++) currentWeek.push(null);
+      for (let d = 0; d < totalDays; d++) {
+        const date = new Date(year, 0, d + 1);
+        const dateKey = toLocalDateKey(date);
+        const progress = calculateDailyProgress(dateKey);
+        const isFuture = dateKey > todayKey;
+        currentWeek.push({ date, dateKey, pct: progress.percentage, isFuture });
+        if (currentWeek.length === 7) {
+          weeks.push(currentWeek);
+          currentWeek = [];
+        }
+      }
+      if (currentWeek.length > 0) {
+        while (currentWeek.length < 7) currentWeek.push(null);
+        weeks.push(currentWeek);
+      }
+
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      return (
+        <div className={`${theme.cardBg} rounded-xl shadow-sm p-3 overflow-x-auto`}>
+          {/* Month labels */}
+          <div className="flex mb-1.5" style={{ paddingLeft: 18 }}>
+            {months.map((m, i) => (
+              <div key={i} style={{ width: `${100 / 12}%`, fontSize: 9, fontWeight: 600 }} className={theme.textMuted}>{m}</div>
+            ))}
+          </div>
+          <div className="flex gap-0.5">
+            {/* Day labels */}
+            <div className="flex flex-col gap-0.5 mr-1 pt-0">
+              {['', 'M', '', 'W', '', 'F', ''].map((d, i) => (
+                <div key={i} style={{ width: 14, height: 8, fontSize: 8 }} className={`flex items-center ${theme.textMuted}`}>{d}</div>
+              ))}
+            </div>
+            {/* Grid */}
+            <div className="flex-1 flex gap-0.5">
+              {weeks.map((week, wi) => (
+                <div key={wi} className="flex flex-col gap-0.5">
+                  {week.map((cell, di) => {
+                    if (!cell) return <div key={di} style={{ width: 8, height: 8 }} />;
+                    const bgColor = cell.isFuture ? (darkMode ? '#0f172a' : '#f8fafc') : getHeatColor(cell.pct);
+                    return (
+                      <div key={di}
+                        onClick={() => !cell.isFuture && goToDay(cell.date)}
+                        style={{ width: 8, height: 8, borderRadius: 2, background: bgColor, cursor: cell.isFuture ? 'default' : 'pointer' }}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Legend */}
+          <div className="flex justify-end items-center gap-1 mt-2.5">
+            <span className={`text-[9px] ${theme.textMuted}`}>Less</span>
+            {[0, 30, 50, 75, 100].map(pct => (
+              <div key={pct} style={{ width: 8, height: 8, borderRadius: 2, background: getHeatColor(pct) }} />
+            ))}
+            <span className={`text-[9px] ${theme.textMuted}`}>More</span>
+          </div>
+        </div>
+      );
+    };
 
     return (
-      <div className="space-y-4">
-        {/* Month Navigator */}
+      <div className="space-y-3">
+        {/* Date Navigator */}
         <div className="flex items-center justify-between py-2">
-          <button onClick={() => changeMonth(-1)} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
+          <button onClick={navPrev} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <h2 className={`text-lg font-semibold ${theme.textPrimary}`}>{calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
-          <button onClick={() => changeMonth(1)} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
+          <div className="text-center">
+            <p className={`text-lg font-semibold ${theme.textPrimary}`}>{navLabel}</p>
+            {navSub && <p className={`text-xs ${isThisWeek ? 'text-emerald-500 font-medium' : theme.textMuted}`}>{navSub}</p>}
+          </div>
+          <button onClick={navNext} className={`w-8 h-8 rounded-full ${theme.btnIcon} shadow-sm flex items-center justify-center`}>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Calendar Grid */}
-        <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-              <div key={i} className={`text-center text-xs font-medium py-1 ${theme.textMuted}`}>{day}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-1">
-            {days.map((day, index) => {
-              if (!day) return <div key={`empty-${index}`} className="aspect-square" />;
-              const date = new Date(year, month, day);
-              const dateKey = getDateKey(date);
-              const progress = calculateDailyProgress(dateKey);
-              const isTodayDate = formatDate(date) === formatDate(new Date());
-              const hasJournal = journalConfig.prompts.some(p => { const v = journalEntries[`${dateKey}-${p.id}`]; return v && (typeof v === 'string' ? v.trim().length > 0 : true); });
-              const hasPhoto = dailyPhotos[dateKey];
-              
-              return (
-                <button key={day} onClick={() => goToDay(day)} className={`aspect-square rounded-lg p-1 relative flex flex-col items-center justify-center transition-all ${isTodayDate ? `ring-2 ${darkMode ? 'ring-slate-400' : 'ring-slate-700'}` : ''} ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}>
-                  <span className={`text-sm font-medium ${isTodayDate ? theme.textPrimary : theme.textSecondary}`}>{day}</span>
-                  {progress.total > 0 && (
-                    <div className={`w-5 h-1 rounded-full mt-0.5 ${theme.progressBg}`}>
-                      <div className={`h-full rounded-full ${progress.percentage === 100 ? theme.progressSuccess : theme.progressFill}`} style={{ width: `${progress.percentage}%` }} />
-                    </div>
-                  )}
-                  <div className="flex gap-0.5 mt-0.5">
-                    {hasJournal && <div className="w-1 h-1 rounded-full bg-blue-400" />}
-                    {hasPhoto && <div className="w-1 h-1 rounded-full bg-purple-400" />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+        {/* Week / Month / Year switcher */}
+        <div className={`${theme.cardBg} rounded-xl shadow-sm p-1 flex gap-1`}>
+          {[
+            { id: 'week', label: 'Week' },
+            { id: 'month', label: 'Month' },
+            { id: 'year', label: 'Year' },
+          ].map(v => (
+            <button
+              key={v.id}
+              onClick={() => setCalendarMode(v.id)}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                calendarMode === v.id ? theme.btnPrimary : theme.textMuted
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
         </div>
 
-        {/* Legend */}
-        <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
-          <p className={`text-xs font-medium mb-2 ${theme.textMuted}`}>LEGEND</p>
-          <div className="flex flex-wrap gap-3 text-xs">
-            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded bg-emerald-500" /><span className={theme.textSecondary}>100%</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-blue-400" /><span className={theme.textSecondary}>Journal</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-purple-400" /><span className={theme.textSecondary}>Photo</span></div>
-          </div>
-        </div>
+        {/* Calendar content */}
+        {calendarMode === 'week' && <WeeklyCalendar />}
+        {calendarMode === 'month' && <MonthlyCalendar />}
+        {calendarMode === 'year' && <YearlyCalendar />}
       </div>
     );
   };
@@ -1860,7 +2741,11 @@ const GoalTrackerApp = () => {
         }
         
         // Handle checkbox goals
-        const goalDailyTasks = goal.tasks.filter(t => !t.frequency || t.frequency === 'daily');
+        const goalDailyTasks = goal.tasks.filter(t => {
+          if (!t.frequency || t.frequency === 'daily') return true;
+          if (t.frequency === 'scheduled') return isTaskScheduledForDate(t, selectedDate);
+          return false;
+        });
         if (goalDailyTasks.length === 0) return;
         
         const category = categories.find(c => c.id === goal.category);
@@ -2005,6 +2890,35 @@ const GoalTrackerApp = () => {
       }
     };
 
+    // Calculate streak for a task (consecutive days of completion)
+    const calculateTaskStreak = (goalId, taskId, totalChecks = 1) => {
+      const isCompletedOnDate = (date) => {
+        const dk = toLocalDateKey(date);
+        const tasks = dailyTasks[dk] || {};
+        for (let i = 0; i < totalChecks; i++) {
+          if (!tasks[`${goalId}-${taskId}-${i}`]) return false;
+        }
+        return true;
+      };
+      
+      let checkDate = new Date(selectedDate);
+      const completedToday = isCompletedOnDate(checkDate);
+      
+      checkDate.setDate(checkDate.getDate() - 1);
+      let streakFromYesterday = 0;
+      
+      for (let i = 0; i < 365; i++) {
+        if (isCompletedOnDate(checkDate)) {
+          streakFromYesterday++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      
+      return completedToday ? streakFromYesterday + 1 : streakFromYesterday;
+    };
+
     // Render task row for unified list
     const renderTaskRow = (goal, task, isDaily, isLast, isChild = false, categoryColor, isPointsGoal = false, showBorder = true) => {
       // For weekly points goals, use week key for storage
@@ -2132,6 +3046,7 @@ const GoalTrackerApp = () => {
       if ((isDaily && totalChecks === 1) || isPointsGoal) {
         const taskKey = `${goal.id}-${task.id}-0`;
         const isChecked = dailyTasks[storageKey]?.[taskKey];
+        const streak = isDaily ? calculateTaskStreak(goal.id, task.id, 1) : 0;
         return (
           <div 
             key={task.id}
@@ -2140,6 +3055,11 @@ const GoalTrackerApp = () => {
             onClick={() => toggleTask(dateKey, goal.id, task.id, 0, task, goal)}
           >
             <span className={`text-sm flex-1 ${isChecked ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+            {streak >= 5 && (
+              <span className="text-xs text-orange-500 flex items-center gap-0.5 flex-shrink-0">
+                <Flame className="w-3 h-3" />{streak}
+              </span>
+            )}
             {isPointsGoal && (
               <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${isChecked ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
                 +{task.pointValue || 1}
@@ -2160,6 +3080,7 @@ const GoalTrackerApp = () => {
       } else if (isDaily) {
         // Multiple checkbox daily task (checkbox goals only)
         const rowAnimating = Array.from({ length: totalChecks }).some((_, i) => animatingTasks[`${goal.id}-${task.id}-${i}`]);
+        const streak = calculateTaskStreak(goal.id, task.id, totalChecks);
         return (
           <div 
             key={task.id}
@@ -2167,6 +3088,11 @@ const GoalTrackerApp = () => {
             style={rowStyle}
           >
             <span className={`text-sm flex-1 ${isComplete ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+            {streak >= 5 && (
+              <span className="text-xs text-orange-500 flex items-center gap-0.5 flex-shrink-0">
+                <Flame className="w-3 h-3" />{streak}
+              </span>
+            )}
             <span className={`text-xs ${theme.textMuted}`}>{completedCount}/{totalChecks}</span>
             <div className="flex gap-1.5 flex-shrink-0 mr-3">
               {Array.from({ length: totalChecks }).map((_, checkIndex) => {
@@ -2849,271 +3775,246 @@ const GoalTrackerApp = () => {
   };
 
   // ============================================
-  // PROGRESS VIEW - Card Stack with Time Period
+  // GOALS VIEW - Goal management & per-goal stats
   // ============================================
-  const ProgressView = () => {
-    const [expandedCategories, setExpandedCategories] = useState(new Set());
-    const [timePeriod, setTimePeriod] = useState('1M');
-    
-    const toggleCategory = (categoryId) => {
-      setExpandedCategories(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(categoryId)) {
-          newSet.delete(categoryId);
-        } else {
-          newSet.add(categoryId);
-        }
-        return newSet;
+  const GoalsView = () => {
+    const [expandedGoal, setExpandedGoal] = useState(null);
+    const [collapsedCats, setCollapsedCats] = useState(new Set());
+
+    const toggleCat = (catId) => {
+      setCollapsedCats(prev => {
+        const n = new Set(prev);
+        n.has(catId) ? n.delete(catId) : n.add(catId);
+        return n;
       });
     };
-    
-    const timePeriods = [
-      { id: '1W', label: '1W', days: 7 },
-      { id: '1M', label: '1M', days: 30 },
-      { id: '3M', label: '3M', days: 90 },
-      { id: '6M', label: '6M', days: 180 },
-      { id: '1Y', label: '1Y', days: 365 },
-      { id: 'ALL', label: 'All', days: null },
-    ];
-    
-    const currentPeriod = timePeriods.find(p => p.id === timePeriod);
-    
-    const calculateCategoryProgress = useCallback((categoryId) => {
-      const categoryGoals = goals.filter(g => g.category === categoryId);
-      if (categoryGoals.length === 0) return { percentage: 0, goalsCount: 0, totalDays: 0, completedDays: 0, goals: [] };
+
+    // Calculate goal-level streak (all daily/scheduled tasks completed)
+    const calculateGoalStreak = useCallback((goal) => {
+      if (!goal.tasks || !Array.isArray(goal.tasks)) return { current: 0, longest: 0 };
       
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-      
-      let periodStart;
-      if (currentPeriod.days === null) {
-        const earliestGoal = categoryGoals.reduce((earliest, goal) => {
-          const created = goal.createdAt ? new Date(goal.createdAt) : new Date();
-          return created < earliest ? created : earliest;
-        }, new Date());
-        periodStart = earliestGoal;
-      } else {
-        periodStart = new Date(today);
-        periodStart.setDate(today.getDate() - currentPeriod.days + 1);
-      }
-      periodStart.setHours(0, 0, 0, 0);
-      
-      let totalExpected = 0;
-      let totalCompleted = 0;
-      
-      const goalsWithProgress = categoryGoals.map(goal => {
-        let goalExpected = 0;
-        let goalCompleted = 0;
-        
-        if (!goal.tasks || !Array.isArray(goal.tasks)) {
-          return { ...goal, percentage: 0, completed: 0, total: 0 };
-        }
-        
-        goal.tasks.forEach(task => {
-          for (let d = new Date(periodStart); d <= today; d.setDate(d.getDate() + 1)) {
-            const dateKey = toLocalDateKey(d);
-            
-            if (!task.frequency || task.frequency === 'daily') {
-              const checksPerDay = task.dailyChecks || 1;
-              goalExpected += checksPerDay;
-              for (let i = 0; i < checksPerDay; i++) {
-                if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) goalCompleted++;
-              }
-            } else if (task.frequency === 'weekly') {
-              if (d.getDay() === 0 || d.getTime() === today.getTime()) {
-                const weekStart = new Date(d);
-                weekStart.setDate(d.getDate() - d.getDay());
-                if (weekStart < periodStart) weekStart.setTime(periodStart.getTime());
-                
-                const target = task.weeklyTarget || 4;
-                goalExpected += target;
-                
-                for (let wd = new Date(weekStart); wd <= d; wd.setDate(wd.getDate() + 1)) {
-                  const wdKey = toLocalDateKey(wd);
-                  if (dailyTasks[wdKey]?.[`${goal.id}-${task.id}-0`]) goalCompleted++;
-                }
-              }
-            }
+      const dailyScheduledTasks = goal.tasks.filter(t => 
+        !t.frequency || t.frequency === 'daily' || t.frequency === 'scheduled'
+      );
+      if (dailyScheduledTasks.length === 0) return { current: 0, longest: 0 };
+
+      const isGoalCompletedOnDate = (date) => {
+        const dk = toLocalDateKey(date);
+        const tasks = dailyTasks[dk] || {};
+        let hadAnyTask = false;
+        for (const task of dailyScheduledTasks) {
+          const isScheduled = task.frequency === 'scheduled';
+          if (isScheduled && !isTaskScheduledForDate(task, date)) continue;
+          hadAnyTask = true;
+          const checks = task.dailyChecks || 1;
+          for (let i = 0; i < checks; i++) {
+            if (!tasks[`${goal.id}-${task.id}-${i}`]) return false;
           }
-        });
-        
-        totalExpected += goalExpected;
-        totalCompleted += goalCompleted;
-        
-        const daysInPeriod = Math.ceil((today - periodStart) / (1000 * 60 * 60 * 24)) + 1;
-        
-        return {
-          ...goal,
-          percentage: goalExpected > 0 ? Math.round((goalCompleted / goalExpected) * 100) : 0,
-          completed: goalCompleted,
-          total: goalExpected,
-          daysInPeriod
-        };
-      });
-      
-      const daysInPeriod = Math.ceil((today - periodStart) / (1000 * 60 * 60 * 24)) + 1;
-      
-      return {
-        percentage: totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0,
-        goalsCount: categoryGoals.length,
-        totalExpected,
-        totalCompleted,
-        daysInPeriod,
-        goals: goalsWithProgress
+        }
+        return hadAnyTask;
       };
-    }, [goals, dailyTasks, currentPeriod]);
-    
-    const calculateChartData = useCallback((categoryId) => {
-      const categoryGoals = goals.filter(g => g.category === categoryId);
-      if (categoryGoals.length === 0) return [];
-      
+
       const today = new Date();
+      today.setHours(12, 0, 0, 0);
+      
+      // Current streak
+      let current = 0;
+      let checkDate = new Date(today);
+      if (isGoalCompletedOnDate(checkDate)) {
+        current = 1;
+        checkDate.setDate(checkDate.getDate() - 1);
+        while (current < 365) {
+          if (isGoalCompletedOnDate(checkDate)) {
+            current++;
+            checkDate.setDate(checkDate.getDate() - 1);
+          } else break;
+        }
+      } else {
+        checkDate.setDate(checkDate.getDate() - 1);
+        while (current < 365) {
+          if (isGoalCompletedOnDate(checkDate)) {
+            current++;
+            checkDate.setDate(checkDate.getDate() - 1);
+          } else break;
+        }
+      }
+
+      // Longest streak
+      const goalStart = goal.createdAt ? new Date(goal.createdAt) : new Date(today.getFullYear(), 0, 1);
+      goalStart.setHours(12, 0, 0, 0);
+      let longest = 0;
+      let runningStreak = 0;
+      const scanDate = new Date(goalStart);
+      while (scanDate <= today) {
+        if (isGoalCompletedOnDate(scanDate)) {
+          runningStreak++;
+          if (runningStreak > longest) longest = runningStreak;
+        } else {
+          runningStreak = 0;
+        }
+        scanDate.setDate(scanDate.getDate() + 1);
+      }
+
+      return { current, longest };
+    }, [dailyTasks, isTaskScheduledForDate]);
+
+    // Calculate days active for a goal
+    const calculateDaysActive = useCallback((goal) => {
+      if (!goal.tasks || !Array.isArray(goal.tasks)) return 0;
+      const today = new Date();
+      const goalStart = goal.createdAt ? new Date(goal.createdAt) : new Date(today.getFullYear(), 0, 1);
+      goalStart.setHours(0, 0, 0, 0);
       today.setHours(23, 59, 59, 999);
       
-      let periodStart;
-      let numPoints;
-      let pointInterval;
-      
-      if (currentPeriod.days === null) {
-        const earliestGoal = categoryGoals.reduce((earliest, goal) => {
-          const created = goal.createdAt ? new Date(goal.createdAt) : new Date();
-          return created < earliest ? created : earliest;
-        }, new Date());
-        periodStart = earliestGoal;
-        const totalDays = Math.ceil((today - periodStart) / (1000 * 60 * 60 * 24));
-        numPoints = Math.min(12, Math.max(4, Math.ceil(totalDays / 7)));
-        pointInterval = Math.ceil(totalDays / numPoints);
-      } else if (currentPeriod.days <= 7) {
-        periodStart = new Date(today);
-        periodStart.setDate(today.getDate() - currentPeriod.days + 1);
-        numPoints = currentPeriod.days;
-        pointInterval = 1;
-      } else if (currentPeriod.days <= 30) {
-        periodStart = new Date(today);
-        periodStart.setDate(today.getDate() - currentPeriod.days + 1);
-        numPoints = Math.ceil(currentPeriod.days / 7);
-        pointInterval = 7;
-      } else {
-        periodStart = new Date(today);
-        periodStart.setDate(today.getDate() - currentPeriod.days + 1);
-        numPoints = Math.min(12, Math.ceil(currentPeriod.days / 7));
-        pointInterval = Math.ceil(currentPeriod.days / numPoints);
+      let activeDays = 0;
+      const d = new Date(goalStart);
+      while (d <= today) {
+        const dk = toLocalDateKey(d);
+        const tasks = dailyTasks[dk] || {};
+        const hasAny = Object.keys(tasks).some(key => key.startsWith(`${goal.id}-`) && tasks[key]);
+        if (hasAny) activeDays++;
+        d.setDate(d.getDate() + 1);
       }
-      periodStart.setHours(0, 0, 0, 0);
-      
-      const dataPoints = [];
-      
-      for (let i = 0; i < numPoints; i++) {
-        const pointEnd = new Date(periodStart);
-        pointEnd.setDate(periodStart.getDate() + (i + 1) * pointInterval - 1);
-        if (pointEnd > today) pointEnd.setTime(today.getTime());
-        
-        const pointStart = new Date(periodStart);
-        pointStart.setDate(periodStart.getDate() + i * pointInterval);
-        
-        let expected = 0;
-        let completed = 0;
-        
-        categoryGoals.forEach(goal => {
-          if (!goal.tasks || !Array.isArray(goal.tasks)) return;
-          
-          goal.tasks.forEach(task => {
-            for (let d = new Date(pointStart); d <= pointEnd; d.setDate(d.getDate() + 1)) {
-              const dateKey = toLocalDateKey(d);
-              
-              if (!task.frequency || task.frequency === 'daily') {
-                const checksPerDay = task.dailyChecks || 1;
-                expected += checksPerDay;
-                for (let c = 0; c < checksPerDay; c++) {
-                  if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) completed++;
-                }
-              }
-            }
-          });
-        });
-        
-        dataPoints.push({
-          percentage: expected > 0 ? Math.round((completed / expected) * 100) : 0
-        });
-      }
-      
-      return dataPoints;
-    }, [goals, dailyTasks, currentPeriod]);
-    
-    const MiniChart = ({ data, color, height = 60, showLabels = false }) => {
-      if (!data || data.length < 2) return <div style={{ height }} className="flex items-center justify-center"><p className={`text-xs ${theme.textMuted}`}>Not enough data</p></div>;
-      
-      const max = 100;
-      const width = 200;
-      const padding = showLabels ? { top: 5, right: 5, bottom: 18, left: 22 } : { top: 3, right: 3, bottom: 3, left: 3 };
-      const chartWidth = width - padding.left - padding.right;
-      const chartHeight = height - padding.top - padding.bottom;
-      
-      const points = data.map((d, i) => {
-        const x = padding.left + (i / (data.length - 1)) * chartWidth;
-        const y = padding.top + chartHeight - (d.percentage / max) * chartHeight;
-        return { x, y, val: d.percentage };
-      });
-      
-      const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-      const areaD = `M ${points[0].x} ${padding.top + chartHeight} ${pathD.substring(1)} L ${points[points.length - 1].x} ${padding.top + chartHeight} Z`;
-      
+      return activeDays;
+    }, [dailyTasks]);
+
+    // Completion rate from goalProgressCache (uses createdAt)
+    const getCompletionRate = useCallback((goal) => {
+      return goalProgressCache[goal.id]?.percentage || 0;
+    }, [goalProgressCache]);
+
+    // Group goals by category
+    const groupedGoals = (categories || []).map(cat => ({
+      ...cat,
+      goals: goals.filter(g => g.category === cat.id)
+    })).filter(c => c.goals.length > 0);
+
+    const uncategorizedGoals = goals.filter(g => !(categories || []).some(c => c.id === g.category));
+
+    // Render a goal row + expanded detail
+    const GoalItem = ({ goal, catColor, isLast }) => {
+      const isExpanded = expandedGoal === goal.id;
+      const completionRate = getCompletionRate(goal);
+      const streaks = calculateGoalStreak(goal);
+      const color = catColor || '#94a3b8';
+
       return (
-        <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
-          {showLabels && [0, 50, 100].map(val => {
-            const y = padding.top + chartHeight - (val / max) * chartHeight;
-            return (
-              <g key={val}>
-                <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke={darkMode ? '#334155' : '#e2e8f0'} strokeWidth="1" strokeDasharray={val === 0 ? "0" : "2,2"} />
-                <text x={padding.left - 4} y={y + 3} fontSize="8" fill={darkMode ? '#64748b' : '#94a3b8'} textAnchor="end">{val}</text>
-              </g>
-            );
-          })}
-          <path d={areaD} fill={color} opacity="0.15" />
-          <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          {points.map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r={showLabels ? "3" : "2"} fill={color} />
-          ))}
-          {showLabels && (
-            <>
-              <text x={padding.left} y={height - 3} fontSize="8" fill={darkMode ? '#64748b' : '#94a3b8'} textAnchor="start">Start</text>
-              <text x={width - padding.right} y={height - 3} fontSize="8" fill={darkMode ? '#64748b' : '#94a3b8'} textAnchor="end">Now</text>
-            </>
+        <div>
+          {/* Goal row */}
+          <button
+            onClick={() => setExpandedGoal(isExpanded ? null : goal.id)}
+            className={`w-full px-3.5 py-3 text-left flex items-center gap-3 ${
+              !isLast && !isExpanded ? `border-b ${theme.divider}` : ''
+            }`}
+          >
+            <div className="flex-1 min-w-0">
+              <div className={`text-sm font-semibold ${theme.textPrimary} truncate`}>{goal.title}</div>
+              <div className={`text-[11px] ${theme.textMuted} flex items-center gap-2 mt-0.5`}>
+                <span>{(goal.tasks || []).length} task{(goal.tasks || []).length !== 1 ? 's' : ''}</span>
+                {streaks.current >= 3 && (
+                  <span className="flex items-center gap-0.5">
+                    <Flame className="w-3 h-3" style={{ color: '#f97316' }} />
+                    <span>{streaks.current}d</span>
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="relative flex-shrink-0" style={{ width: 38, height: 38 }}>
+              <svg width="38" height="38" viewBox="0 0 38 38">
+                <circle cx="19" cy="19" r="15" fill="none" stroke={darkMode ? '#334155' : '#f1f5f9'} strokeWidth="3" />
+                <circle cx="19" cy="19" r="15" fill="none" stroke={color} strokeWidth="3"
+                  strokeDasharray={`${completionRate * 0.94} 94`}
+                  strokeLinecap="round"
+                  transform="rotate(-90 19 19)"
+                  style={{ transition: 'stroke-dasharray 0.5s' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className={`text-[10px] font-bold ${theme.textPrimary}`}>{completionRate}%</span>
+              </div>
+            </div>
+          </button>
+
+          {/* Expanded detail */}
+          {isExpanded && (
+            <div className={`px-3.5 pb-3.5 ${!isLast ? `border-b ${theme.divider}` : ''}`}>
+              {/* Yearly target */}
+              {goal.yearlyGoal && (
+                <div className={`p-2.5 rounded-lg mb-3 ${theme.inputBg}`}>
+                  <div className={`text-[9px] font-semibold uppercase tracking-wider mb-1 ${theme.textMuted}`}>Yearly Target</div>
+                  <div className={`text-[13px] font-semibold ${theme.textSecondary}`}>{goal.yearlyGoal}</div>
+                </div>
+              )}
+
+              {/* Stats */}
+              <div className="flex gap-1.5 mb-3">
+                {[
+                  { value: `${streaks.current}d`, label: 'Streak', highlight: streaks.current >= 5 },
+                  { value: `${streaks.longest}d`, label: 'Best' },
+                  { value: `${calculateDaysActive(goal)}`, label: 'Days active' },
+                ].map((s, i) => (
+                  <div key={i} className="flex-1 text-center py-2 rounded-lg" style={{
+                    background: s.highlight ? `${color}15` : (darkMode ? '#1e293b' : '#f8fafc'),
+                    border: s.highlight ? `1px solid ${color}30` : '1px solid transparent'
+                  }}>
+                    <div className="text-sm font-bold" style={{ color: s.highlight ? color : (darkMode ? '#e2e8f0' : '#1e293b') }}>{s.value}</div>
+                    <div className={`text-[9px] ${theme.textMuted}`}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tasks */}
+              <div className="mb-3">
+                <div className={`text-[9px] font-semibold uppercase tracking-wider mb-1.5 ${theme.textMuted}`}>Tasks</div>
+                {(goal.tasks || []).map((task, ti) => (
+                  <div key={task.id} className={`flex items-center gap-2 py-1.5 ${
+                    ti < (goal.tasks || []).length - 1 ? `border-b ${theme.divider}` : ''
+                  }`}>
+                    <div className="w-1 h-1 rounded-full flex-shrink-0" style={{ backgroundColor: color, opacity: 0.5 }} />
+                    <span className={`text-xs flex-1 ${theme.textSecondary}`}>{task.action}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${theme.inputBg} ${theme.textMuted}`}>
+                      {task.frequency === 'daily' ? (task.dailyChecks > 1 ? `${task.dailyChecks}x/day` : 'daily')
+                        : task.frequency === 'weekly' ? `${task.weeklyTarget || 4}x/wk`
+                        : task.frequency === 'scheduled' ? `${(task.scheduledDays || []).length}d/wk`
+                        : task.frequency}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Created date */}
+              {goal.createdAt && (
+                <p className={`text-[10px] mb-3 ${theme.textMuted}`}>
+                  Created {new Date(goal.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </p>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <button onClick={(e) => { e.stopPropagation(); setEditingGoal(goal); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold ${theme.btnSecondary}`}>Edit Goal</button>
+                {deletingGoalId === goal.id ? (
+                  <button onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id); setDeletingGoalId(null); setExpandedGoal(null); }} className="px-4 py-2 rounded-lg text-xs font-semibold bg-red-500 text-white">Confirm</button>
+                ) : (
+                  <button onClick={(e) => { e.stopPropagation(); setDeletingGoalId(goal.id); }} className="px-4 py-2 rounded-lg text-xs font-semibold" style={{ background: darkMode ? '#451a1a' : '#fef2f2', color: '#ef4444' }}>Delete</button>
+                )}
+              </div>
+            </div>
           )}
-        </svg>
+        </div>
       );
     };
-    
-    const activeCategories = (categories || []).filter(cat => 
-      goals.some(g => g.category === cat.id)
-    );
 
     return (
       <div className="space-y-3">
+        {/* Header */}
         <div className="flex items-center justify-between py-2">
           <div>
-            <h2 className={`text-lg font-semibold ${theme.textPrimary}`}>Progress</h2>
-            <p className={`text-xs ${theme.textMuted}`}>By category</p>
+            <h2 className={`text-lg font-semibold ${theme.textPrimary}`}>Goals</h2>
+            <p className={`text-xs ${theme.textMuted}`}>{goals.length} active goal{goals.length !== 1 ? 's' : ''}</p>
           </div>
           <button onClick={() => setShowCategorySettings(true)} className={`p-2 rounded-lg ${theme.btnSecondary}`}>
             <Settings className="w-4 h-4" />
           </button>
-        </div>
-        
-        <div className={`${theme.cardBg} rounded-xl shadow-sm p-1 flex gap-1`}>
-          {timePeriods.map(period => (
-            <button
-              key={period.id}
-              onClick={() => setTimePeriod(period.id)}
-              className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all ${
-                timePeriod === period.id
-                  ? theme.btnPrimary
-                  : `${theme.textMuted} hover:${theme.inputBg}`
-              }`}
-            >
-              {period.label}
-            </button>
-          ))}
         </div>
 
         {goals.length === 0 ? (
@@ -3124,114 +4025,51 @@ const GoalTrackerApp = () => {
             <button onClick={() => setShowGoalForm(true)} className={`px-4 py-2 rounded-lg text-sm font-medium ${theme.btnPrimary}`}>Create Goal</button>
           </div>
         ) : (
-          <div className="space-y-3">
-            {activeCategories.map(category => {
-              const progress = calculateCategoryProgress(category.id);
-              const chartData = calculateChartData(category.id);
-              const isExpanded = expandedCategories.has(category.id);
-              
+          <>
+            {groupedGoals.map(cat => {
+              const isCollapsed = collapsedCats.has(cat.id);
               return (
-                <div key={category.id} className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
-                  <button 
-                    onClick={() => toggleCategory(category.id)}
-                    className="w-full p-4 flex items-center gap-3"
+                <div key={cat.id}>
+                  <button
+                    onClick={() => toggleCat(cat.id)}
+                    className="flex items-center gap-2 mb-2 w-full px-1"
+                    style={{ background: 'none', border: 'none' }}
                   >
-                    <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" 
-                      style={{ backgroundColor: `${category.color}15` }}
-                    >
-                      <span className="text-base font-bold" style={{ color: category.color }}>{progress.percentage}%</span>
-                    </div>
-                    
-                    <div className="flex-1 text-left min-w-0">
-                      <h3 className={`font-semibold text-sm ${theme.textPrimary}`}>{category.name}</h3>
-                      <p className={`text-xs ${theme.textMuted}`}>{progress.goalsCount} goal{progress.goalsCount !== 1 ? 's' : ''}</p>
-                    </div>
-                    
-                    <div className="w-16 h-8 flex-shrink-0">
-                      <MiniChart data={chartData} color={category.color} height={32} />
-                    </div>
-                    
-                    <ChevronRight className={`w-4 h-4 flex-shrink-0 ${theme.textMuted} transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                    <span className={`text-[11px] font-bold uppercase tracking-wider flex-1 text-left ${theme.textMuted}`}>{cat.name}</span>
+                    <span className={`text-xs ${theme.textMuted}`}>{cat.goals.length}</span>
+                    <ChevronRight className={`w-3 h-3 ${theme.textMuted} transition-transform ${isCollapsed ? '' : 'rotate-90'}`} />
                   </button>
-                  
-                  {isExpanded && (
-                    <div className={`px-4 pb-4 border-t ${theme.divider}`}>
-                      <div className="py-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className={`text-xs font-medium ${theme.textMuted}`}>
-                            {currentPeriod.days === null ? 'All Time' : `Last ${currentPeriod.days} days`}
-                          </p>
-                          {chartData.length >= 2 && (
-                            <p className={`text-xs ${theme.textMuted}`}>
-                              {chartData[0]?.percentage}% → {chartData[chartData.length - 1]?.percentage}%
-                            </p>
-                          )}
-                        </div>
-                        <MiniChart data={chartData} color={category.color} height={100} showLabels />
-                      </div>
-                      
-                      <div className="space-y-2 mt-2">
-                        <p className={`text-xs font-medium ${theme.textMuted}`}>Goals</p>
-                        {progress.goals.map(goal => (
-                          <div key={goal.id} className={`p-3 rounded-lg ${theme.inputBg}`}>
-                            <div className="flex justify-between mb-1.5">
-                              <div className="flex items-center gap-1.5">
-                                {goal.goalType === 'points' && <Star className="w-3.5 h-3.5 text-amber-500" />}
-                                <span className={`text-sm font-medium ${theme.textPrimary}`}>{goal.title}</span>
-                              </div>
-                              <span className="text-sm font-bold" style={{ color: category.color }}>{goal.percentage}%</span>
-                            </div>
-                            <div className={`h-1.5 rounded-full mb-1.5 ${theme.progressBg}`}>
-                              <div 
-                                className="h-full rounded-full transition-all" 
-                                style={{ width: `${goal.percentage}%`, backgroundColor: category.color }} 
-                              />
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <p className={`text-xs ${theme.textMuted}`}>{goal.completed} of {goal.total} tasks</p>
-                              <div className="flex gap-2">
-                                <button onClick={(e) => { e.stopPropagation(); setEditingGoal(goal); }} className={`text-xs ${theme.textSecondary}`}>Edit</button>
-                                {deletingGoalId === goal.id ? (
-                                  <button onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id); setDeletingGoalId(null); }} className="text-xs text-red-500">Confirm</button>
-                                ) : (
-                                  <button onClick={(e) => { e.stopPropagation(); setDeletingGoalId(goal.id); }} className="text-xs text-red-500">Delete</button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+
+                  {!isCollapsed && (
+                    <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden mb-3`}>
+                      {cat.goals.map((goal, gi) => (
+                        <GoalItem key={goal.id} goal={goal} catColor={cat.color} isLast={gi === cat.goals.length - 1} />
+                      ))}
                     </div>
                   )}
                 </div>
               );
             })}
 
-            {goals.filter(g => !activeCategories.some(c => c.id === g.category)).length > 0 && (
-              <div className={`${theme.cardBg} rounded-xl shadow-sm p-4`}>
-                <h3 className={`font-semibold text-sm mb-3 ${theme.textPrimary}`}>Uncategorized</h3>
-                {goals.filter(g => !activeCategories.some(c => c.id === g.category)).map(goal => {
-                  const progress = calculateProgress(goal);
-                  return (
-                    <div key={goal.id} className={`p-3 rounded-lg ${theme.inputBg} mb-2 last:mb-0`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className={`font-medium text-sm ${theme.textPrimary}`}>{goal.title}</h4>
-                        <span className={`text-sm font-semibold ${theme.textPrimary}`}>{progress.percentage}%</span>
-                      </div>
-                      <div className={`h-1.5 rounded-full ${theme.progressBg}`}>
-                        <div className={`h-full rounded-full ${theme.progressFill}`} style={{ width: `${progress.percentage}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
+            {uncategorizedGoals.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2 px-1">
+                  <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.textMuted}`}>Uncategorized</span>
+                </div>
+                <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden mb-3`}>
+                  {uncategorizedGoals.map((goal, gi) => (
+                    <GoalItem key={goal.id} goal={goal} catColor="#94a3b8" isLast={gi === uncategorizedGoals.length - 1} />
+                  ))}
+                </div>
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     );
   };
+
 
   // ============================================
   // MAIN RENDER
@@ -3295,7 +4133,7 @@ const GoalTrackerApp = () => {
             <div className={`flex gap-1 ${theme.cardBg} rounded-full p-1 shadow-sm w-fit`}>
               <button onClick={() => setCurrentView('daily')} className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${currentView === 'daily' ? theme.btnPrimary : theme.textSecondary}`}>Daily</button>
               <button onClick={() => setCurrentView('calendar')} className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${currentView === 'calendar' ? theme.btnPrimary : theme.textSecondary}`}>Calendar</button>
-              <button onClick={() => setCurrentView('progress')} className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${currentView === 'progress' ? theme.btnPrimary : theme.textSecondary}`}>Progress</button>
+              <button onClick={() => setCurrentView('goals')} className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all ${currentView === 'goals' ? theme.btnPrimary : theme.textSecondary}`}>Goals</button>
             </div>
           </div>
         </div>
@@ -3305,7 +4143,7 @@ const GoalTrackerApp = () => {
       <div className="max-w-lg mx-auto px-4 py-4 pb-8">
         {currentView === 'daily' && <DailyView />}
         {currentView === 'calendar' && <CalendarView />}
-        {currentView === 'progress' && <ProgressView />}
+        {currentView === 'goals' && <GoalsView />}
       </div>
 
       {/* Modals */}
@@ -3319,10 +4157,11 @@ const GoalTrackerApp = () => {
   );
 };
 
-    // Render the app
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<GoalTrackerApp />);
+export default GoalTrackerApp;
+
+const container = document.getElementById('root');
+const root = ReactDOM.createRoot(container);
+root.render(React.createElement(GoalTrackerApp));
   </script>
 </body>
 </html>
-
