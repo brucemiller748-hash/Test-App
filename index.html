@@ -5,68 +5,276 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Life Tracker">
   <title>Life Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     * { -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; overscroll-behavior: none; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif; }
-    @supports (padding-top: env(safe-area-inset-top)) {
-      .safe-top { padding-top: env(safe-area-inset-top); }
-      .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    }
-    input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; touch-action: pan-x; }
-    input[type="range"]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; }
-    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; margin-top: -7px; }
-    .touch-pan-y { touch-action: pan-y; }
-    #loading { padding: 40px; text-align: center; font-size: 18px; }
+    body { margin: 0; padding: 0; overscroll-behavior: none; }
+    /* Tailwind v2 doesn't have all classes used - add missing ones */
+    .tracking-tight { letter-spacing: -0.025em; }
+    .tracking-wider { letter-spacing: 0.05em; }
+    .backdrop-blur-sm { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+    .min-h-screen { min-height: 100vh; min-height: -webkit-fill-available; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .aspect-square { aspect-ratio: 1/1; }
+    .gap-0\.5 { gap: 0.125rem; }
+    .gap-1\.5 { gap: 0.375rem; }
+    .gap-2\.5 { gap: 0.625rem; }
+    .gap-3\.5 { gap: 0.875rem; }
+    .w-1\.5 { width: 0.375rem; }
+    .h-1\.5 { height: 0.375rem; }
+    .w-2\.5 { width: 0.625rem; }
+    .h-2\.5 { height: 0.625rem; }
+    .w-3\.5 { width: 0.875rem; }
+    .h-3\.5 { height: 0.875rem; }
+    .p-0\.5 { padding: 0.125rem; }
+    .p-2\.5 { padding: 0.625rem; }
+    .p-3\.5 { padding: 0.875rem; }
+    .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+    .px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+    .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+    .py-3\.5 { padding-top: 0.875rem; padding-bottom: 0.875rem; }
+    .pb-2\.5 { padding-bottom: 0.625rem; }
+    .pb-3\.5 { padding-bottom: 0.875rem; }
+    .mb-1\.5 { margin-bottom: 0.375rem; }
+    .mb-2\.5 { margin-bottom: 0.625rem; }
+    .mb-3\.5 { margin-bottom: 0.875rem; }
+    .mt-0\.5 { margin-top: 0.125rem; }
+    .mt-1\.5 { margin-top: 0.375rem; }
+    .mt-2\.5 { margin-top: 0.625rem; }
+    .ml-0\.5 { margin-left: 0.125rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-2xl { border-radius: 1rem; }
+    .text-\[8px\] { font-size: 8px; line-height: 1.2; }
+    .text-\[9px\] { font-size: 9px; line-height: 1.2; }
+    .text-\[10px\] { font-size: 10px; line-height: 1.3; }
+    .text-\[11px\] { font-size: 11px; line-height: 1.3; }
+    .text-\[12px\] { font-size: 12px; line-height: 1.4; }
+    .text-\[13px\] { font-size: 13px; line-height: 1.4; }
+    .text-\[14px\] { font-size: 14px; line-height: 1.4; }
+    .text-\[15px\] { font-size: 15px; line-height: 1.4; }
+    .space-y-0\.5 > :not(:first-child) { margin-top: 0.125rem; }
+    .space-y-1\.5 > :not(:first-child) { margin-top: 0.375rem; }
+    .space-y-2\.5 > :not(:first-child) { margin-top: 0.625rem; }
+    .space-y-3\.5 > :not(:first-child) { margin-top: 0.875rem; }
+    .ring-2 { box-shadow: 0 0 0 2px; }
+    .ring-offset-1 { box-shadow: 0 0 0 1px #fff, 0 0 0 3px; }
+    .z-\[1\] { z-index: 1; }
+    .bg-slate-50 { background-color: #f8fafc; }
+    .bg-slate-100 { background-color: #f1f5f9; }
+    .bg-slate-200 { background-color: #e2e8f0; }
+    .bg-slate-300 { background-color: #cbd5e1; }
+    .bg-slate-400 { background-color: #94a3b8; }
+    .bg-slate-500 { background-color: #64748b; }
+    .bg-slate-600 { background-color: #475569; }
+    .bg-slate-700 { background-color: #334155; }
+    .bg-slate-800 { background-color: #1e293b; }
+    .bg-slate-900 { background-color: #0f172a; }
+    .text-slate-50 { color: #f8fafc; }
+    .text-slate-100 { color: #f1f5f9; }
+    .text-slate-200 { color: #e2e8f0; }
+    .text-slate-300 { color: #cbd5e1; }
+    .text-slate-400 { color: #94a3b8; }
+    .text-slate-500 { color: #64748b; }
+    .text-slate-600 { color: #475569; }
+    .text-slate-700 { color: #334155; }
+    .text-slate-800 { color: #1e293b; }
+    .text-slate-900 { color: #0f172a; }
+    .border-slate-100 { border-color: #f1f5f9; }
+    .border-slate-200 { border-color: #e2e8f0; }
+    .border-slate-300 { border-color: #cbd5e1; }
+    .border-slate-700 { border-color: #334155; }
+    .bg-emerald-50 { background-color: #ecfdf5; }
+    .bg-emerald-100 { background-color: #d1fae5; }
+    .bg-emerald-500 { background-color: #10b981; }
+    .text-emerald-400 { color: #34d399; }
+    .text-emerald-500 { color: #10b981; }
+    .text-emerald-600 { color: #059669; }
+    .text-emerald-700 { color: #047857; }
+    .text-emerald-900 { color: #064e3b; }
+    .bg-indigo-50 { background-color: #eef2ff; }
+    .bg-red-100 { background-color: #fee2e2; }
+    .bg-red-500 { background-color: #ef4444; }
+    .text-red-400 { color: #f87171; }
+    .text-red-500 { color: #ef4444; }
+    .text-red-600 { color: #dc2626; }
+    .text-blue-400 { color: #60a5fa; }
+    .text-blue-500 { color: #3b82f6; }
+    .text-orange-500 { color: #f97316; }
+    .text-amber-500 { color: #f59e0b; }
+    .bg-gradient-to-b { background-image: linear-gradient(to bottom, var(--tw-gradient-stops)); }
+    .from-slate-50 { --tw-gradient-from: #f8fafc; --tw-gradient-stops: #f8fafc, var(--tw-gradient-to, rgba(248, 250, 252, 0)); }
+    .to-slate-100 { --tw-gradient-to: #f1f5f9; }
+    .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); }
+    .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
+    .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+    select { background-image: none; }
+    input[type="number"] { -moz-appearance: textfield; }
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .-rotate-90 { --tw-rotate: -90deg; transform: rotate(-90deg); }
+    .rotate-90 { --tw-rotate: 90deg; transform: rotate(90deg); }
+    .-translate-y-1\/2 { transform: translateY(-50%); }
+    .col-span-1 { grid-column: span 1 / span 1; }
+    .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration: 150ms; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .overflow-x-auto { overflow-x: auto; }
+    .snap-x { scroll-snap-type: x mandatory; }
+    .snap-center { scroll-snap-align: center; }
+    .resize-none { resize: none; }
+    .appearance-none { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
   </style>
 </head>
 <body>
-  <div id="root"><div id="loading">Loading Life Tracker...</div></div>
-  <script type="text/babel" data-presets="react">
-const { useState, useEffect, useMemo, useCallback, useRef } = React;
+  <div id="root"></div>
+  <script>
+    // Global error handler to catch Babel transpilation and runtime errors
+    window.onerror = function(msg, url, line, col, error) {
+      var root = document.getElementById('root');
+      if (root && !root.hasChildNodes()) {
+        root.innerHTML = '<div style="padding:20px;color:#ef4444;font-family:monospace;font-size:13px"><h2 style="margin:0 0 10px">Error loading app</h2><p>' + msg + '</p><p>Line: ' + line + '</p></div>';
+      }
+      console.error('Global error:', msg, error);
+    };
+  </script>
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useCallback, useRef } = React;
 
-// Simple SVG Icon component
-const Icon = ({ d, className = "", size = 24, strokeWidth = 2, ...props }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" 
-       fill="none" stroke="currentColor" strokeWidth={strokeWidth} 
-       strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
-    {Array.isArray(d) ? d.map((path, i) => <path key={i} d={path} />) : <path d={d} />}
-  </svg>
+
+// ===== Lucide Icon Components =====
+const iconProps = { width: "100%", height: "100%", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
+
+const Camera = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"}),
+  React.createElement('circle', {cx: "12", cy: "13", r: "3"})
 );
+const Book = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"})
+);
+const Music = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M9 18V5l12-2v13"}),
+  React.createElement('circle', {cx: "6", cy: "18", r: "3"}),
+  React.createElement('circle', {cx: "18", cy: "16", r: "3"})
+);
+const Film = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('rect', {width: "18", height: "18", x: "3", y: "3", rx: "2", ry: "2"}),
+  React.createElement('line', {x1: "7", y1: "3", x2: "7", y2: "21"}),
+  React.createElement('line', {x1: "17", y1: "3", x2: "17", y2: "21"}),
+  React.createElement('line', {x1: "3", y1: "7", x2: "7", y2: "7"}),
+  React.createElement('line', {x1: "17", y1: "7", x2: "21", y2: "7"}),
+  React.createElement('line', {x1: "3", y1: "12", x2: "21", y2: "12"}),
+  React.createElement('line', {x1: "3", y1: "17", x2: "7", y2: "17"}),
+  React.createElement('line', {x1: "17", y1: "17", x2: "21", y2: "17"})
+);
+const Target = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('circle', {cx: "12", cy: "12", r: "10"}),
+  React.createElement('circle', {cx: "12", cy: "12", r: "6"}),
+  React.createElement('circle', {cx: "12", cy: "12", r: "2"})
+);
+const CheckCircle2 = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('circle', {cx: "12", cy: "12", r: "10"}),
+  React.createElement('path', {d: "m9 12 2 2 4-4"})
+);
+const Check = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M20 6 9 17l-5-5"})
+);
+const Circle = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('circle', {cx: "12", cy: "12", r: "10"})
+);
+const Plus = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M5 12h14"}),
+  React.createElement('path', {d: "M12 5v14"})
+);
+const Minus = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M5 12h14"})
+);
+const X = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M18 6 6 18"}),
+  React.createElement('path', {d: "m6 6 12 12"})
+);
+const ChevronLeft = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "m15 18-6-6 6-6"})
+);
+const ChevronRight = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "m9 18 6-6-6-6"})
+);
+const ChevronUp = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "m18 15-6-6-6 6"})
+);
+const ChevronDown = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "m6 9 6 6 6-6"})
+);
+const Trash2 = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M3 6h18"}),
+  React.createElement('path', {d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"}),
+  React.createElement('path', {d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"}),
+  React.createElement('line', {x1: "10", y1: "11", x2: "10", y2: "17"}),
+  React.createElement('line', {x1: "14", y1: "11", x2: "14", y2: "17"})
+);
+const Settings = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"}),
+  React.createElement('circle', {cx: "12", cy: "12", r: "3"})
+);
+const Sun = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('circle', {cx: "12", cy: "12", r: "4"}),
+  React.createElement('path', {d: "M12 2v2"}),
+  React.createElement('path', {d: "M12 20v2"}),
+  React.createElement('path', {d: "m4.93 4.93 1.41 1.41"}),
+  React.createElement('path', {d: "m17.66 17.66 1.41 1.41"}),
+  React.createElement('path', {d: "M2 12h2"}),
+  React.createElement('path', {d: "M20 12h2"}),
+  React.createElement('path', {d: "m6.34 17.66-1.41 1.41"}),
+  React.createElement('path', {d: "m19.07 4.93-1.41 1.41"})
+);
+const Moon = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"})
+);
+const Star = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('polygon', {points: "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"})
+);
+const Flame = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"})
+);
+const Zap = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('polygon', {points: "13 2 3 14 12 14 11 22 21 10 12 10 13 2"})
+);
+const Clock = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('circle', {cx: "12", cy: "12", r: "10"}),
+  React.createElement('polyline', {points: "12 6 12 12 16 14"})
+);
+const Heart = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"})
+);
+const Trophy = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('path', {d: "M6 9H4.5a2.5 2.5 0 0 1 0-5H6"}),
+  React.createElement('path', {d: "M18 9h1.5a2.5 2.5 0 0 0 0-5H18"}),
+  React.createElement('path', {d: "M4 22h16"}),
+  React.createElement('path', {d: "M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"}),
+  React.createElement('path', {d: "M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"}),
+  React.createElement('path', {d: "M18 2H6v7a6 6 0 0 0 12 0V2Z"})
+);
+const Sliders = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('line', {x1: "4", x2: "4", y1: "21", y2: "14"}),
+  React.createElement('line', {x1: "4", x2: "4", y1: "10", y2: "3"}),
+  React.createElement('line', {x1: "12", x2: "12", y1: "21", y2: "12"}),
+  React.createElement('line', {x1: "12", x2: "12", y1: "8", y2: "3"}),
+  React.createElement('line', {x1: "20", x2: "20", y1: "21", y2: "16"}),
+  React.createElement('line', {x1: "20", x2: "20", y1: "12", y2: "3"}),
+  React.createElement('line', {x1: "2", x2: "6", y1: "14", y2: "14"}),
+  React.createElement('line', {x1: "10", x2: "14", y1: "8", y2: "8"}),
+  React.createElement('line', {x1: "18", x2: "22", y1: "16", y2: "16"})
+);
+const Hash = (props) => React.createElement('svg', {...iconProps, className: props.className, style: props.style},
+  React.createElement('line', {x1: "4", x2: "20", y1: "9", y2: "9"}),
+  React.createElement('line', {x1: "4", x2: "20", y1: "15", y2: "15"}),
+  React.createElement('line', {x1: "10", x2: "8", y1: "3", y2: "21"}),
+  React.createElement('line', {x1: "16", x2: "14", y1: "3", y2: "21"})
+);
+// ===== End Icon Components =====
 
-// Icon definitions
-const Camera = (p) => <Icon {...p} d={["M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z","M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"]} />;
-const Book = (p) => <Icon {...p} d={["M4 19.5A2.5 2.5 0 0 1 6.5 17H20","M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"]} />;
-const Music = (p) => <Icon {...p} d={["M9 18V5l12-2v13","M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z","M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"]} />;
-const Film = (p) => <Icon {...p} d={["M19.82 2H4.18A2.18 2.18 0 0 0 2 4.18v15.64A2.18 2.18 0 0 0 4.18 22h15.64A2.18 2.18 0 0 0 22 19.82V4.18A2.18 2.18 0 0 0 19.82 2z","M7 2v20","M17 2v20","M2 12h20","M2 7h5","M2 17h5","M17 17h5","M17 7h5"]} />;
-const Target = (p) => <Icon {...p} d={["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z","M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z","M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"]} />;
-const CheckCircle2 = (p) => <Icon {...p} d={["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z","M9 12l2 2 4-4"]} />;
-const Check = (p) => <Icon {...p} d="M20 6L9 17l-5-5" />;
-const Circle = (p) => <Icon {...p} d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z" />;
-const Plus = (p) => <Icon {...p} d={["M12 5v14","M5 12h14"]} />;
-const Minus = (p) => <Icon {...p} d="M5 12h14" />;
-const X = (p) => <Icon {...p} d={["M18 6L6 18","M6 6l12 12"]} />;
-const ChevronLeft = (p) => <Icon {...p} d="M15 18l-6-6 6-6" />;
-const ChevronRight = (p) => <Icon {...p} d="M9 18l6-6-6-6" />;
-const ChevronUp = (p) => <Icon {...p} d="M18 15l-6-6-6 6" />;
-const ChevronDown = (p) => <Icon {...p} d="M6 9l6 6 6-6" />;
-const Trash2 = (p) => <Icon {...p} d={["M3 6h18","M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2","M10 11v6","M14 11v6"]} />;
-const Settings = (p) => <Icon {...p} d={["M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z","M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"]} />;
-const Sun = (p) => <Icon {...p} d={["M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z","M12 1v2","M12 21v2","M4.22 4.22l1.42 1.42","M18.36 18.36l1.42 1.42","M1 12h2","M21 12h2","M4.22 19.78l1.42-1.42","M18.36 5.64l1.42-1.42"]} />;
-const Moon = (p) => <Icon {...p} d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />;
-const Star = (p) => <Icon {...p} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />;
-const Flame = (p) => <Icon {...p} d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />;
-const Zap = (p) => <Icon {...p} d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />;
-const Clock = (p) => <Icon {...p} d={["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z","M12 6v6l4 2"]} />;
-const Heart = (p) => <Icon {...p} d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />;
-const Trophy = (p) => <Icon {...p} d={["M6 9H4.5a2.5 2.5 0 0 1 0-5H6","M18 9h1.5a2.5 2.5 0 0 0 0-5H18","M4 22h16","M10 22V9a2 2 0 0 0-2-2H6V4h12v3h-2a2 2 0 0 0-2 2v13"]} />;
-const Sliders = (p) => <Icon {...p} d={["M4 21v-7","M4 10V3","M12 21v-9","M12 8V3","M20 21v-5","M20 12V3","M1 14h6","M9 8h6","M17 16h6"]} />;
-const Hash = (p) => <Icon {...p} d={["M4 9h16","M4 15h16","M10 3L8 21","M16 3l-2 18"]} />;
 
 
 // Format date to YYYY-MM-DD using LOCAL time (not UTC)
@@ -204,9 +412,22 @@ const GoalTrackerApp = () => {
   const [editingGoal, setEditingGoal] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [animatingTasks, setAnimatingTasks] = useState({});
+  const [rippleTasks, setRippleTasks] = useState({});
+  const [groupCompletionAnim, setGroupCompletionAnim] = useState(new Set());
+  const [userOpenedGroups, setUserOpenedGroups] = useState(new Set());
+  const [allDoneCelebrating, setAllDoneCelebrating] = useState(false);
+  const [showTrophyBadge, setShowTrophyBadge] = useState(false);
   const [showCategorySettings, setShowCategorySettings] = useState(false);
+  
+  // DailyView state (lifted to prevent remounts)
+  const [showMediaForm, setShowMediaForm] = useState(false);
+  const [mediaForm, setMediaForm] = useState({ type: 'book', title: '', notes: '' });
+  const [collapsedGoals, setCollapsedGoals] = useState(new Set());
 
   const { goals, dailyTasks, taskCompletions, journalEntries, journalConfig, dailyPhotos, media, darkMode, monthlyIntentions, categories } = appState;
+
+  // Ref to store journal drafts - persists across DailyView remounts
+  const journalDraftsRef = useRef({});
 
   // ============================================
   // PERSISTENCE
@@ -323,13 +544,25 @@ const GoalTrackerApp = () => {
            date.getFullYear() === today.getFullYear();
   }, []);
 
+  // Check if a goal was active (existed) on a given date
+  // Goals should only count for dates on or after their creation
+  const isGoalActiveOnDate = useCallback((goal, dateKey) => {
+    if (!goal.createdAt) return true; // Legacy goals without createdAt are always active
+    const createdDateKey = toLocalDateKey(new Date(goal.createdAt));
+    return dateKey >= createdDateKey;
+  }, []);
+
   // Animation helper
   const triggerTaskAnimation = useCallback((taskKey) => {
     setAnimatingTasks(prev => ({ ...prev, [taskKey]: true }));
+    setRippleTasks(prev => ({ ...prev, [taskKey]: true }));
     triggerHaptic();
     setTimeout(() => {
       setAnimatingTasks(prev => ({ ...prev, [taskKey]: false }));
-    }, 1200);
+    }, 800);
+    setTimeout(() => {
+      setRippleTasks(prev => ({ ...prev, [taskKey]: false }));
+    }, 700);
   }, []);
 
   // ============================================
@@ -360,6 +593,14 @@ const GoalTrackerApp = () => {
       return newTasks;
     });
   }, [setGoals, setDailyTasks]);
+
+  const archiveGoal = useCallback((id) => {
+    setGoals(prev => prev.map(g => g.id === id ? { ...g, archived: true, archivedAt: new Date().toISOString() } : g));
+  }, [setGoals]);
+
+  const unarchiveGoal = useCallback((id) => {
+    setGoals(prev => prev.map(g => g.id === id ? { ...g, archived: false, archivedAt: null } : g));
+  }, [setGoals]);
 
   // ============================================
   // WEEK HELPERS (must be before task management)
@@ -394,6 +635,9 @@ const GoalTrackerApp = () => {
 
     if (currentValue) {
       setDailyTasks(prev => ({ ...prev, [storageKey]: { ...prev[storageKey], [taskKey]: false } }));
+      // Reset celebration states if unchecking
+      setAllDoneCelebrating(false);
+      setShowTrophyBadge(false);
       return;
     }
 
@@ -405,8 +649,73 @@ const GoalTrackerApp = () => {
       return;
     }
 
-    setDailyTasks(prev => ({ ...prev, [storageKey]: { ...prev[storageKey], [taskKey]: true } }));
-  }, [dailyTasks, setDailyTasks, triggerTaskAnimation, getWeekKey]);
+    setDailyTasks(prev => {
+      const newState = { ...prev, [storageKey]: { ...prev[storageKey], [taskKey]: true } };
+      
+      // Check group completion for 2B: Celebrate & Fold
+      if (goal && goal.tasks && goal.tasks.length > 1) {
+        const allGroupDone = goal.tasks.every(t => {
+          const checksNeeded = t.dailyChecks || 1;
+          for (let i = 0; i < checksNeeded; i++) {
+            const k = `${goalId}-${t.id}-${i}`;
+            if (k === taskKey) continue; // This one is being set to true
+            if (!newState[storageKey]?.[k]) return false;
+          }
+          return true;
+        });
+        
+        if (allGroupDone) {
+          // Determine the collapse key prefix (daily or weekly)
+          const isWeeklyTask = task?.frequency === 'weekly';
+          const collapsePrefix = isWeeklyTask ? 'weekly' : 'daily';
+          const collapseKey = `${collapsePrefix}-${goalId}`;
+          
+          setGroupCompletionAnim(prev => new Set([...prev, collapseKey]));
+          if (navigator.vibrate) navigator.vibrate([20, 60, 30, 60, 40]);
+          setTimeout(() => {
+            setCollapsedGoals(prev => {
+              // Only auto-collapse if user hasn't manually re-opened
+              if (userOpenedGroups.has(collapseKey)) return prev;
+              return new Set([...prev, collapseKey]);
+            });
+            setGroupCompletionAnim(prev => { const n = new Set(prev); n.delete(collapseKey); return n; });
+          }, 1200);
+        }
+      }
+      
+      // Check all daily tasks complete for 3B: Golden Glow
+      // Compute daily progress with new state
+      let totalTasks = 0;
+      let completedTasks = 0;
+      goals.forEach(g => {
+        if (!g.tasks || !Array.isArray(g.tasks) || g.archived) return;
+        if (g.goalType === 'points') return; // Points goals have separate completion logic
+        g.tasks.forEach(t => {
+          if (!t.frequency || t.frequency === 'daily') {
+            const checksPerDay = t.dailyChecks || 1;
+            totalTasks += checksPerDay;
+            for (let i = 0; i < checksPerDay; i++) {
+              const k = `${g.id}-${t.id}-${i}`;
+              if (k === taskKey) { completedTasks++; continue; }
+              if (newState[storageKey]?.[k]) completedTasks++;
+            }
+          }
+        });
+      });
+      
+      if (totalTasks > 0 && completedTasks === totalTasks && !allDoneCelebrating) {
+        if (navigator.vibrate) navigator.vibrate([30, 80, 30, 80, 60, 120, 80]);
+        setAllDoneCelebrating(true);
+        setTimeout(() => setShowTrophyBadge(true), 300);
+        setTimeout(() => {
+          setAllDoneCelebrating(false);
+          setShowTrophyBadge(false);
+        }, 4000);
+      }
+      
+      return newState;
+    });
+  }, [dailyTasks, setDailyTasks, triggerTaskAnimation, getWeekKey, goals, allDoneCelebrating, userOpenedGroups]);
 
   const saveTaskCompletion = useCallback((dateKey, goalId, taskId, checkIndex, note, photo) => {
     const taskKey = `${goalId}-${taskId}-${checkIndex}`;
@@ -601,25 +910,94 @@ const GoalTrackerApp = () => {
       goalStart.setHours(0, 0, 0, 0);
       const daysPassed = Math.floor((today - goalStart) / (1000 * 60 * 60 * 24)) + 1;
 
-      let completedDays = 0;
-      for (let i = 0; i < daysPassed; i++) {
-        const date = new Date(goalStart);
-        date.setDate(date.getDate() + i);
-        const dateKey = toLocalDateKey(date);
-        const tasks = dailyTasks[dateKey] || {};
-        const hasCompletion = Object.keys(tasks).some(key => 
-          key === goal.id || key.startsWith(`${goal.id}-`)
-        );
-        if (hasCompletion) completedDays++;
+      if (!goal.tasks || !Array.isArray(goal.tasks) || goal.tasks.length === 0) {
+        cache[goal.id] = { completedDays: 0, totalDays: daysPassed, percentage: 0 };
+        return;
       }
+
+      let totalExpected = 0;
+      let totalCompleted = 0;
+
+      goal.tasks.forEach(task => {
+        const frequency = task.frequency || 'daily';
+
+        if (frequency === 'daily') {
+          // Daily tasks: count each day
+          const checksPerDay = task.dailyChecks || 1;
+          for (let i = 0; i < daysPassed; i++) {
+            const date = new Date(goalStart);
+            date.setDate(date.getDate() + i);
+            const dateKey = toLocalDateKey(date);
+            totalExpected += checksPerDay;
+            for (let c = 0; c < checksPerDay; c++) {
+              if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) totalCompleted++;
+            }
+          }
+        } else if (frequency === 'weekly') {
+          // Weekly tasks: group by week, compare to weekly target
+          const weeklyTarget = task.weeklyTarget || 4;
+          
+          // Find the Sunday that starts the week containing goalStart
+          const firstWeekStart = new Date(goalStart);
+          firstWeekStart.setDate(goalStart.getDate() - goalStart.getDay());
+          
+          // Iterate through each week
+          let weekStart = new Date(firstWeekStart);
+          while (weekStart <= today) {
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            
+            // Count completions in this week (only for days within goal's active period)
+            let weeklyCompletions = 0;
+            let daysInWeekActive = 0;
+            
+            for (let d = new Date(weekStart); d <= weekEnd && d <= today; d.setDate(d.getDate() + 1)) {
+              if (d >= goalStart) {
+                daysInWeekActive++;
+                const dateKey = toLocalDateKey(d);
+                if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-0`]) weeklyCompletions++;
+              }
+            }
+            
+            // Only count this week if some days were active
+            if (daysInWeekActive > 0) {
+              // Pro-rate the target if it's a partial week (goal started mid-week or current week)
+              const adjustedTarget = daysInWeekActive < 7 
+                ? Math.max(1, Math.round(weeklyTarget * (daysInWeekActive / 7)))
+                : weeklyTarget;
+              
+              totalExpected += adjustedTarget;
+              totalCompleted += Math.min(weeklyCompletions, adjustedTarget); // Cap at target
+            }
+            
+            // Move to next week
+            weekStart.setDate(weekStart.getDate() + 7);
+          }
+        } else if (frequency === 'scheduled') {
+          // Scheduled tasks: only count on scheduled days
+          const checksPerDay = task.dailyChecks || 1;
+          for (let i = 0; i < daysPassed; i++) {
+            const date = new Date(goalStart);
+            date.setDate(date.getDate() + i);
+            if (isTaskScheduledForDate(task, date)) {
+              const dateKey = toLocalDateKey(date);
+              totalExpected += checksPerDay;
+              for (let c = 0; c < checksPerDay; c++) {
+                if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) totalCompleted++;
+              }
+            }
+          }
+        }
+      });
+
       cache[goal.id] = {
-        completedDays,
-        totalDays: daysPassed,
-        percentage: daysPassed > 0 ? Math.round((completedDays / daysPassed) * 100) : 0
+        completedDays: totalCompleted, // Now represents completions, not days
+        totalDays: totalExpected, // Now represents expected completions
+        percentage: totalExpected > 0 ? Math.round((totalCompleted / totalExpected) * 100) : 0
       };
     });
     return cache;
-  }, [goals, dailyTasks]);
+  }, [goals, dailyTasks, isTaskScheduledForDate]);
 
   const calculateProgress = useCallback((goal) => {
     return goalProgressCache[goal.id] || { completedDays: 0, totalDays: 0, percentage: 0 };
@@ -646,6 +1024,8 @@ const GoalTrackerApp = () => {
     
     goals.forEach(goal => {
       if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+      if (goal.archived) return; // Skip archived goals
+      if (!isGoalActiveOnDate(goal, selectedDateKey)) return; // Skip goals created after this date
       
       // Handle daily points goals
       if (goal.goalType === 'points' && (!goal.pointTargetFrequency || goal.pointTargetFrequency === 'daily')) {
@@ -698,6 +1078,8 @@ const GoalTrackerApp = () => {
     let completedTasks = 0;
     goals.forEach(goal => {
       if (goal.goalType === 'points') return;
+      if (goal.archived) return; // Skip archived goals
+      if (!isGoalActiveOnDate(goal, dateKey)) return; // Skip goals created after this date
       if (!goal.tasks || !Array.isArray(goal.tasks)) return;
       goal.tasks.forEach(task => {
         if ((!task.frequency || task.frequency === 'daily') ||
@@ -715,7 +1097,7 @@ const GoalTrackerApp = () => {
       total: totalTasks,
       percentage: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
     };
-  }, [goals, dailyTasks, isTaskScheduledForDate]);
+  }, [goals, dailyTasks, isTaskScheduledForDate, isGoalActiveOnDate]);
 
   const weeklyOverallProgress = useMemo(() => {
     const { weekStart, weekEnd } = getWeekRange(selectedDate);
@@ -727,9 +1109,13 @@ const GoalTrackerApp = () => {
 
     goals.forEach(goal => {
       if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+      if (goal.archived) return; // Skip archived goals
       
       // Handle weekly points goals
       if (goal.goalType === 'points' && goal.pointTargetFrequency === 'weekly') {
+        // Only count if goal was created before or during this week
+        const weekEndKey = toLocalDateKey(weekEnd);
+        if (!isGoalActiveOnDate(goal, weekEndKey)) return;
         totalPoints += goal.pointTarget || 10;
         earnedPoints += calculatePointsEarnedForWeek(weekKey, goal);
         return;
@@ -744,6 +1130,7 @@ const GoalTrackerApp = () => {
           const checksPerDay = task.dailyChecks || 1;
           for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
             const dateKey = toLocalDateKey(d);
+            if (!isGoalActiveOnDate(goal, dateKey)) continue; // Skip days before goal was created
             totalExpected += checksPerDay;
             for (let i = 0; i < checksPerDay; i++) {
               if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) totalCompleted++;
@@ -752,8 +1139,9 @@ const GoalTrackerApp = () => {
         } else if (task.frequency === 'scheduled') {
           const checksPerDay = task.dailyChecks || 1;
           for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+            const dateKey = toLocalDateKey(d);
+            if (!isGoalActiveOnDate(goal, dateKey)) continue; // Skip days before goal was created
             if (isTaskScheduledForDate(task, d)) {
-              const dateKey = toLocalDateKey(d);
               totalExpected += checksPerDay;
               for (let i = 0; i < checksPerDay; i++) {
                 if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${i}`]) totalCompleted++;
@@ -761,10 +1149,20 @@ const GoalTrackerApp = () => {
             }
           }
         } else if (task.frequency === 'weekly') {
+          // For weekly tasks, count proportionally based on days active
           const target = task.weeklyTarget || 4;
-          totalExpected += target;
+          let daysActive = 0;
           for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
             const dateKey = toLocalDateKey(d);
+            if (isGoalActiveOnDate(goal, dateKey)) daysActive++;
+          }
+          if (daysActive === 0) return;
+          // Adjust target proportionally if goal was created mid-week
+          const adjustedTarget = daysActive < 7 ? Math.ceil(target * (daysActive / 7)) : target;
+          totalExpected += adjustedTarget;
+          for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+            const dateKey = toLocalDateKey(d);
+            if (!isGoalActiveOnDate(goal, dateKey)) continue;
             if (isTaskCompleted(dateKey, goal.id, task.id)) totalCompleted++;
           }
         }
@@ -1335,7 +1733,7 @@ const GoalTrackerApp = () => {
                   <div className={`w-7 h-7 rounded-lg ${darkMode ? 'bg-amber-900/50' : 'bg-amber-100'} flex items-center justify-center`}>
                     <Trophy className="w-4 h-4 text-amber-500" />
                   </div>
-                  <span className={`text-xs font-medium ${theme.textSecondary}`}>Yearly Target</span>
+                  <span className={`text-xs font-medium ${theme.textSecondary}`}>Target</span>
                   <span className={`text-xs ${theme.textMuted} ml-auto`}>(optional)</span>
                 </div>
                 <input 
@@ -1931,6 +2329,107 @@ const GoalTrackerApp = () => {
         return { ...cat, pct, dailyBars };
       }).filter(Boolean);
 
+      // ---- Effort Distribution for this week ----
+      const weeklyEffortData = weekDays.map(day => {
+        let easy = 0, medium = 0, hard = 0;
+        goals.forEach(goal => {
+          if (!goal.tasks) return;
+          goal.tasks.forEach(task => {
+            const diff = task.difficulty || 'medium';
+            const isDaily = !task.frequency || task.frequency === 'daily';
+            const isSched = task.frequency === 'scheduled' && isTaskScheduledForDate(task, day.date);
+            if (!isDaily && !isSched) return;
+            const checks = task.dailyChecks || 1;
+            for (let c = 0; c < checks; c++) {
+              if (dailyTasks[day.dateKey]?.[`${goal.id}-${task.id}-${c}`]) {
+                if (diff === 'easy') easy++;
+                else if (diff === 'hard') hard++;
+                else medium++;
+              }
+            }
+          });
+        });
+        return { easy, medium, hard, total: easy + medium + hard };
+      });
+      const weekEffortTotals = weeklyEffortData.reduce(
+        (acc, d) => ({ easy: acc.easy + d.easy, medium: acc.medium + d.medium, hard: acc.hard + d.hard }),
+        { easy: 0, medium: 0, hard: 0 }
+      );
+      const weekEffortTotal = weekEffortTotals.easy + weekEffortTotals.medium + weekEffortTotals.hard;
+
+      // ---- Weekly Time Budget ----
+      const weekTimeData = (() => {
+        let scheduled = 0, completed = 0;
+        goals.forEach(goal => {
+          if (!goal.tasks) return;
+          goal.tasks.forEach(task => {
+            const est = task.timeEstimate || 0;
+            if (!est) return;
+            weekDays.forEach(day => {
+              const isDaily = !task.frequency || task.frequency === 'daily';
+              const isSched = task.frequency === 'scheduled' && isTaskScheduledForDate(task, day.date);
+              if (!isDaily && !isSched) return;
+              if (day.isFuture) return;
+              const checks = task.dailyChecks || 1;
+              for (let c = 0; c < checks; c++) {
+                scheduled += est;
+                if (dailyTasks[day.dateKey]?.[`${goal.id}-${task.id}-${c}`]) {
+                  completed += est;
+                }
+              }
+            });
+          });
+        });
+        const remaining = Math.max(0, scheduled - completed);
+        const pct = scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0;
+        return { scheduled, completed, remaining, pct };
+      })();
+      const fmtTime = (m) => { const h = Math.floor(m / 60); const mm = m % 60; return h > 0 ? `${h}h ${mm}m` : `${mm}m`; };
+
+      // ---- Enhanced Category Data (for expanded cards) ----
+      const categoryDepthData = (categories || []).map(cat => {
+        const catGoals = goals.filter(g => g.category === cat.id && g.goalType !== 'points');
+        if (catGoals.length === 0) return null;
+        let totalAll = 0, totalDone = 0, timeScheduled = 0, timeCompleted = 0;
+        let easyCount = 0, mediumCount = 0, hardCount = 0;
+        const dailyBars = weekDays.map(day => {
+          let dayTotal = 0, dayDone = 0;
+          catGoals.forEach(goal => {
+            if (!goal.tasks) return;
+            goal.tasks.forEach(task => {
+              const isDaily = !task.frequency || task.frequency === 'daily';
+              const isSched = task.frequency === 'scheduled' && isTaskScheduledForDate(task, day.date);
+              if (!isDaily && !isSched) return;
+              const checks = task.dailyChecks || 1;
+              const diff = task.difficulty || 'medium';
+              const est = task.timeEstimate || 0;
+              for (let c = 0; c < checks; c++) {
+                if (!day.isFuture) {
+                  dayTotal++; totalAll++;
+                  timeScheduled += est;
+                  if (dailyTasks[day.dateKey]?.[`${goal.id}-${task.id}-${c}`]) {
+                    dayDone++; totalDone++;
+                    timeCompleted += est;
+                    if (diff === 'easy') easyCount++;
+                    else if (diff === 'hard') hardCount++;
+                    else mediumCount++;
+                  }
+                }
+              }
+            });
+          });
+          return dayTotal > 0 ? dayDone / dayTotal : 0;
+        });
+        const pct = totalAll > 0 ? Math.round(totalDone / totalAll * 100) : 0;
+        const effortTotal = easyCount + mediumCount + hardCount;
+        const effortMix = effortTotal > 0 ? {
+          easy: Math.round((easyCount / effortTotal) * 100),
+          medium: Math.round((mediumCount / effortTotal) * 100),
+          hard: Math.round((hardCount / effortTotal) * 100),
+        } : { easy: 0, medium: 0, hard: 0 };
+        return { ...cat, pct, dailyBars, timeScheduled, timeCompleted, effortMix };
+      }).filter(Boolean);
+
       return (
         <>
           {/* Heat map calendar card */}
@@ -1980,6 +2479,53 @@ const GoalTrackerApp = () => {
               ))}
             </div>
           </div>
+
+
+          {/* Category Depth - Expanded Cards */}
+          {categoryDepthData.length > 0 && (
+            <div>
+              <p className={`text-[11px] font-semibold uppercase tracking-wider mb-2 ml-1 ${theme.textMuted}`}>Category Depth</p>
+              <div className="space-y-2.5">
+                {categoryDepthData.map((cat, ci) => {
+                  const timePct = cat.timeScheduled > 0 ? Math.round((cat.timeCompleted / cat.timeScheduled) * 100) : 0;
+                  return (
+                    <div key={ci} className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                      <div className="h-1.5" style={{ backgroundColor: darkMode ? '#1e293b' : '#e2e8f0' }}>
+                        <div className="h-full" style={{ width: `${cat.pct}%`, backgroundColor: cat.color }} />
+                      </div>
+                      <div className="p-3.5">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                            <span className={`text-[13px] font-semibold ${theme.textPrimary}`}>{cat.name}</span>
+                          </div>
+                          <span className="text-[14px] font-bold" style={{ color: cat.color }}>{cat.pct}%</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className={`rounded-lg p-2.5 ${theme.inputBg}`}>
+                            <div className={`text-[9px] font-semibold uppercase tracking-wider mb-1 ${theme.textMuted}`}>Time</div>
+                            <div className="flex items-baseline gap-1">
+                              <span className={`text-[14px] font-bold ${theme.textPrimary}`}>{fmtTime(cat.timeCompleted)}</span>
+                            </div>
+                            <div className={`text-[9px] ${theme.textMuted}`}>of {fmtTime(cat.timeScheduled)} scheduled</div>
+                          </div>
+                          <div className={`rounded-lg p-2.5 ${theme.inputBg}`}>
+                            <div className={`text-[9px] font-semibold uppercase tracking-wider mb-1.5 ${theme.textMuted}`}>Effort Mix</div>
+                            <div className="flex rounded-full overflow-hidden h-2 mb-1.5">
+                              <div style={{ width: `${cat.effortMix.easy}%`, backgroundColor: '#86efac' }} />
+                              <div style={{ width: `${cat.effortMix.medium}%`, backgroundColor: '#fde68a' }} />
+                              <div style={{ width: `${cat.effortMix.hard}%`, backgroundColor: '#f87171' }} />
+                            </div>
+                            <div className={`text-[9px] ${theme.textMuted}`}>{cat.effortMix.hard}% hard tasks</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Scheduled tasks */}
           {scheduledDays.length > 0 && (
@@ -2078,6 +2624,114 @@ const GoalTrackerApp = () => {
               </div>
             </div>
           )}
+
+          {/* Effort Distribution */}
+          {weekEffortTotal > 0 && (
+            <div>
+              <p className={`text-[11px] font-semibold uppercase tracking-wider mb-2 ml-1 ${theme.textMuted}`}>Effort Distribution</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                <div className="px-3.5 py-3">
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <div className="flex-1 flex rounded-full overflow-hidden h-2.5">
+                      {weekEffortTotal > 0 && <>
+                        <div style={{ width: `${(weekEffortTotals.easy / weekEffortTotal) * 100}%`, backgroundColor: '#86efac' }} />
+                        <div style={{ width: `${(weekEffortTotals.medium / weekEffortTotal) * 100}%`, backgroundColor: '#fde68a' }} />
+                        <div style={{ width: `${(weekEffortTotals.hard / weekEffortTotal) * 100}%`, backgroundColor: '#f87171' }} />
+                      </>}
+                    </div>
+                  </div>
+                  <div className="flex justify-around">
+                    {[
+                      { label: 'Easy', count: weekEffortTotals.easy, pct: weekEffortTotal > 0 ? Math.round((weekEffortTotals.easy / weekEffortTotal) * 100) : 0, dotColor: '#22c55e' },
+                      { label: 'Medium', count: weekEffortTotals.medium, pct: weekEffortTotal > 0 ? Math.round((weekEffortTotals.medium / weekEffortTotal) * 100) : 0, dotColor: '#eab308' },
+                      { label: 'Hard', count: weekEffortTotals.hard, pct: weekEffortTotal > 0 ? Math.round((weekEffortTotals.hard / weekEffortTotal) * 100) : 0, dotColor: '#ef4444' },
+                    ].map((e, i) => (
+                      <div key={i} className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: e.dotColor }} />
+                          <span className={`text-[13px] font-bold ${theme.textPrimary}`}>{e.count}</span>
+                        </div>
+                        <div className={`text-[9px] ${theme.textMuted}`}>{e.label} ({e.pct}%)</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Daily stacked bars */}
+                <div className={`px-3.5 pb-3.5 border-t ${theme.divider} pt-3`}>
+                  <div className="flex items-end gap-1.5" style={{ height: 56 }}>
+                    {weeklyEffortData.map((day, i) => {
+                      const maxTotal = Math.max(...weeklyEffortData.map(d => d.total), 1);
+                      const scale = 44 / maxTotal;
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center">
+                          <span className={`text-[9px] font-semibold mb-0.5 ${theme.textMuted}`}>{day.total || ''}</span>
+                          <div className="w-full flex flex-col-reverse rounded-md overflow-hidden" style={{ height: day.total * scale || 2 }}>
+                            <div style={{ height: day.easy * scale, backgroundColor: '#86efac' }} />
+                            <div style={{ height: day.medium * scale, backgroundColor: '#fde68a' }} />
+                            <div style={{ height: day.hard * scale, backgroundColor: '#f87171' }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-1.5 mt-1">
+                    {weekDays.map((d, i) => (
+                      <div key={i} className={`flex-1 text-center text-[9px] font-medium ${theme.textMuted}`}>{d.label.charAt(0)}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Weekly Time Budget */}
+          {weekTimeData.scheduled > 0 && (
+            <div>
+              <p className={`text-[11px] font-semibold uppercase tracking-wider mb-2 ml-1 ${theme.textMuted}`}>Weekly Time Budget</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm p-3.5`}>
+                <div className="flex items-center gap-4">
+                  <div className="relative w-20 h-20 flex-shrink-0">
+                    <svg viewBox="0 0 80 80" className="w-full h-full" style={{ transform: 'rotate(-90deg)' }}>
+                      <circle cx="40" cy="40" r="32" fill="none" stroke={darkMode ? '#1e293b' : '#e2e8f0'} strokeWidth="8" />
+                      <circle cx="40" cy="40" r="32" fill="none" stroke="#3b82f6" strokeWidth="8"
+                        strokeDasharray={`${weekTimeData.pct * 2.01} ${201 - weekTimeData.pct * 2.01}`}
+                        strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className={`text-lg font-bold ${theme.textPrimary}`}>{weekTimeData.pct}%</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-1.5">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-medium ${theme.textMuted}`}>Scheduled</span>
+                        <span className={`text-[11px] font-bold ${theme.textPrimary}`}>{fmtTime(weekTimeData.scheduled)}</span>
+                      </div>
+                      <div className={`h-1 rounded-full mt-0.5 ${theme.progressBg}`}>
+                        <div className={`h-full rounded-full ${darkMode ? 'bg-slate-500' : 'bg-slate-400'}`} style={{ width: '100%' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-medium ${theme.textMuted}`}>Completed</span>
+                        <span className="text-[11px] font-bold text-blue-500">{fmtTime(weekTimeData.completed)}</span>
+                      </div>
+                      <div className={`h-1 rounded-full mt-0.5 ${theme.progressBg}`}>
+                        <div className="h-full rounded-full bg-blue-500" style={{ width: `${weekTimeData.pct}%` }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-medium ${theme.textMuted}`}>Remaining</span>
+                        <span className="text-[11px] font-bold text-orange-500">{fmtTime(weekTimeData.remaining)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
         </>
       );
     };
@@ -2338,6 +2992,120 @@ const GoalTrackerApp = () => {
         setIsEditingIntention(false);
       };
 
+
+      // ---- Monthly Effort Distribution ----
+      const monthlyEffortCounts = (() => {
+        let easy = 0, medium = 0, hard = 0;
+        const weeklyBreakdown = weeksData.map((week, wi) => {
+          let wEasy = 0, wMedium = 0, wHard = 0;
+          const ws = new Date(year, month, 1);
+          ws.setDate(ws.getDate() - ws.getDay() + wi * 7);
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(ws);
+            d.setDate(ws.getDate() + i);
+            if (d.getMonth() !== month || d.getFullYear() !== year) continue;
+            const dateKey = toLocalDateKey(d);
+            if (dateKey > todayKey) continue;
+            goals.forEach(goal => {
+              if (!goal.tasks) return;
+              goal.tasks.forEach(task => {
+                const diff = task.difficulty || 'medium';
+                const isDaily = !task.frequency || task.frequency === 'daily';
+                const isSched = task.frequency === 'scheduled' && isTaskScheduledForDate(task, d);
+                if (!isDaily && !isSched) return;
+                const checks = task.dailyChecks || 1;
+                for (let c = 0; c < checks; c++) {
+                  if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) {
+                    if (diff === 'easy') { wEasy++; easy++; }
+                    else if (diff === 'hard') { wHard++; hard++; }
+                    else { wMedium++; medium++; }
+                  }
+                }
+              });
+            });
+          }
+          return { easy: wEasy, medium: wMedium, hard: wHard, total: wEasy + wMedium + wHard };
+        });
+        return { easy, medium, hard, total: easy + medium + hard, weeklyBreakdown };
+      })();
+
+      // ---- Monthly Time by Goal ----
+      const monthlyGoalTime = goals.filter(g => g.goalType !== 'points').map(goal => {
+        if (!goal.tasks || goal.tasks.length === 0) return null;
+        let scheduled = 0, completed = 0;
+        const cat = (categories || []).find(c => c.id === goal.category);
+        for (let day = 1; day <= daysPassed; day++) {
+          const d = new Date(year, month, day);
+          const dateKey = toLocalDateKey(d);
+          goal.tasks.forEach(task => {
+            const est = task.timeEstimate || 0;
+            if (!est) return;
+            const isDaily = !task.frequency || task.frequency === 'daily';
+            const isSched = task.frequency === 'scheduled' && isTaskScheduledForDate(task, d);
+            if (!isDaily && !isSched) return;
+            const checks = task.dailyChecks || 1;
+            for (let c = 0; c < checks; c++) {
+              scheduled += est;
+              if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) completed += est;
+            }
+          });
+        }
+        if (scheduled === 0) return null;
+        return { id: goal.id, name: goal.title, color: cat?.color || '#64748b', scheduled, completed };
+      }).filter(Boolean).sort((a, b) => b.scheduled - a.scheduled);
+      const monthTotalScheduled = monthlyGoalTime.reduce((s, g) => s + g.scheduled, 0);
+      const monthTotalCompleted = monthlyGoalTime.reduce((s, g) => s + g.completed, 0);
+      const fmtTime = (m) => { const h = Math.floor(m / 60); const mm = m % 60; return h > 0 ? `${h}h ${mm > 0 ? mm + 'm' : ''}` : `${mm}m`; };
+
+      // ---- Monthly Category Depth (Comparative Matrix) ----
+      const monthlyCategoryDepth = (categories || []).map(cat => {
+        const catGoals = goals.filter(g => g.category === cat.id && g.goalType !== 'points');
+        if (catGoals.length === 0) return null;
+        let totalDone = 0, totalAll = 0, timeSched = 0, timeComp = 0;
+        let easyC = 0, medC = 0, hardC = 0;
+        const weeklyPcts = weeksData.map((week, wi) => {
+          if (week.isFuture) return 0;
+          let wDone = 0, wAll = 0;
+          const ws = new Date(year, month, 1);
+          ws.setDate(ws.getDate() - ws.getDay() + wi * 7);
+          catGoals.forEach(goal => {
+            if (!goal.tasks) return;
+            goal.tasks.forEach(task => {
+              const diff = task.difficulty || 'medium';
+              const est = task.timeEstimate || 0;
+              for (let i = 0; i < 7; i++) {
+                const d = new Date(ws);
+                d.setDate(ws.getDate() + i);
+                if (d.getMonth() !== month) continue;
+                const dateKey = toLocalDateKey(d);
+                if (dateKey > todayKey) continue;
+                const isDaily = !task.frequency || task.frequency === 'daily';
+                const isSched = task.frequency === 'scheduled' && isTaskScheduledForDate(task, d);
+                if (!isDaily && !isSched) return;
+                const checks = task.dailyChecks || 1;
+                for (let c = 0; c < checks; c++) {
+                  wAll++; totalAll++; timeSched += est;
+                  if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) {
+                    wDone++; totalDone++; timeComp += est;
+                    if (diff === 'easy') easyC++;
+                    else if (diff === 'hard') hardC++;
+                    else medC++;
+                  }
+                }
+              }
+            });
+          });
+          return wAll > 0 ? Math.round((wDone / wAll) * 100) : 0;
+        });
+        const pct = totalAll > 0 ? Math.round((totalDone / totalAll) * 100) : 0;
+        const effortTotal = easyC + medC + hardC;
+        const effortMix = effortTotal > 0 ? {
+          easy: Math.round((easyC / effortTotal) * 100),
+          medium: Math.round((medC / effortTotal) * 100),
+          hard: Math.round((hardC / effortTotal) * 100),
+        } : { easy: 0, medium: 0, hard: 0 };
+        return { ...cat, pct, weeklyPcts, timeScheduled: timeSched, timeCompleted: timeComp, effortMix };
+      }).filter(Boolean);
       return (
         <div className="space-y-3">
           {/* Monthly Intention */}
@@ -2604,82 +3372,1077 @@ const GoalTrackerApp = () => {
               </div>
             </div>
           )}
+
+
+          {/* Effort Distribution */}
+          {monthlyEffortCounts.total > 0 && (
+            <div>
+              <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Effort Distribution</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                <div className="px-3.5 py-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex-1 flex rounded-full overflow-hidden h-3">
+                      <div style={{ width: `${(monthlyEffortCounts.easy / monthlyEffortCounts.total) * 100}%`, backgroundColor: '#86efac' }} />
+                      <div style={{ width: `${(monthlyEffortCounts.medium / monthlyEffortCounts.total) * 100}%`, backgroundColor: '#fde68a' }} />
+                      <div style={{ width: `${(monthlyEffortCounts.hard / monthlyEffortCounts.total) * 100}%`, backgroundColor: '#f87171' }} />
+                    </div>
+                  </div>
+                  <div className="flex justify-around">
+                    {[
+                      { label: 'Easy', count: monthlyEffortCounts.easy, pct: Math.round((monthlyEffortCounts.easy / monthlyEffortCounts.total) * 100), dotColor: '#22c55e' },
+                      { label: 'Medium', count: monthlyEffortCounts.medium, pct: Math.round((monthlyEffortCounts.medium / monthlyEffortCounts.total) * 100), dotColor: '#eab308' },
+                      { label: 'Hard', count: monthlyEffortCounts.hard, pct: Math.round((monthlyEffortCounts.hard / monthlyEffortCounts.total) * 100), dotColor: '#ef4444' },
+                    ].map((e, i) => (
+                      <div key={i} className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: e.dotColor }} />
+                          <span className={`text-[13px] font-bold ${theme.textPrimary}`}>{e.count}</span>
+                        </div>
+                        <div className={`text-[9px] ${theme.textMuted}`}>{e.label} ({e.pct}%)</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Weekly stacked bars */}
+                <div className={`px-3.5 pb-3.5 border-t ${theme.divider} pt-3`}>
+                  <div className="flex items-end gap-3" style={{ height: 70 }}>
+                    {monthlyEffortCounts.weeklyBreakdown.map((week, i) => {
+                      const maxTotal = Math.max(...monthlyEffortCounts.weeklyBreakdown.map(w => w.total), 1);
+                      const scale = 56 / maxTotal;
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center">
+                          <span className={`text-[9px] font-semibold mb-0.5 ${theme.textMuted}`}>{week.total || ''}</span>
+                          <div className="w-full flex flex-col-reverse rounded-md overflow-hidden" style={{ height: week.total * scale || 2 }}>
+                            <div style={{ height: week.easy * scale, backgroundColor: '#86efac' }} />
+                            <div style={{ height: week.medium * scale, backgroundColor: '#fde68a' }} />
+                            <div style={{ height: week.hard * scale, backgroundColor: '#f87171' }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-3 mt-1">
+                    {monthlyEffortCounts.weeklyBreakdown.map((_, i) => (
+                      <div key={i} className={`flex-1 text-center text-[9px] font-medium ${theme.textMuted}`}>Wk {i + 1}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Time by Goal */}
+          {monthlyGoalTime.length > 0 && (
+            <div>
+              <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Time by Goal</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                <div className={`px-3.5 py-2.5 flex justify-around border-b ${theme.divider}`}>
+                  <div className="text-center">
+                    <div className={`text-[14px] font-bold ${theme.textPrimary}`}>{fmtTime(monthTotalCompleted)}</div>
+                    <div className={`text-[9px] ${theme.textMuted}`}>completed</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-[14px] font-bold ${theme.textMuted}`}>{fmtTime(monthTotalScheduled)}</div>
+                    <div className={`text-[9px] ${theme.textMuted}`}>scheduled</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-[14px] font-bold ${monthTotalScheduled > 0 && Math.round((monthTotalCompleted / monthTotalScheduled) * 100) >= 75 ? 'text-emerald-500' : 'text-orange-500'}`}>
+                      {monthTotalScheduled > 0 ? Math.round((monthTotalCompleted / monthTotalScheduled) * 100) : 0}%
+                    </div>
+                    <div className={`text-[9px] ${theme.textMuted}`}>follow-through</div>
+                  </div>
+                </div>
+                {monthlyGoalTime.map((goal, i) => {
+                  const pctDone = Math.round((goal.completed / goal.scheduled) * 100);
+                  const maxSched = Math.max(...monthlyGoalTime.map(g => g.scheduled));
+                  const barW = (goal.scheduled / maxSched) * 100;
+                  return (
+                    <div key={i} className={`px-3.5 py-2.5 ${i < monthlyGoalTime.length - 1 ? `border-b ${theme.divider}` : ''}`}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: goal.color }} />
+                          <span className={`text-[11px] font-medium ${theme.textPrimary}`}>{goal.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[10px] font-bold ${theme.textPrimary}`}>{fmtTime(goal.completed)}</span>
+                          <span className={`text-[9px] ${theme.textMuted}`}>/ {fmtTime(goal.scheduled)}</span>
+                        </div>
+                      </div>
+                      <div className="relative h-2 rounded-full overflow-hidden" style={{ width: `${barW}%` }}>
+                        <div className="absolute inset-0 rounded-full" style={{ backgroundColor: darkMode ? '#1e293b' : '#e2e8f0' }} />
+                        <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pctDone}%`, backgroundColor: pctDone >= 90 ? '#22c55e' : pctDone >= 60 ? goal.color : '#f97316' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Category Depth - Comparative Matrix */}
+          {monthlyCategoryDepth.length > 0 && (
+            <div>
+              <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Category Depth</p>
+              <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                {monthlyCategoryDepth.map((cat, ci) => {
+                  const timePct = cat.timeScheduled > 0 ? Math.round((cat.timeCompleted / cat.timeScheduled) * 100) : 0;
+                  return (
+                    <div key={ci} className={`px-3.5 py-3 ${ci < monthlyCategoryDepth.length - 1 ? `border-b ${theme.divider}` : ''}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
+                          <span className={`text-[12px] font-semibold ${theme.textPrimary}`}>{cat.name}</span>
+                        </div>
+                        <span className="text-[13px] font-bold" style={{ color: cat.color }}>{cat.pct}%</span>
+                      </div>
+                      <div className="flex items-center gap-4 ml-4">
+                        <div className="flex items-center gap-1.5">
+                          <div className="relative w-7 h-7 flex-shrink-0">
+                            <svg viewBox="0 0 28 28" className="w-full h-full" style={{ transform: 'rotate(-90deg)' }}>
+                              <circle cx="14" cy="14" r="10" fill="none" stroke={darkMode ? '#1e293b' : '#e2e8f0'} strokeWidth="3" />
+                              <circle cx="14" cy="14" r="10" fill="none" stroke="#3b82f6" strokeWidth="3"
+                                strokeDasharray={`${timePct * 0.628} ${62.8 - timePct * 0.628}`} strokeLinecap="round" />
+                            </svg>
+                          </div>
+                          <div>
+                            <div className={`text-[10px] font-bold ${theme.textPrimary}`}>{fmtTime(cat.timeCompleted)}</div>
+                            <div className={`text-[8px] ${theme.textMuted}`}>time</div>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex rounded-full overflow-hidden h-2 mb-0.5">
+                            <div style={{ width: `${cat.effortMix.easy}%`, backgroundColor: '#86efac' }} />
+                            <div style={{ width: `${cat.effortMix.medium}%`, backgroundColor: '#fde68a' }} />
+                            <div style={{ width: `${cat.effortMix.hard}%`, backgroundColor: '#f87171' }} />
+                          </div>
+                          <div className={`text-[8px] ${theme.textMuted}`}>{cat.effortMix.hard}% hard</div>
+                        </div>
+                        <div className="flex gap-0.5 items-end flex-shrink-0" style={{ height: 16, width: 32 }}>
+                          {cat.weeklyPcts.map((pctVal, wi) => (
+                            <div key={wi} className="flex-1 rounded-sm" style={{ height: `${Math.max((pctVal / 100) * 14, 1)}px`, backgroundColor: cat.color, opacity: 0.4 + (wi / Math.max(cat.weeklyPcts.length - 1, 1)) * 0.6 }} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       );
     };
 
-    // ==== YEARLY VIEW ====
+    // ==== YEARLY VIEW (Month Cards + Mini Heat Map) ====
     const YearlyCalendar = () => {
+      const [yearlyTab, setYearlyTab] = useState('highlights');
       const year = calendarDate.getFullYear();
       const jan1 = new Date(year, 0, 1);
-      const startOffset = jan1.getDay(); // 0=Sun
+      const startOffset = jan1.getDay();
       const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
       const totalDays = isLeap ? 366 : 365;
+      const today = new Date();
+      const todayKey = toLocalDateKey(today);
+      const isCurrentYear = year === today.getFullYear();
+      const daysPassed = isCurrentYear 
+        ? Math.floor((today - jan1) / (1000 * 60 * 60 * 24)) + 1
+        : totalDays;
 
-      // Build weeks (columns) of 7 days
-      const weeks = [];
-      let currentWeek = [];
-      // Pad first week
-      for (let i = 0; i < startOffset; i++) currentWeek.push(null);
-      for (let d = 0; d < totalDays; d++) {
-        const date = new Date(year, 0, d + 1);
-        const dateKey = toLocalDateKey(date);
-        const progress = calculateDailyProgress(dateKey);
-        const isFuture = dateKey > todayKey;
-        currentWeek.push({ date, dateKey, pct: progress.percentage, isFuture });
-        if (currentWeek.length === 7) {
-          weeks.push(currentWeek);
-          currentWeek = [];
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      // Navigation helpers
+      const goToDay = (date) => { setSelectedDate(date); setCurrentView('daily'); };
+      const goToMonth = (monthIndex) => { 
+        setCalendarDate(new Date(year, monthIndex, 1)); 
+        setCalendarMode('month'); 
+      };
+
+      // Build weeks for compact heat map
+      const weeks = useMemo(() => {
+        const result = [];
+        let currentWeek = [];
+        for (let i = 0; i < startOffset; i++) currentWeek.push(null);
+        for (let d = 0; d < totalDays; d++) {
+          const date = new Date(year, 0, d + 1);
+          const dateKey = toLocalDateKey(date);
+          const progress = calculateDailyProgress(dateKey);
+          const isFuture = dateKey > todayKey;
+          currentWeek.push({ date, dateKey, pct: progress.percentage, isFuture });
+          if (currentWeek.length === 7) {
+            result.push(currentWeek);
+            currentWeek = [];
+          }
         }
-      }
-      if (currentWeek.length > 0) {
-        while (currentWeek.length < 7) currentWeek.push(null);
-        weeks.push(currentWeek);
-      }
+        if (currentWeek.length > 0) {
+          while (currentWeek.length < 7) currentWeek.push(null);
+          result.push(currentWeek);
+        }
+        return result;
+      }, [year, startOffset, totalDays, calculateDailyProgress, todayKey]);
 
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      // Calculate monthly stats
+      const monthlyStats = useMemo(() => {
+        const months = [];
+        for (let m = 0; m < 12; m++) {
+          const daysInMonth = new Date(year, m + 1, 0).getDate();
+          let total = 0, count = 0, perfectDays = 0, totalTasks = 0;
 
-      return (
-        <div className={`${theme.cardBg} rounded-xl shadow-sm p-3 overflow-x-auto`}>
-          {/* Month labels */}
-          <div className="flex mb-1.5" style={{ paddingLeft: 18 }}>
-            {months.map((m, i) => (
-              <div key={i} style={{ width: `${100 / 12}%`, fontSize: 9, fontWeight: 600 }} className={theme.textMuted}>{m}</div>
-            ))}
-          </div>
-          <div className="flex gap-0.5">
-            {/* Day labels */}
-            <div className="flex flex-col gap-0.5 mr-1 pt-0">
-              {['', 'M', '', 'W', '', 'F', ''].map((d, i) => (
-                <div key={i} style={{ width: 14, height: 8, fontSize: 8 }} className={`flex items-center ${theme.textMuted}`}>{d}</div>
-              ))}
-            </div>
-            {/* Grid */}
-            <div className="flex-1 flex gap-0.5">
+          for (let d = 1; d <= daysInMonth; d++) {
+            const date = new Date(year, m, d);
+            if (date > today) continue;
+            const dateKey = toLocalDateKey(date);
+            const progress = calculateDailyProgress(dateKey);
+            if (progress.total > 0) {
+              total += progress.percentage;
+              count++;
+              totalTasks += progress.completed;
+              if (progress.percentage === 100) perfectDays++;
+            }
+          }
+
+          const prevMonth = m > 0 ? months[m - 1] : null;
+          const avg = count > 0 ? Math.round(total / count) : 0;
+
+          months.push({
+            index: m,
+            name: new Date(year, m).toLocaleString('default', { month: 'long' }),
+            shortName: monthNames[m],
+            avg,
+            daysTracked: count,
+            daysInMonth,
+            perfectDays,
+            totalTasks,
+            isFuture: new Date(year, m, 1) > today,
+            isCurrent: m === today.getMonth() && year === today.getFullYear(),
+            trend: prevMonth && !prevMonth.isFuture && prevMonth.daysTracked > 0 ? avg - prevMonth.avg : null,
+          });
+        }
+        return months;
+      }, [year, calculateDailyProgress]);
+
+      // Calculate yearly stats
+      const yearlyStats = useMemo(() => {
+        const tracked = monthlyStats.filter(m => !m.isFuture && m.daysTracked > 0);
+        const yearAvg = tracked.length > 0 
+          ? Math.round(tracked.reduce((s, m) => s + m.avg, 0) / tracked.length) 
+          : 0;
+        const totalPerfect = monthlyStats.reduce((s, m) => s + m.perfectDays, 0);
+        const totalDaysTracked = monthlyStats.reduce((s, m) => s + m.daysTracked, 0);
+        const totalTasks = monthlyStats.reduce((s, m) => s + m.totalTasks, 0);
+        const bestMonth = tracked.reduce((best, m) => m.avg > (best?.avg || 0) ? m : best, null);
+
+        // Find best day
+        let bestDay = { date: null, pct: 0 };
+        for (let d = 0; d < daysPassed; d++) {
+          const date = new Date(year, 0, d + 1);
+          const dateKey = toLocalDateKey(date);
+          const progress = calculateDailyProgress(dateKey);
+          if (progress.percentage > bestDay.pct && progress.total > 0) {
+            bestDay = { date, pct: progress.percentage };
+          }
+        }
+
+        // Calculate streaks
+        let currentStreak = 0;
+        let longestStreak = 0;
+        let tempStreak = 0;
+        
+        for (let d = 0; d < daysPassed; d++) {
+          const date = new Date(year, 0, d + 1);
+          const dateKey = toLocalDateKey(date);
+          const progress = calculateDailyProgress(dateKey);
+          if (progress.percentage >= 50 && progress.total > 0) {
+            tempStreak++;
+            longestStreak = Math.max(longestStreak, tempStreak);
+          } else {
+            tempStreak = 0;
+          }
+        }
+
+        // Current streak (from today backwards)
+        for (let d = daysPassed - 1; d >= 0; d--) {
+          const date = new Date(year, 0, d + 1);
+          const dateKey = toLocalDateKey(date);
+          const progress = calculateDailyProgress(dateKey);
+          if (progress.percentage >= 50 && progress.total > 0) {
+            currentStreak++;
+          } else {
+            break;
+          }
+        }
+
+        // Day of week patterns
+        const dayOfWeekData = [
+          { day: 'Sun', total: 0, count: 0, pct: 0 },
+          { day: 'Mon', total: 0, count: 0, pct: 0 },
+          { day: 'Tue', total: 0, count: 0, pct: 0 },
+          { day: 'Wed', total: 0, count: 0, pct: 0 },
+          { day: 'Thu', total: 0, count: 0, pct: 0 },
+          { day: 'Fri', total: 0, count: 0, pct: 0 },
+          { day: 'Sat', total: 0, count: 0, pct: 0 },
+        ];
+
+        for (let d = 0; d < daysPassed; d++) {
+          const date = new Date(year, 0, d + 1);
+          const dateKey = toLocalDateKey(date);
+          const progress = calculateDailyProgress(dateKey);
+          if (progress.total > 0) {
+            const dow = date.getDay();
+            dayOfWeekData[dow].total += progress.percentage;
+            dayOfWeekData[dow].count++;
+          }
+        }
+
+        dayOfWeekData.forEach(d => {
+          d.pct = d.count > 0 ? Math.round(d.total / d.count) : 0;
+        });
+
+        const bestDayOfWeek = dayOfWeekData.reduce((best, d) => d.pct > best.pct ? d : best, { pct: 0 });
+
+        // Quarterly data
+        const quarterlyData = [0, 1, 2, 3].map(q => {
+          const qMonths = monthlyStats.slice(q * 3, q * 3 + 3).filter(m => !m.isFuture && m.daysTracked > 0);
+          const qAvg = qMonths.length > 0 
+            ? Math.round(qMonths.reduce((s, m) => s + m.avg, 0) / qMonths.length)
+            : null;
+          return { q: `Q${q + 1}`, pct: qAvg, isFuture: qMonths.length === 0 };
+        });
+
+        return {
+          yearAvg,
+          totalPerfect,
+          totalDaysTracked,
+          totalTasks,
+          bestMonth,
+          bestDay,
+          currentStreak,
+          longestStreak,
+          dayOfWeekData,
+          bestDayOfWeek,
+          quarterlyData,
+        };
+      }, [monthlyStats, daysPassed, year, calculateDailyProgress]);
+
+      // Goal stats
+      const goalStats = useMemo(() => {
+        const activeGoals = goals.filter(g => !g.archived);
+        const completedGoals = goals.filter(g => g.archived);
+        const needsAttention = activeGoals.filter(g => {
+          const pct = goalProgressCache[g.id]?.percentage || 0;
+          return pct < 50;
+        }).length;
+
+        let bestGoal = null;
+        let bestPct = 0;
+        activeGoals.forEach(g => {
+          const pct = goalProgressCache[g.id]?.percentage || 0;
+          if (pct > bestPct) {
+            bestPct = pct;
+            bestGoal = { ...g, pct };
+          }
+        });
+
+        return { total: activeGoals.length + completedGoals.length, active: activeGoals.length, completed: completedGoals.length, needsAttention, bestGoal };
+      }, [goals, goalProgressCache]);
+
+      // Category stats
+      const categoryStats = useMemo(() => {
+        return (categories || []).map(cat => {
+          const catGoals = goals.filter(g => g.category === cat.id && !g.archived);
+          if (catGoals.length === 0) return null;
+          let totalPct = 0;
+          catGoals.forEach(g => { totalPct += goalProgressCache[g.id]?.percentage || 0; });
+          const avgPct = Math.round(totalPct / catGoals.length);
+          return { ...cat, pct: avgPct, goalCount: catGoals.length };
+        }).filter(Boolean).sort((a, b) => b.pct - a.pct);
+      }, [categories, goals, goalProgressCache]);
+
+      // Journal stats
+      const journalStats = useMemo(() => {
+        let entries = 0;
+        let sliderTotals = {};
+        let sliderCounts = {};
+
+        journalConfig.prompts.forEach(p => {
+          if (p.type === 'slider') {
+            sliderTotals[p.id] = 0;
+            sliderCounts[p.id] = 0;
+          }
+        });
+
+        for (let d = 0; d < daysPassed; d++) {
+          const date = new Date(year, 0, d + 1);
+          const dateKey = toLocalDateKey(date);
+          let hasEntry = false;
+          journalConfig.prompts.forEach(p => {
+            const val = journalEntries[`${dateKey}-${p.id}`];
+            if (p.type === 'text' && val && val.trim().length > 0) hasEntry = true;
+            if (p.type === 'slider' && val !== undefined) {
+              sliderTotals[p.id] += val;
+              sliderCounts[p.id]++;
+            }
+          });
+          if (hasEntry) entries++;
+        }
+
+        const sliderAvgs = journalConfig.prompts
+          .filter(p => p.type === 'slider')
+          .map(p => ({
+            label: p.label,
+            avg: sliderCounts[p.id] > 0 ? (sliderTotals[p.id] / sliderCounts[p.id]).toFixed(1) : null,
+            max: p.max || 10,
+          }))
+          .filter(s => s.avg !== null);
+
+        return { entries, sliderAvgs };
+      }, [year, daysPassed, journalConfig, journalEntries]);
+
+      // Compact Heat Map Component
+      const CompactHeatMap = () => {
+        const cellSize = 6;
+        const gap = 1;
+
+        return (
+          <div className="overflow-x-auto">
+            <div className="flex" style={{ gap }}>
               {weeks.map((week, wi) => (
-                <div key={wi} className="flex flex-col gap-0.5">
+                <div key={wi} className="flex flex-col" style={{ gap }}>
                   {week.map((cell, di) => {
-                    if (!cell) return <div key={di} style={{ width: 8, height: 8 }} />;
-                    const bgColor = cell.isFuture ? (darkMode ? '#0f172a' : '#f8fafc') : getHeatColor(cell.pct);
+                    if (!cell) return <div key={di} style={{ width: cellSize, height: cellSize }} />;
+                    const bgColor = cell.isFuture ? (darkMode ? '#1e293b' : '#f8fafc') : getHeatColor(cell.pct);
                     return (
-                      <div key={di}
+                      <div
+                        key={di}
                         onClick={() => !cell.isFuture && goToDay(cell.date)}
-                        style={{ width: 8, height: 8, borderRadius: 2, background: bgColor, cursor: cell.isFuture ? 'default' : 'pointer' }}
+                        style={{
+                          width: cellSize,
+                          height: cellSize,
+                          borderRadius: 1,
+                          background: bgColor,
+                          opacity: cell.isFuture ? 0.3 : 1,
+                          cursor: cell.isFuture ? 'default' : 'pointer'
+                        }}
                       />
                     );
                   })}
                 </div>
               ))}
             </div>
+            
+            <div className="flex justify-end items-center gap-1 mt-1.5">
+              <span className={`text-[7px] ${theme.textMuted}`} style={{ opacity: 0.6 }}>Less</span>
+              {[0, 30, 50, 75, 100].map(pct => (
+                <div key={pct} style={{ width: 6, height: 6, borderRadius: 1, background: getHeatColor(pct) }} />
+              ))}
+              <span className={`text-[7px] ${theme.textMuted}`} style={{ opacity: 0.6 }}>More</span>
+            </div>
           </div>
-          {/* Legend */}
-          <div className="flex justify-end items-center gap-1 mt-2.5">
-            <span className={`text-[9px] ${theme.textMuted}`}>Less</span>
-            {[0, 30, 50, 75, 100].map(pct => (
-              <div key={pct} style={{ width: 8, height: 8, borderRadius: 2, background: getHeatColor(pct) }} />
+        );
+      };
+
+      // Get progress color
+      const getYearlyProgressColor = (pct) => {
+        if (pct === 0) return darkMode ? '#475569' : '#e2e8f0';
+        if (pct < 40) return '#fb923c';
+        if (pct < 70) return '#facc15';
+        if (pct < 90) return '#4ade80';
+        return '#22c55e';
+      };
+
+      // ===== HIGHLIGHTS TAB =====
+      const HighlightsTab = () => (
+        <div className="space-y-3">
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
+            <span className={`text-xs font-semibold ${theme.textMuted}`}>🏆 KEY ACHIEVEMENTS</span>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {[
+                { label: 'Best Day', value: yearlyStats.bestDay.date ? yearlyStats.bestDay.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—', sub: yearlyStats.bestDay.pct ? `${yearlyStats.bestDay.pct}%` : '', color: '#22c55e' },
+                { label: 'Best Month', value: yearlyStats.bestMonth?.shortName || '—', sub: yearlyStats.bestMonth ? `${yearlyStats.bestMonth.avg}%` : '', color: '#6366f1' },
+                { label: 'Current Streak', value: `${yearlyStats.currentStreak}d`, sub: isCurrentYear ? 'and counting' : '', color: '#f97316' },
+                { label: 'Longest Streak', value: `${yearlyStats.longestStreak}d`, sub: 'this year', color: '#8b5cf6' },
+              ].map((h, i) => (
+                <div key={i} className={`p-2.5 rounded-lg ${theme.inputBg}`}>
+                  <div className={`text-[10px] ${theme.textMuted}`}>{h.label}</div>
+                  <div className="text-lg font-bold" style={{ color: h.color }}>{h.value}</div>
+                  {h.sub && <div className={`text-[10px] ${theme.textMuted}`}>{h.sub}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
+            <span className={`text-xs font-semibold ${theme.textMuted}`}>📈 MONTHLY TREND</span>
+            <div className="flex items-end gap-1 h-16 mt-2">
+              {monthlyStats.map((m, i) => {
+                const isFuture = m.isFuture;
+                const isMax = !isFuture && m.avg === yearlyStats.bestMonth?.avg;
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center">
+                    <div
+                      className="w-full rounded-t transition-all"
+                      style={{
+                        height: isFuture ? '4px' : `${Math.max(m.avg * 0.6, 4)}px`,
+                        background: isFuture ? (darkMode ? '#334155' : '#e2e8f0') : isMax ? '#6366f1' : getYearlyProgressColor(m.avg),
+                        minHeight: 4,
+                      }}
+                    />
+                    <span className={`text-[7px] mt-0.5 ${isMax ? 'text-indigo-500 font-bold' : theme.textMuted}`}>
+                      {m.shortName.charAt(0)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {monthlyStats[0].daysTracked > 0 && (
+              <div className={`text-[10px] text-center mt-2 ${theme.textSecondary}`}>
+                {(() => {
+                  const firstMonth = monthlyStats.find(m => m.daysTracked > 0);
+                  const currentMonth = monthlyStats.filter(m => !m.isFuture && m.daysTracked > 0).pop();
+                  if (!firstMonth || !currentMonth || firstMonth === currentMonth) return null;
+                  const diff = currentMonth.avg - firstMonth.avg;
+                  if (diff > 0) return `📈 Up ${diff}% since ${firstMonth.shortName}`;
+                  if (diff < 0) return `📉 Down ${Math.abs(diff)}% since ${firstMonth.shortName}`;
+                  return '➡️ Holding steady';
+                })()}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+
+      // ===== GOALS TAB =====
+      const GoalsTab = () => (
+        <div className="space-y-3">
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
+            <span className={`text-xs font-semibold ${theme.textMuted}`}>🎯 GOALS THIS YEAR</span>
+            <div className={`text-xs ${theme.textSecondary} mt-1 mb-3`}>
+              {goalStats.total} goals • {goalStats.completed} completed • {goalStats.needsAttention > 0 ? `${goalStats.needsAttention} needs attention` : 'all on track'}
+            </div>
+            
+            {goalStats.bestGoal && (
+              <div className="p-3 rounded-lg" style={{ 
+                background: darkMode 
+                  ? 'linear-gradient(135deg, #064e3b 0%, #065f46 100%)' 
+                  : 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', 
+                border: darkMode ? '1px solid #10b981' : '1px solid #a7f3d0' 
+              }}>
+                <div className="flex items-center gap-1 mb-1">
+                  <span style={{ fontSize: 12 }}>🏆</span>
+                  <span className={`text-[10px] font-semibold ${darkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>GOAL OF THE YEAR</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold text-white bg-emerald-500">
+                    {goalStats.bestGoal.pct}%
+                  </div>
+                  <div>
+                    <div className={`text-sm font-semibold ${darkMode ? 'text-emerald-100' : 'text-emerald-900'}`}>{goalStats.bestGoal.title}</div>
+                    <div className={`text-[10px] ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>Most consistent goal</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
+            <span className={`text-xs font-semibold ${theme.textMuted}`}>📊 BY CATEGORY</span>
+            {categoryStats.length === 0 ? (
+              <p className={`text-xs ${theme.textMuted} mt-2`}>No category data yet</p>
+            ) : (
+              <div className="space-y-2.5 mt-2">
+                {categoryStats.map((c, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className={theme.textSecondary}>{c.name}</span>
+                      <span className="font-semibold" style={{ color: c.color }}>{c.pct}%</span>
+                    </div>
+                    <div className={`h-2 rounded-full ${theme.inputBg}`}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${c.pct}%`, background: c.color }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+
+      // ===== PATTERNS TAB =====
+      const PatternsTab = () => {
+        const maxPct = Math.max(...yearlyStats.dayOfWeekData.map(d => d.pct));
+        
+        return (
+          <div className="space-y-3">
+            <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
+              <span className={`text-xs font-semibold ${theme.textMuted}`}>📅 WEEKLY PATTERNS</span>
+              <div className="flex items-end gap-2 h-20 mt-3">
+                {yearlyStats.dayOfWeekData.map((d, i) => {
+                  const isMax = d.pct === maxPct && d.pct > 0;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center">
+                      <div className={`text-[9px] font-semibold mb-1`} style={{ color: isMax ? '#22c55e' : (darkMode ? '#64748b' : '#94a3b8') }}>
+                        {d.pct}%
+                      </div>
+                      <div
+                        className="w-full rounded-t transition-all"
+                        style={{
+                          height: `${Math.max(d.pct * 0.6, 4)}px`,
+                          background: isMax ? '#22c55e' : (darkMode ? '#475569' : '#cbd5e1'),
+                        }}
+                      />
+                      <span className={`text-[10px] mt-1.5 font-medium ${isMax ? 'text-emerald-500' : theme.textMuted}`}>
+                        {d.day.slice(0, 3)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              {yearlyStats.bestDayOfWeek.pct > 0 && (
+                <div className={`text-[11px] text-center mt-3 ${theme.textSecondary}`}>
+                  ⭐ You're most consistent on <span className="text-emerald-500 font-semibold">{yearlyStats.bestDayOfWeek.day}s</span>
+                </div>
+              )}
+            </div>
+
+            <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
+              <span className={`text-xs font-semibold ${theme.textMuted}`}>🗓️ QUARTERLY</span>
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                {yearlyStats.quarterlyData.map((q, i) => {
+                  const isBest = q.pct !== null && q.pct === Math.max(...yearlyStats.quarterlyData.filter(x => x.pct !== null).map(x => x.pct));
+                  return (
+                    <div key={i} className={`p-2 rounded-lg text-center ${
+                      q.isFuture ? theme.inputBg :
+                      isBest ? (darkMode ? 'bg-emerald-900/50 border border-emerald-700' : 'bg-emerald-50 border border-emerald-200') :
+                      theme.inputBg
+                    }`}>
+                      <div className={`text-[10px] font-bold ${isBest ? 'text-emerald-500' : theme.textMuted}`}>{q.q}</div>
+                      <div className={`text-lg font-bold ${q.isFuture ? theme.textMuted : isBest ? 'text-emerald-500' : theme.textPrimary}`}>
+                        {q.pct === null ? '—' : `${q.pct}%`}
+                      </div>
+                      {isBest && <div className="text-[8px] text-emerald-500">Best</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // ===== JOURNAL TAB =====
+      const JournalTab = () => (
+        <div className="space-y-3">
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-3`}>
+            <span className={`text-xs font-semibold ${theme.textMuted}`}>📓 JOURNAL INSIGHTS</span>
+            <div className={`grid grid-cols-${Math.min(3, 1 + journalStats.sliderAvgs.length)} gap-2 mt-2`}>
+              <div className={`p-2.5 rounded-lg ${theme.inputBg} text-center`}>
+                <div className={`text-lg font-bold ${theme.textPrimary}`}>{journalStats.entries}</div>
+                <div className={`text-[9px] ${theme.textMuted}`}>Entries</div>
+              </div>
+              {journalStats.sliderAvgs.slice(0, 2).map((s, i) => (
+                <div key={i} className={`p-2.5 rounded-lg ${theme.inputBg} text-center`}>
+                  <div className="text-lg font-bold" style={{ color: parseFloat(s.avg) >= s.max * 0.7 ? '#22c55e' : parseFloat(s.avg) >= s.max * 0.4 ? '#eab308' : '#f97316' }}>
+                    {s.avg}
+                  </div>
+                  <div className={`text-[9px] ${theme.textMuted}`}>Avg {s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {journalStats.entries === 0 && (
+            <div className={`${theme.cardBg} rounded-xl shadow-sm p-4 text-center`}>
+              <p className={`text-sm ${theme.textMuted}`}>Start journaling to see insights here!</p>
+            </div>
+          )}
+        </div>
+      );
+
+      // ===== MAIN RETURN =====
+      return (
+        <div className="space-y-3">
+          {/* Header Card with Mini Heat Map */}
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-4`}>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className={`text-xl font-bold ${theme.textPrimary}`}>{year}</h2>
+                <p className={`text-xs ${theme.textMuted} mt-0.5`}>
+                  {yearlyStats.totalDaysTracked} days tracked • {yearlyStats.totalPerfect} perfect
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold" style={{ color: getYearlyProgressColor(yearlyStats.yearAvg) }}>
+                  {yearlyStats.yearAvg}%
+                </div>
+                <div className={`text-[10px] ${theme.textMuted}`}>Year Average</div>
+              </div>
+            </div>
+            
+            <div className={`pt-3 border-t ${theme.divider}`}>
+              <CompactHeatMap />
+            </div>
+          </div>
+
+          {/* Month Cards Grid */}
+          <div className="grid grid-cols-2 gap-2.5">
+            {monthlyStats.map((month) => (
+              <button
+                key={month.index}
+                onClick={() => !month.isFuture && goToMonth(month.index)}
+                disabled={month.isFuture}
+                className={`text-left ${theme.cardBg} rounded-xl shadow-sm overflow-hidden transition-all active:scale-[0.98] ${
+                  month.isFuture ? 'opacity-40' : ''
+                } ${month.isCurrent ? `ring-2 ${darkMode ? 'ring-slate-400' : 'ring-slate-700'} ring-offset-2 ${darkMode ? 'ring-offset-slate-900' : 'ring-offset-slate-100'}` : ''}`}
+              >
+                {/* Progress bar at top */}
+                <div className={`h-1 ${theme.inputBg}`}>
+                  <div
+                    className="h-full rounded-r"
+                    style={{ width: `${month.avg}%`, backgroundColor: getYearlyProgressColor(month.avg) }}
+                  />
+                </div>
+                
+                <div className="p-3">
+                  <div className="flex items-baseline justify-between mb-1">
+                    <span className={`text-sm font-semibold ${theme.textSecondary}`}>{month.shortName}</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-base font-bold" style={{ color: getYearlyProgressColor(month.avg) }}>
+                        {month.isFuture ? '—' : `${month.avg}%`}
+                      </span>
+                      {month.trend !== null && (
+                        <span className={`text-[10px] ${month.trend >= 0 ? 'text-emerald-500' : 'text-orange-500'}`}>
+                          {month.trend >= 0 ? '↑' : '↓'}{Math.abs(month.trend)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {!month.isFuture && (
+                    <div className={`flex justify-between text-[10px] ${theme.textMuted}`}>
+                      <span>{month.daysTracked}d</span>
+                      {month.perfectDays > 0 && <span>⭐{month.perfectDays}</span>}
+                    </div>
+                  )}
+                </div>
+              </button>
             ))}
-            <span className={`text-[9px] ${theme.textMuted}`}>More</span>
           </div>
+
+          {/* Analysis Tabs */}
+          <div className={`${theme.cardBg} rounded-xl shadow-sm p-1 flex gap-1`}>
+            {[
+              { id: 'highlights', label: 'Highlights' },
+              { id: 'goals', label: 'Goals' },
+              { id: 'patterns', label: 'Patterns' },
+              { id: 'journal', label: 'Journal' },
+            ].map(t => (
+              <button
+                key={t.id}
+                onClick={() => setYearlyTab(t.id)}
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  yearlyTab === t.id ? theme.btnPrimary : theme.textMuted
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          {yearlyTab === 'highlights' && <HighlightsTab />}
+          {yearlyTab === 'goals' && <GoalsTab />}
+          {yearlyTab === 'patterns' && <PatternsTab />}
+          {yearlyTab === 'journal' && <JournalTab />}
+
+          {/* ============ TIME & DIFFICULTY ANALYSIS ============ */}
+          {(() => {
+            // Effort Distribution
+            const monthNames12 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const yearEffort = (() => {
+              let easy = 0, medium = 0, hard = 0;
+              const monthly = [];
+              for (let m = 0; m < 12; m++) {
+                let mE = 0, mM = 0, mH = 0;
+                const dim = new Date(year, m + 1, 0).getDate();
+                for (let d = 1; d <= dim; d++) {
+                  const dt = new Date(year, m, d);
+                  if (dt > today) break;
+                  const dk = toLocalDateKey(dt);
+                  goals.forEach(goal => {
+                    if (!goal.tasks) return;
+                    goal.tasks.forEach(task => {
+                      const diff = task.difficulty || 'medium';
+                      const isD = !task.frequency || task.frequency === 'daily';
+                      const isS = task.frequency === 'scheduled' && isTaskScheduledForDate(task, dt);
+                      if (!isD && !isS) return;
+                      const checks = task.dailyChecks || 1;
+                      for (let c = 0; c < checks; c++) {
+                        if (dailyTasks[dk]?.[`${goal.id}-${task.id}-${c}`]) {
+                          if (diff === 'easy') { mE++; easy++; }
+                          else if (diff === 'hard') { mH++; hard++; }
+                          else { mM++; medium++; }
+                        }
+                      }
+                    });
+                  });
+                }
+                const mT = mE + mM + mH;
+                monthly.push({ easy: mE, medium: mM, hard: mH, total: mT, hardPct: mT > 0 ? Math.round((mH / mT) * 100) : 0 });
+              }
+              return { easy, medium, hard, total: easy + medium + hard, monthly };
+            })();
+            const yHardTrend = yearEffort.monthly.length >= 2
+              ? yearEffort.monthly[yearEffort.monthly.length - 1].hardPct - yearEffort.monthly[0].hardPct
+              : 0;
+
+            // Goals Ranked by Time
+            const yearGoalTime = goals.filter(g => g.goalType !== 'points').map(goal => {
+              if (!goal.tasks || goal.tasks.length === 0) return null;
+              let scheduled = 0, completed = 0;
+              const cat = (categories || []).find(c => c.id === goal.category);
+              for (let m = 0; m < 12; m++) {
+                const dim = new Date(year, m + 1, 0).getDate();
+                for (let d = 1; d <= dim; d++) {
+                  const dt = new Date(year, m, d);
+                  if (dt > today) break;
+                  const dk = toLocalDateKey(dt);
+                  goal.tasks.forEach(task => {
+                    const est = task.timeEstimate || 0;
+                    if (!est) return;
+                    const isD = !task.frequency || task.frequency === 'daily';
+                    const isS = task.frequency === 'scheduled' && isTaskScheduledForDate(task, dt);
+                    if (!isD && !isS) return;
+                    const checks = task.dailyChecks || 1;
+                    for (let c = 0; c < checks; c++) {
+                      scheduled += est;
+                      if (dailyTasks[dk]?.[`${goal.id}-${task.id}-${c}`]) completed += est;
+                    }
+                  });
+                }
+              }
+              if (scheduled === 0) return null;
+              return { id: goal.id, name: goal.title, color: cat?.color || '#64748b', scheduled, completed };
+            }).filter(Boolean).sort((a, b) => b.scheduled - a.scheduled);
+            const yTotalSched = yearGoalTime.reduce((s, g) => s + g.scheduled, 0);
+            const yTotalComp = yearGoalTime.reduce((s, g) => s + g.completed, 0);
+            const fmtT = (m) => { const h = Math.floor(m / 60); const mm = m % 60; return h > 0 ? `${h}h${mm > 0 ? ' ' + mm + 'm' : ''}` : `${mm}m`; };
+
+            // Category Full Year Cards
+            const yearCatDepth = (categories || []).map(cat => {
+              const cGoals = goals.filter(g => g.category === cat.id && g.goalType !== 'points');
+              if (cGoals.length === 0) return null;
+              let totalDone = 0, totalAll = 0, timeSched = 0, timeComp = 0;
+              let eC = 0, mC = 0, hC = 0;
+              const monthlyPcts = [];
+              for (let m = 0; m < 12; m++) {
+                let mDone = 0, mAll = 0;
+                const dim = new Date(year, m + 1, 0).getDate();
+                for (let d = 1; d <= dim; d++) {
+                  const dt = new Date(year, m, d);
+                  if (dt > today) { break; }
+                  const dk = toLocalDateKey(dt);
+                  cGoals.forEach(goal => {
+                    if (!goal.tasks) return;
+                    goal.tasks.forEach(task => {
+                      const diff = task.difficulty || 'medium';
+                      const est = task.timeEstimate || 0;
+                      const isD = !task.frequency || task.frequency === 'daily';
+                      const isS = task.frequency === 'scheduled' && isTaskScheduledForDate(task, dt);
+                      if (!isD && !isS) return;
+                      const checks = task.dailyChecks || 1;
+                      for (let c = 0; c < checks; c++) {
+                        mAll++; totalAll++; timeSched += est;
+                        if (dailyTasks[dk]?.[`${goal.id}-${task.id}-${c}`]) {
+                          mDone++; totalDone++; timeComp += est;
+                          if (diff === 'easy') eC++;
+                          else if (diff === 'hard') hC++;
+                          else mC++;
+                        }
+                      }
+                    });
+                  });
+                }
+                monthlyPcts.push(mAll > 0 ? Math.round((mDone / mAll) * 100) : 0);
+              }
+              const pct = totalAll > 0 ? Math.round((totalDone / totalAll) * 100) : 0;
+              const eT = eC + mC + hC;
+              const hardPct = eT > 0 ? Math.round((hC / eT) * 100) : 0;
+              const timePct = timeSched > 0 ? Math.round((timeComp / timeSched) * 100) : 0;
+              const trend = monthlyPcts.length >= 2 ? monthlyPcts[monthlyPcts.length - 1] - monthlyPcts[0] : 0;
+              return { ...cat, pct, monthlyPcts, hoursScheduled: Math.round(timeSched / 60), hoursCompleted: Math.round(timeComp / 60), hardPct, timePct, trend };
+            }).filter(Boolean);
+
+            return (
+              <div className="space-y-3 mt-3">
+                <div className={`h-px ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
+
+                {/* Effort Distribution */}
+                {yearEffort.total > 0 && (
+                  <div>
+                    <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Effort Distribution</p>
+                    <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                      <div className="px-3.5 py-3">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="flex-1 flex rounded-full overflow-hidden h-3">
+                            <div style={{ width: `${(yearEffort.easy / yearEffort.total) * 100}%`, backgroundColor: '#86efac' }} />
+                            <div style={{ width: `${(yearEffort.medium / yearEffort.total) * 100}%`, backgroundColor: '#fde68a' }} />
+                            <div style={{ width: `${(yearEffort.hard / yearEffort.total) * 100}%`, backgroundColor: '#f87171' }} />
+                          </div>
+                        </div>
+                        <div className="flex justify-around">
+                          {[
+                            { label: 'Easy', count: yearEffort.easy, pct: Math.round((yearEffort.easy / yearEffort.total) * 100), dotColor: '#22c55e' },
+                            { label: 'Medium', count: yearEffort.medium, pct: Math.round((yearEffort.medium / yearEffort.total) * 100), dotColor: '#eab308' },
+                            { label: 'Hard', count: yearEffort.hard, pct: Math.round((yearEffort.hard / yearEffort.total) * 100), dotColor: '#ef4444' },
+                          ].map((e, i) => (
+                            <div key={i} className="text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: e.dotColor }} />
+                                <span className={`text-[13px] font-bold ${theme.textPrimary}`}>{e.count}</span>
+                              </div>
+                              <div className={`text-[9px] ${theme.textMuted}`}>{e.label} ({e.pct}%)</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Hard % trend */}
+                      <div className={`px-3.5 pb-3.5 border-t ${theme.divider} pt-3`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-[10px] font-semibold ${theme.textMuted}`}>Hard task % trend</span>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                            yHardTrend >= 0 ? (darkMode ? 'bg-emerald-900/50 text-emerald-400' : 'text-emerald-600 bg-emerald-100')
+                              : (darkMode ? 'bg-red-900/50 text-red-400' : 'text-red-600 bg-red-100')
+                          }`}>{yHardTrend >= 0 ? '+' : ''}{yHardTrend}%</span>
+                        </div>
+                        <svg width="100%" height="50" viewBox="0 0 240 50" preserveAspectRatio="xMidYMid meet">
+                          {[0, 25, 50].map(val => {
+                            const y = 45 - (val / 50) * 40;
+                            return <line key={val} x1="0" y1={y} x2="240" y2={y} stroke={darkMode ? '#1e293b' : '#f1f5f9'} strokeWidth="1" />;
+                          })}
+                          {yearEffort.monthly.filter(m => m.total > 0).length >= 2 && (
+                            <>
+                              <path d={`M ${yearEffort.monthly.map((m, i) => `${i * (240 / 11)} ${45 - (m.hardPct / 50) * 40}`).join(' L ')} L 240 45 L 0 45 Z`} fill="#ef4444" opacity="0.1" />
+                              <path d={`M ${yearEffort.monthly.map((m, i) => `${i * (240 / 11)} ${45 - (m.hardPct / 50) * 40}`).join(' L ')}`} fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <circle cx="0" cy={45 - (yearEffort.monthly[0].hardPct / 50) * 40} r="3" fill="#ef4444" />
+                              <circle cx="240" cy={45 - (yearEffort.monthly[11].hardPct / 50) * 40} r="3" fill="#ef4444" />
+                            </>
+                          )}
+                        </svg>
+                        <div className="flex gap-[3px] mt-0.5">
+                          {monthNames12.map((m, i) => (
+                            <div key={i} className={`flex-1 text-center text-[8px] font-medium ${theme.textMuted}`}>{m}</div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Goals Ranked by Time */}
+                {yearGoalTime.length > 0 && (
+                  <div>
+                    <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Time by Goal</p>
+                    <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                      <div className={`px-3.5 py-2.5 flex justify-around border-b ${theme.divider}`}>
+                        <div className="text-center">
+                          <div className={`text-[15px] font-bold ${theme.textPrimary}`}>{fmtT(yTotalComp)}</div>
+                          <div className={`text-[9px] ${theme.textMuted}`}>completed</div>
+                        </div>
+                        <div className="text-center">
+                          <div className={`text-[15px] font-bold ${theme.textMuted}`}>{fmtT(yTotalSched)}</div>
+                          <div className={`text-[9px] ${theme.textMuted}`}>scheduled</div>
+                        </div>
+                        <div className="text-center">
+                          <div className={`text-[15px] font-bold ${yTotalSched > 0 && Math.round((yTotalComp / yTotalSched) * 100) >= 75 ? 'text-emerald-500' : 'text-orange-500'}`}>
+                            {yTotalSched > 0 ? Math.round((yTotalComp / yTotalSched) * 100) : 0}%
+                          </div>
+                          <div className={`text-[9px] ${theme.textMuted}`}>follow-through</div>
+                        </div>
+                      </div>
+                      {yearGoalTime.map((goal, i) => {
+                        const pctDone = Math.round((goal.completed / goal.scheduled) * 100);
+                        const maxSched = Math.max(...yearGoalTime.map(g => g.scheduled));
+                        const barW = (goal.scheduled / maxSched) * 100;
+                        return (
+                          <div key={i} className={`px-3.5 py-2.5 ${i < yearGoalTime.length - 1 ? `border-b ${theme.divider}` : ''}`}>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: goal.color }} />
+                                <span className={`text-[11px] font-medium ${theme.textPrimary}`}>{goal.name}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className={`text-[10px] font-bold ${theme.textPrimary}`}>{fmtT(goal.completed)}</span>
+                                <span className={`text-[9px] ${theme.textMuted}`}>/ {fmtT(goal.scheduled)}</span>
+                              </div>
+                            </div>
+                            <div className="relative h-2 rounded-full overflow-hidden" style={{ width: `${barW}%` }}>
+                              <div className="absolute inset-0 rounded-full" style={{ backgroundColor: darkMode ? '#1e293b' : '#e2e8f0' }} />
+                              <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pctDone}%`, backgroundColor: pctDone >= 90 ? '#22c55e' : pctDone >= 60 ? goal.color : '#f97316' }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Category Depth - Full Year Cards */}
+                {yearCatDepth.length > 0 && (
+                  <div>
+                    <p className={`text-[11px] font-bold uppercase tracking-wider mb-2 pl-1 ${theme.textMuted}`}>Category Depth</p>
+                    <div className="space-y-2.5">
+                      {yearCatDepth.map((cat, ci) => (
+                        <div key={ci} className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                          <div className="h-1.5" style={{ backgroundColor: darkMode ? '#1e293b' : '#e2e8f0' }}>
+                            <div className="h-full" style={{ width: `${cat.pct}%`, backgroundColor: cat.color }} />
+                          </div>
+                          <div className="p-3.5">
+                            <div className="flex items-center justify-between mb-2.5">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                                <span className={`text-[13px] font-semibold ${theme.textPrimary}`}>{cat.name}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[14px] font-bold" style={{ color: cat.color }}>{cat.pct}%</span>
+                                {cat.trend !== 0 && (
+                                  <span className={`text-[9px] font-bold px-1 py-0.5 rounded ${
+                                    cat.trend >= 0 ? (darkMode ? 'bg-emerald-900/50 text-emerald-400' : 'text-emerald-600 bg-emerald-100')
+                                      : (darkMode ? 'bg-red-900/50 text-red-400' : 'text-red-600 bg-red-100')
+                                  }`}>{cat.trend >= 0 ? '+' : ''}{cat.trend}%</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 mb-2.5">
+                              <div className={`rounded-lg px-2.5 py-2 ${theme.inputBg}`}>
+                                <div className={`text-[9px] font-semibold uppercase tracking-wider mb-0.5 ${theme.textMuted}`}>Time</div>
+                                <span className={`text-[13px] font-bold ${theme.textPrimary}`}>{cat.hoursCompleted}h</span>
+                                <div className={`text-[9px] ${theme.textMuted}`}>/ {cat.hoursScheduled}h</div>
+                              </div>
+                              <div className={`rounded-lg px-2.5 py-2 ${theme.inputBg}`}>
+                                <div className={`text-[9px] font-semibold uppercase tracking-wider mb-0.5 ${theme.textMuted}`}>Hard %</div>
+                                <span className="text-[13px] font-bold" style={{ color: cat.hardPct > 30 ? '#ef4444' : cat.hardPct > 15 ? '#eab308' : '#22c55e' }}>{cat.hardPct}%</span>
+                                <div className="flex rounded-full overflow-hidden h-1.5 mt-1">
+                                  <div style={{ width: `${100 - cat.hardPct}%`, backgroundColor: darkMode ? '#334155' : '#e2e8f0' }} />
+                                  <div style={{ width: `${cat.hardPct}%`, backgroundColor: '#f87171' }} />
+                                </div>
+                              </div>
+                              <div className={`rounded-lg px-2.5 py-2 ${theme.inputBg}`}>
+                                <div className={`text-[9px] font-semibold uppercase tracking-wider mb-0.5 ${theme.textMuted}`}>Follow-thru</div>
+                                <span className="text-[13px] font-bold" style={{ color: cat.timePct >= 80 ? '#22c55e' : cat.timePct >= 60 ? '#eab308' : '#ef4444' }}>{cat.timePct}%</span>
+                                <div className={`text-[9px] ${theme.textMuted}`}>of scheduled</div>
+                              </div>
+                            </div>
+                            <svg width="100%" height="28" viewBox="0 0 240 28" preserveAspectRatio="xMidYMid meet">
+                              <path d={`M ${cat.monthlyPcts.map((p, i) => `${i * (240 / 11)} ${26 - (p / 100) * 24}`).join(' L ')} L 240 26 L 0 26 Z`} fill={cat.color} opacity="0.08" />
+                              <path d={`M ${cat.monthlyPcts.map((p, i) => `${i * (240 / 11)} ${26 - (p / 100) * 24}`).join(' L ')}`} fill="none" stroke={cat.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       );
     };
@@ -2733,12 +4496,10 @@ const GoalTrackerApp = () => {
   const DailyView = () => {
     const dateKey = selectedDateKey;
     const todayMedia = media[dateKey] || [];
-    const [showMediaForm, setShowMediaForm] = useState(false);
-    const [mediaForm, setMediaForm] = useState({ type: 'book', title: '', notes: '' });
-    const [collapsedGoals, setCollapsedGoals] = useState(new Set());
     const changeDate = (days) => { const newDate = new Date(selectedDate); newDate.setDate(newDate.getDate() + days); setSelectedDate(newDate); };
 
     const toggleGoalCollapse = (goalId) => {
+      const isCurrentlyCollapsed = collapsedGoals.has(goalId);
       setCollapsedGoals(prev => {
         const newSet = new Set(prev);
         if (newSet.has(goalId)) {
@@ -2748,6 +4509,13 @@ const GoalTrackerApp = () => {
         }
         return newSet;
       });
+      // If user is re-opening a collapsed group, mark it as user-opened
+      // so auto-collapse won't close it again
+      if (isCurrentlyCollapsed) {
+        setUserOpenedGroups(prev => new Set([...prev, goalId]));
+      } else {
+        setUserOpenedGroups(prev => { const n = new Set(prev); n.delete(goalId); return n; });
+      }
     };
 
     // Build unified task list sorted by category (including daily points goals)
@@ -2756,6 +4524,8 @@ const GoalTrackerApp = () => {
       
       goals.forEach(goal => {
         if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+        if (goal.archived) return; // Skip archived goals
+        if (!isGoalActiveOnDate(goal, dateKey)) return; // Skip goals created after this date
         
         // Handle points-based goals with daily target
         if (goal.goalType === 'points') {
@@ -2839,9 +4609,13 @@ const GoalTrackerApp = () => {
     const buildUnifiedWeeklyTaskList = () => {
       const items = [];
       const weekKey = getWeekKey(selectedDate);
+      const { weekEnd } = getWeekRange(selectedDate);
+      const weekEndKey = toLocalDateKey(weekEnd);
       
       goals.forEach(goal => {
         if (!goal.tasks || !Array.isArray(goal.tasks)) return;
+        if (goal.archived) return; // Skip archived goals
+        if (!isGoalActiveOnDate(goal, weekEndKey)) return; // Skip goals created after this week
         
         // Handle points-based goals with weekly target
         if (goal.goalType === 'points') {
@@ -3091,28 +4865,32 @@ const GoalTrackerApp = () => {
         const taskKey = `${goal.id}-${task.id}-0`;
         const isChecked = dailyTasks[storageKey]?.[taskKey];
         const streak = isDaily ? calculateTaskStreak(goal.id, task.id, 1) : 0;
+        const isAnim = animatingTasks[taskKey];
+        const hasRipple = rippleTasks[taskKey];
         return (
           <div 
             key={task.id}
-            className={`flex items-center gap-3 py-2.5 cursor-pointer ${animatingTasks[taskKey] ? 'task-row-animate' : ''}`}
-            style={rowStyle}
+            className={`flex items-center gap-3 py-2.5 cursor-pointer ${isAnim ? 'task-slide-settle' : ''}`}
+            style={{ ...rowStyle, position: 'relative', overflow: 'hidden' }}
             onClick={() => toggleTask(dateKey, goal.id, task.id, 0, task, goal)}
           >
-            <span className={`text-sm flex-1 ${isChecked ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+            {isAnim && <div className="task-left-glow" />}
+            {hasRipple && <div className="task-ripple-overlay" />}
+            <span className={`text-sm flex-1 relative z-[1] ${isChecked ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
             {streak >= 5 && (
-              <span className="text-xs text-orange-500 flex items-center gap-0.5 flex-shrink-0">
+              <span className="text-xs text-orange-500 flex items-center gap-0.5 flex-shrink-0 relative z-[1]">
                 <Flame className="w-3 h-3" />{streak}
               </span>
             )}
             {isPointsGoal && (
-              <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${isChecked ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+              <span className={`text-xs font-medium px-1.5 py-0.5 rounded relative z-[1] ${isChecked ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
                 +{task.pointValue || 1}
               </span>
             )}
             {taskCompletions[`${storageKey}-${goal.id}-${task.id}-0`] && (
-              <button onClick={(e) => { e.stopPropagation(); setViewingCompletion({ completion: taskCompletions[`${storageKey}-${goal.id}-${task.id}-0`], taskName: task.action }); }} className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0" />
+              <button onClick={(e) => { e.stopPropagation(); setViewingCompletion({ completion: taskCompletions[`${storageKey}-${goal.id}-${task.id}-0`], taskName: task.action }); }} className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0 relative z-[1]" />
             )}
-            <div className={`flex-shrink-0 mr-3 ${animatingTasks[taskKey] ? 'checkbox-animate' : ''}`}>
+            <div className={`flex-shrink-0 mr-3 relative z-[1] ${isAnim ? 'checkbox-ripple-pop' : ''}`}>
               {isChecked ? (
                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
               ) : (
@@ -3124,21 +4902,24 @@ const GoalTrackerApp = () => {
       } else if (isDaily) {
         // Multiple checkbox daily task (checkbox goals only)
         const rowAnimating = Array.from({ length: totalChecks }).some((_, i) => animatingTasks[`${goal.id}-${task.id}-${i}`]);
+        const rowRippling = Array.from({ length: totalChecks }).some((_, i) => rippleTasks[`${goal.id}-${task.id}-${i}`]);
         const streak = calculateTaskStreak(goal.id, task.id, totalChecks);
         return (
           <div 
             key={task.id}
-            className={`flex items-center gap-3 py-2.5 ${rowAnimating ? 'task-row-animate' : ''}`}
-            style={rowStyle}
+            className={`flex items-center gap-3 py-2.5 ${rowAnimating ? 'task-slide-settle' : ''}`}
+            style={{ ...rowStyle, position: 'relative', overflow: 'hidden' }}
           >
-            <span className={`text-sm flex-1 ${isComplete ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+            {rowAnimating && <div className="task-left-glow" />}
+            {rowRippling && <div className="task-ripple-overlay" />}
+            <span className={`text-sm flex-1 relative z-[1] ${isComplete ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
             {streak >= 5 && (
-              <span className="text-xs text-orange-500 flex items-center gap-0.5 flex-shrink-0">
+              <span className="text-xs text-orange-500 flex items-center gap-0.5 flex-shrink-0 relative z-[1]">
                 <Flame className="w-3 h-3" />{streak}
               </span>
             )}
-            <span className={`text-xs ${theme.textMuted}`}>{completedCount}/{totalChecks}</span>
-            <div className="flex gap-1.5 flex-shrink-0 mr-3">
+            <span className={`text-xs relative z-[1] ${theme.textMuted}`}>{completedCount}/{totalChecks}</span>
+            <div className="flex gap-1.5 flex-shrink-0 mr-3 relative z-[1]">
               {Array.from({ length: totalChecks }).map((_, checkIndex) => {
                 const taskKey = `${goal.id}-${task.id}-${checkIndex}`;
                 const isChecked = dailyTasks[dateKey]?.[taskKey];
@@ -3146,7 +4927,7 @@ const GoalTrackerApp = () => {
                   <button 
                     key={checkIndex} 
                     onClick={() => toggleTask(dateKey, goal.id, task.id, checkIndex, task, goal)}
-                    className={animatingTasks[taskKey] ? 'checkbox-animate' : ''}
+                    className={animatingTasks[taskKey] ? 'checkbox-ripple-pop' : ''}
                   >
                     {isChecked ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-500" />
@@ -3163,16 +4944,20 @@ const GoalTrackerApp = () => {
         // Weekly checkbox task
         const isCheckedToday = isTaskCompleted(dateKey, goal.id, task.id, goal);
         const taskKey = `${goal.id}-${task.id}-0`;
+        const isAnim = animatingTasks[taskKey];
+        const hasRipple = rippleTasks[taskKey];
         return (
           <div 
             key={task.id}
-            className={`flex items-center gap-3 py-2.5 cursor-pointer ${animatingTasks[taskKey] ? 'task-row-animate' : ''}`}
-            style={rowStyle}
+            className={`flex items-center gap-3 py-2.5 cursor-pointer ${isAnim ? 'task-slide-settle' : ''}`}
+            style={{ ...rowStyle, position: 'relative', overflow: 'hidden' }}
             onClick={() => toggleTask(dateKey, goal.id, task.id, 0, task, goal)}
           >
-            <span className={`text-sm flex-1 ${isCheckedToday ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
-            <span className={`text-xs ${theme.textMuted}`}>{weekProgress.completed}/{weekProgress.target}</span>
-            <div className={`flex-shrink-0 mr-3 ${animatingTasks[taskKey] ? 'checkbox-animate' : ''}`}>
+            {isAnim && <div className="task-left-glow" />}
+            {hasRipple && <div className="task-ripple-overlay" />}
+            <span className={`text-sm flex-1 relative z-[1] ${isCheckedToday ? 'text-slate-600' : theme.textPrimary}`}>{task.action}</span>
+            <span className={`text-xs relative z-[1] ${theme.textMuted}`}>{weekProgress.completed}/{weekProgress.target}</span>
+            <div className={`flex-shrink-0 mr-3 relative z-[1] ${isAnim ? 'checkbox-ripple-pop' : ''}`}>
               {isCheckedToday ? (
                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
               ) : (
@@ -3212,11 +4997,30 @@ const GoalTrackerApp = () => {
           <div>
             <div className="flex items-center justify-between mb-2">
               <p className={`text-xs font-semibold uppercase tracking-wider ${theme.textMuted}`}>Daily Tasks</p>
-              <p className={`text-xs ${theme.textSecondary}`}>{dailyProgress.percentage}%</p>
+              <div className="flex items-center gap-1.5">
+                {showTrophyBadge && (
+                  <Trophy className="w-3.5 h-3.5 text-amber-500 trophy-spin" />
+                )}
+                <p className={`text-xs ${dailyProgress.percentage === 100 ? 'text-emerald-500 font-semibold' : theme.textSecondary}`}>{dailyProgress.percentage}%</p>
+              </div>
             </div>
 
-            <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
-              <ProgressBar percentage={dailyProgress.percentage} darkMode={darkMode} />
+            <div 
+              className={`${theme.cardBg} rounded-xl overflow-hidden`}
+              style={{
+                boxShadow: allDoneCelebrating 
+                  ? '0 0 0 2px rgba(245,158,11,0.5), 0 0 24px rgba(245,158,11,0.12), 0 1px 3px rgba(0,0,0,0.06)'
+                  : '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+                transition: 'box-shadow 0.6s ease-out',
+              }}
+            >
+              {allDoneCelebrating ? (
+                <div style={{ height: '6px', background: darkMode ? '#334155' : '#e2e8f0', overflow: 'hidden' }}>
+                  <div className="gold-shimmer-bar" style={{ height: '100%', width: '100%' }} />
+                </div>
+              ) : (
+                <ProgressBar percentage={dailyProgress.percentage} darkMode={darkMode} />
+              )}
               
               {dailyItems.map((item, itemIndex) => {
                 const isCollapsed = collapsedGoals.has(`daily-${item.goal.id}`);
@@ -3277,19 +5081,46 @@ const GoalTrackerApp = () => {
                 }
                 
                 // Handle multi-task checkbox goals (group)
+                const isCelebratingGroup = groupCompletionAnim.has(`daily-${item.goal.id}`);
                 return (
-                  <div key={item.goal.id} style={{ borderTop: itemIndex > 0 ? '4px solid' : 'none', borderTopColor: darkMode ? '#1e293b' : '#f1f5f9' }}>
+                  <div key={item.goal.id} style={{ 
+                    borderTop: itemIndex > 0 ? '4px solid' : 'none', 
+                    borderTopColor: darkMode ? '#1e293b' : '#f1f5f9',
+                    transition: 'box-shadow 0.4s',
+                    boxShadow: isCelebratingGroup ? 'inset 0 0 0 2px rgba(16,185,129,0.35)' : 'none',
+                  }}>
                     <button 
                       onClick={() => toggleGoalCollapse(`daily-${item.goal.id}`)}
                       className="w-full px-3 py-2 flex items-center gap-2"
-                      style={{ borderLeft: `3px solid ${borderColor}`, backgroundColor: headerBg, boxShadow: headerShadow }}
+                      style={{ 
+                        borderLeft: `3px solid ${borderColor}`, 
+                        backgroundColor: isCelebratingGroup ? 'rgba(16,185,129,0.08)' : headerBg, 
+                        boxShadow: headerShadow,
+                        position: 'relative',
+                        overflow: 'hidden',
+                        transition: 'background-color 0.4s',
+                      }}
                     >
-                      <ChevronDown className={`w-4 h-4 ${theme.textMuted} transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
-                      <span className={`text-sm font-medium flex-1 text-left ${goalComplete ? 'text-slate-600' : theme.textPrimary}`}>{item.goal.title}</span>
-                      <MiniProgressBar percentage={item.percentage} darkMode={darkMode} />
+                      {isCelebratingGroup && <div className="group-success-ripple" />}
+                      <ChevronDown className={`w-4 h-4 ${theme.textMuted} transition-transform relative z-[1]`} style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                      <span className={`text-sm font-medium flex-1 text-left relative z-[1] ${goalComplete ? 'text-slate-600' : theme.textPrimary}`}>{item.goal.title}</span>
+                      {goalComplete ? (
+                        <span className={`text-xs font-bold text-emerald-500 bg-emerald-500/10 rounded px-1.5 py-0.5 relative z-[1] ${isCelebratingGroup ? 'badge-pop' : ''}`}>
+                          ✓ Done
+                        </span>
+                      ) : (
+                        <MiniProgressBar percentage={item.percentage} darkMode={darkMode} />
+                      )}
                     </button>
                     
-                    {!isCollapsed && (
+                    <div style={{
+                      maxHeight: isCollapsed ? '0px' : '600px',
+                      opacity: isCollapsed ? 0 : 1,
+                      overflow: 'hidden',
+                      transition: isCelebratingGroup
+                        ? 'max-height 0.45s 0.6s ease-in-out, opacity 0.3s 0.5s'
+                        : 'max-height 0.35s ease-in-out, opacity 0.25s ease-in-out',
+                    }}>
                       <div className="relative">
                         {/* Dotted connector line */}
                         <div style={{ 
@@ -3306,7 +5137,7 @@ const GoalTrackerApp = () => {
                           </div>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
@@ -3392,19 +5223,46 @@ const GoalTrackerApp = () => {
                 }
                 
                 // Handle multi-task checkbox goals (group)
+                const isCelebratingWeeklyGroup = groupCompletionAnim.has(`weekly-${item.goal.id}`);
                 return (
-                  <div key={item.goal.id} style={{ borderTop: itemIndex > 0 ? '4px solid' : 'none', borderTopColor: darkMode ? '#1e293b' : '#f1f5f9' }}>
+                  <div key={item.goal.id} style={{ 
+                    borderTop: itemIndex > 0 ? '4px solid' : 'none', 
+                    borderTopColor: darkMode ? '#1e293b' : '#f1f5f9',
+                    transition: 'box-shadow 0.4s',
+                    boxShadow: isCelebratingWeeklyGroup ? 'inset 0 0 0 2px rgba(16,185,129,0.35)' : 'none',
+                  }}>
                     <button 
                       onClick={() => toggleGoalCollapse(`weekly-${item.goal.id}`)}
                       className="w-full px-3 py-2 flex items-center gap-2"
-                      style={{ borderLeft: `3px solid ${borderColor}`, backgroundColor: headerBg, boxShadow: headerShadow }}
+                      style={{ 
+                        borderLeft: `3px solid ${borderColor}`, 
+                        backgroundColor: isCelebratingWeeklyGroup ? 'rgba(16,185,129,0.08)' : headerBg, 
+                        boxShadow: headerShadow,
+                        position: 'relative',
+                        overflow: 'hidden',
+                        transition: 'background-color 0.4s',
+                      }}
                     >
-                      <ChevronDown className={`w-4 h-4 ${theme.textMuted} transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
-                      <span className={`text-sm font-medium flex-1 text-left ${goalComplete ? 'text-slate-600' : theme.textPrimary}`}>{item.goal.title}</span>
-                      <MiniProgressBar percentage={item.percentage} darkMode={darkMode} />
+                      {isCelebratingWeeklyGroup && <div className="group-success-ripple" />}
+                      <ChevronDown className={`w-4 h-4 ${theme.textMuted} transition-transform relative z-[1]`} style={{ transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                      <span className={`text-sm font-medium flex-1 text-left relative z-[1] ${goalComplete ? 'text-slate-600' : theme.textPrimary}`}>{item.goal.title}</span>
+                      {goalComplete ? (
+                        <span className={`text-xs font-bold text-emerald-500 bg-emerald-500/10 rounded px-1.5 py-0.5 relative z-[1] ${isCelebratingWeeklyGroup ? 'badge-pop' : ''}`}>
+                          ✓ Done
+                        </span>
+                      ) : (
+                        <MiniProgressBar percentage={item.percentage} darkMode={darkMode} />
+                      )}
                     </button>
                     
-                    {!isCollapsed && (
+                    <div style={{
+                      maxHeight: isCollapsed ? '0px' : '600px',
+                      opacity: isCollapsed ? 0 : 1,
+                      overflow: 'hidden',
+                      transition: isCelebratingWeeklyGroup
+                        ? 'max-height 0.45s 0.6s ease-in-out, opacity 0.3s 0.5s'
+                        : 'max-height 0.35s ease-in-out, opacity 0.25s ease-in-out',
+                    }}>
                       <div className="relative">
                         {/* Dotted connector line */}
                         <div style={{ 
@@ -3421,7 +5279,7 @@ const GoalTrackerApp = () => {
                           </div>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
@@ -3482,6 +5340,11 @@ const GoalTrackerApp = () => {
               }
               if (hasContent) writeStreak++;
               
+              // Get draft value from ref, or fall back to saved state
+              const draftValue = journalDraftsRef.current[promptKey] !== undefined 
+                ? journalDraftsRef.current[promptKey] 
+                : value;
+              
               return (
                 <div key={prompt.id} className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
                   <div className={`px-3 py-2.5 flex items-center justify-between border-b ${darkMode ? 'border-slate-700/50' : 'border-slate-100'}`}>
@@ -3495,8 +5358,12 @@ const GoalTrackerApp = () => {
                   </div>
                   <div className="p-3">
                     <textarea
-                      value={value}
-                      onChange={(e) => setJournalEntries(prev => ({ ...prev, [promptKey]: e.target.value }))}
+                      defaultValue={draftValue}
+                      onChange={(e) => { journalDraftsRef.current[promptKey] = e.target.value; }}
+                      onBlur={(e) => {
+                        setJournalEntries(prev => ({ ...prev, [promptKey]: e.target.value }));
+                        delete journalDraftsRef.current[promptKey];
+                      }}
                       placeholder={prompt.placeholder || 'Write here...'}
                       className={`w-full rounded-lg px-3 py-2.5 text-sm min-h-[100px] resize-none border ${theme.border} ${theme.inputBg} ${theme.textPrimary} focus:outline-none focus:ring-2 focus:ring-slate-300`}
                     />
@@ -3927,13 +5794,18 @@ const GoalTrackerApp = () => {
       return goalProgressCache[goal.id]?.percentage || 0;
     }, [goalProgressCache]);
 
-    // Group goals by category
+    // Separate active and archived goals
+    const activeGoals = goals.filter(g => !g.archived);
+    const archivedGoals = goals.filter(g => g.archived);
+    const [showArchived, setShowArchived] = useState(false);
+
+    // Group active goals by category
     const groupedGoals = (categories || []).map(cat => ({
       ...cat,
-      goals: goals.filter(g => g.category === cat.id)
+      goals: activeGoals.filter(g => g.category === cat.id)
     })).filter(c => c.goals.length > 0);
 
-    const uncategorizedGoals = goals.filter(g => !(categories || []).some(c => c.id === g.category));
+    const uncategorizedGoals = activeGoals.filter(g => !(categories || []).some(c => c.id === g.category));
 
     // Render a goal row + expanded detail
     const GoalItem = ({ goal, catColor, isLast }) => {
@@ -3941,6 +5813,27 @@ const GoalTrackerApp = () => {
       const completionRate = getCompletionRate(goal);
       const streaks = calculateGoalStreak(goal);
       const color = catColor || '#94a3b8';
+
+      // Calculate all-time time invested
+      const timeInvested = (() => {
+        let total = 0;
+        if (!goal.tasks) return 0;
+        goal.tasks.forEach(task => {
+          const est = task.timeEstimate || 0;
+          if (!est) return;
+          const checks = task.dailyChecks || 1;
+          Object.keys(dailyTasks).forEach(dateKey => {
+            for (let c = 0; c < checks; c++) {
+              if (dailyTasks[dateKey]?.[`${goal.id}-${task.id}-${c}`]) total += est;
+            }
+          });
+        });
+        return total;
+      })();
+      const fmtTimeInvested = (m) => {
+        if (m >= 60) { const h = Math.floor(m / 60); const mm = m % 60; return mm > 0 ? `${h}h ${mm}m` : `${h}h`; }
+        return `${m}m`;
+      };
 
       return (
         <div>
@@ -3982,10 +5875,10 @@ const GoalTrackerApp = () => {
           {/* Expanded detail */}
           {isExpanded && (
             <div className={`px-3.5 pb-3.5 ${!isLast ? `border-b ${theme.divider}` : ''}`}>
-              {/* Yearly target */}
+              {/* Target */}
               {goal.yearlyGoal && (
                 <div className={`p-2.5 rounded-lg mb-3 ${theme.inputBg}`}>
-                  <div className={`text-[9px] font-semibold uppercase tracking-wider mb-1 ${theme.textMuted}`}>Yearly Target</div>
+                  <div className={`text-[9px] font-semibold uppercase tracking-wider mb-1 ${theme.textMuted}`}>Target</div>
                   <div className={`text-[13px] font-semibold ${theme.textSecondary}`}>{goal.yearlyGoal}</div>
                 </div>
               )}
@@ -3996,6 +5889,7 @@ const GoalTrackerApp = () => {
                   { value: `${streaks.current}d`, label: 'Streak', highlight: streaks.current >= 5 },
                   { value: `${streaks.longest}d`, label: 'Best' },
                   { value: `${calculateDaysActive(goal)}`, label: 'Days active' },
+                  ...(timeInvested > 0 ? [{ value: fmtTimeInvested(timeInvested), label: 'Time invested' }] : []),
                 ].map((s, i) => (
                   <div key={i} className="flex-1 text-center py-2 rounded-lg" style={{
                     background: s.highlight ? `${color}15` : (darkMode ? '#1e293b' : '#f8fafc'),
@@ -4035,7 +5929,8 @@ const GoalTrackerApp = () => {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <button onClick={(e) => { e.stopPropagation(); setEditingGoal(goal); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold ${theme.btnSecondary}`}>Edit Goal</button>
+                <button onClick={(e) => { e.stopPropagation(); setEditingGoal(goal); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold ${theme.btnSecondary}`}>Edit</button>
+                <button onClick={(e) => { e.stopPropagation(); archiveGoal(goal.id); setExpandedGoal(null); }} className="px-4 py-2 rounded-lg text-xs font-semibold" style={{ background: darkMode ? '#1e3a5f' : '#eff6ff', color: '#3b82f6' }}>Complete</button>
                 {deletingGoalId === goal.id ? (
                   <button onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id); setDeletingGoalId(null); setExpandedGoal(null); }} className="px-4 py-2 rounded-lg text-xs font-semibold bg-red-500 text-white">Confirm</button>
                 ) : (
@@ -4054,14 +5949,14 @@ const GoalTrackerApp = () => {
         <div className="flex items-center justify-between py-2">
           <div>
             <h2 className={`text-lg font-semibold ${theme.textPrimary}`}>Goals</h2>
-            <p className={`text-xs ${theme.textMuted}`}>{goals.length} active goal{goals.length !== 1 ? 's' : ''}</p>
+            <p className={`text-xs ${theme.textMuted}`}>{activeGoals.length} active goal{activeGoals.length !== 1 ? 's' : ''}</p>
           </div>
           <button onClick={() => setShowCategorySettings(true)} className={`p-2 rounded-lg ${theme.btnSecondary}`}>
             <Settings className="w-4 h-4" />
           </button>
         </div>
 
-        {goals.length === 0 ? (
+        {activeGoals.length === 0 && archivedGoals.length === 0 ? (
           <div className={`${theme.cardBg} rounded-xl shadow-sm p-8 text-center`}>
             <Target className={`w-10 h-10 mx-auto mb-3 ${theme.textMuted}`} />
             <h3 className={`text-sm font-semibold mb-1 ${theme.textPrimary}`}>No goals yet</h3>
@@ -4108,6 +6003,61 @@ const GoalTrackerApp = () => {
                 </div>
               </div>
             )}
+
+            {/* Completed/Archived Goals Section */}
+            {archivedGoals.length > 0 && (
+              <div className="mt-6">
+                <button
+                  onClick={() => setShowArchived(!showArchived)}
+                  className="flex items-center gap-2 mb-2 w-full px-1"
+                  style={{ background: 'none', border: 'none' }}
+                >
+                  <Check className="w-3 h-3" style={{ color: '#22c55e' }} />
+                  <span className={`text-[11px] font-bold uppercase tracking-wider flex-1 text-left ${theme.textMuted}`}>Completed</span>
+                  <span className={`text-xs ${theme.textMuted}`}>{archivedGoals.length}</span>
+                  <ChevronRight className={`w-3 h-3 ${theme.textMuted} transition-transform ${showArchived ? 'rotate-90' : ''}`} />
+                </button>
+
+                {showArchived && (
+                  <div className={`${theme.cardBg} rounded-xl shadow-sm overflow-hidden`}>
+                    {archivedGoals.map((goal, gi) => {
+                      const catColor = (categories || []).find(c => c.id === goal.category)?.color || '#94a3b8';
+                      const completionRate = getCompletionRate(goal);
+                      return (
+                        <div key={goal.id} className={`px-3.5 py-3 ${gi < archivedGoals.length - 1 ? `border-b ${theme.divider}` : ''}`}>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className={`text-sm font-semibold ${theme.textSecondary} truncate`}>{goal.title}</div>
+                              <div className={`text-[11px] ${theme.textMuted} flex items-center gap-2 mt-0.5`}>
+                                <span>{completionRate}% completion</span>
+                                {goal.archivedAt && (
+                                  <span>• Completed {new Date(goal.archivedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => unarchiveGoal(goal.id)} 
+                                className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold ${theme.btnSecondary}`}
+                              >
+                                Restore
+                              </button>
+                              <button 
+                                onClick={() => deleteGoal(goal.id)} 
+                                className="px-3 py-1.5 rounded-lg text-[11px] font-semibold"
+                                style={{ background: darkMode ? '#451a1a' : '#fef2f2', color: '#ef4444' }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
@@ -4140,21 +6090,76 @@ const GoalTrackerApp = () => {
           background: ${darkMode ? '#e2e8f0' : '#334155'};
           cursor: pointer;
         }
-        @keyframes taskGlow {
-          0% { transform: scale(1); background-color: transparent; }
-          20% { transform: scale(0.98); background-color: rgba(34, 197, 94, 0.2); }
-          40% { transform: scale(1); background-color: rgba(34, 197, 94, 0.3); }
-          60% { transform: scale(1); background-color: rgba(34, 197, 94, 0.2); }
-          80% { transform: scale(1); background-color: rgba(34, 197, 94, 0.08); }
-          100% { transform: scale(1); background-color: transparent; }
+        @keyframes taskLeftGlow {
+          0% { opacity: 0; }
+          20% { opacity: 1; }
+          100% { opacity: 0; }
         }
-        @keyframes checkPop {
+        @keyframes taskRippleExpand {
+          0% { transform: translate(50%, -50%) scale(0); opacity: 1; }
+          100% { transform: translate(50%, -50%) scale(1); opacity: 0; }
+        }
+        @keyframes ripplePop {
           0% { transform: scale(1); }
-          40% { transform: scale(0.85); }
+          30% { transform: scale(0.7); }
+          60% { transform: scale(1.15); }
           100% { transform: scale(1); }
         }
-        .task-row-animate { animation: taskGlow 1.2s ease-out; }
-        .checkbox-animate { animation: checkPop 0.35s ease-out; }
+        @keyframes slideSettle {
+          0% { transform: translateX(0); }
+          15% { transform: translateX(-3px); }
+          50% { transform: translateX(1.5px); }
+          100% { transform: translateX(0); }
+        }
+        @keyframes groupRipple {
+          0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+        @keyframes badgePop {
+          0% { transform: scale(0); opacity: 0; }
+          60% { transform: scale(1.2); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes goldShimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        @keyframes trophySpin {
+          0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+          50% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .task-left-glow {
+          position: absolute; left: 0; top: 0; bottom: 0; width: 100%;
+          background: linear-gradient(90deg, rgba(16,185,129,0.18) 0%, rgba(16,185,129,0.06) 35%, transparent 70%);
+          animation: taskLeftGlow 0.8s ease-out forwards;
+          pointer-events: none; z-index: 0;
+        }
+        .task-ripple-overlay {
+          position: absolute; right: 24px; top: 50%;
+          width: 400px; height: 400px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(16,185,129,0.14) 0%, transparent 65%);
+          transform: translate(50%, -50%) scale(0);
+          animation: taskRippleExpand 0.7s ease-out forwards;
+          pointer-events: none; z-index: 0;
+        }
+        .task-slide-settle { animation: slideSettle 0.5s ease-out; }
+        .checkbox-ripple-pop { animation: ripplePop 0.4s ease-out; }
+        .group-success-ripple {
+          position: absolute; left: 50%; top: 50%;
+          width: 500px; height: 500px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 65%);
+          transform: translate(-50%, -50%) scale(0);
+          animation: groupRipple 1s ease-out forwards;
+          pointer-events: none;
+        }
+        .badge-pop { animation: badgePop 0.4s 0.2s ease-out both; }
+        .gold-shimmer-bar {
+          background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+          background-size: 200% 100%;
+          animation: goldShimmer 1s ease-in-out infinite;
+        }
+        .trophy-spin { animation: trophySpin 0.6s ease-out; }
       `}</style>
       
       {/* Sticky Header */}
@@ -4185,7 +6190,7 @@ const GoalTrackerApp = () => {
 
       {/* Main Content */}
       <div className="max-w-lg mx-auto px-4 py-4 pb-8">
-        {currentView === 'daily' && <DailyView />}
+        {currentView === 'daily' && DailyView()}
         {currentView === 'calendar' && <CalendarView />}
         {currentView === 'goals' && <GoalsView />}
       </div>
@@ -4202,10 +6207,18 @@ const GoalTrackerApp = () => {
 };
 
 
-// Render the app
-const container = document.getElementById('root');
-const root = ReactDOM.createRoot(container);
-root.render(<GoalTrackerApp />);
+
+    try {
+      if (ReactDOM.createRoot) {
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(GoalTrackerApp));
+      } else {
+        ReactDOM.render(React.createElement(GoalTrackerApp), document.getElementById('root'));
+      }
+    } catch(e) {
+      console.error('Render error:', e);
+      document.getElementById('root').innerHTML = '<div style="padding:20px;color:red;font-family:monospace"><h2>Error loading app</h2><pre>' + e.message + '\n' + e.stack + '</pre></div>';
+    }
   </script>
 </body>
 </html>
